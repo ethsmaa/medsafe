@@ -1,0 +1,38 @@
+{
+    "name": "@medsafe/backend",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "node ./build.mjs",
+        "dev": "node ./build.mjs --watch & dotenvx run -f .env.development -- node --watch --watch-path=./dist/runtime dist/runtime/server.js",
+        "start": "node dist/runtime/server.js",
+        "lint": "tsc --noEmit",
+        "db:migrate": "dotenvx run -f .env.development -- prisma migrate dev && dotenvx run -f .env.development -- prisma generate",
+        "db:generate": "prisma generate",
+        "db:deploy": "prisma migrate deploy"
+    },
+    "dependencies": {
+        "@dotenvx/dotenvx": "^1.51.4",
+        "@hono/node-server": "^1.19.7",
+        "@hono/trpc-server": "^0.4.2",
+        "@prisma/adapter-pg": "^7.2.0",
+        "@prisma/client": "^7.2.0",
+        "@trpc/client": "^11.8.1",
+        "@trpc/server": "^11.8.1",
+        "@types/pg": "^8.16.0",
+        "dotenv": "^16.4.5",
+        "hono": "^4.11.1",
+        "pg": "^8.17.1",
+        "superjson": "^2.2.6",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@better-auth/cli": "^1.4.15",
+        "@medsafe/typescript-config": "workspace:*",
+        "@types/node": "^22.5.4",
+        "esbuild": "^0.23.1",
+        "prisma": "^7.2.0",
+        "tsx": "^4.19.0",
+        "typescript": "^5.7.2"
+    }
+}
