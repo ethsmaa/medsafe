@@ -1,6 +1,11 @@
 {
     "name": "@medsafe/backend",
     "private": true,
+    "exports": {
+        ".": "./src/features/trpc/router.ts",
+        "./db": "./src/features/database/types.ts",
+        "./auth": "./src/features/auth/index.ts"
+    },
     "type": "module",
     "scripts": {
         "build": "node ./build.mjs",
@@ -20,6 +25,7 @@
         "@trpc/client": "^11.8.1",
         "@trpc/server": "^11.8.1",
         "@types/pg": "^8.16.0",
+        "better-auth": "^1.4.18",
         "dotenv": "^16.4.5",
         "hono": "^4.11.1",
         "pg": "^8.17.1",

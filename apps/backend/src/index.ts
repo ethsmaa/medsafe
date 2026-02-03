@@ -6,6 +6,8 @@ import { auth } from "./features/auth/index.js";
 import { createTRPCConextForHono } from "./features/trpc/index.js";
 import { appRouter } from "./features/trpc/router.js";
 
+export type { AppRouter } from "./features/trpc/router.js";
+
 const app = new Hono();
 
 // Global CORS Middleware
@@ -190,4 +192,5 @@ console.log(`Server is running on port ${port}`);
 serve({
     fetch: app.fetch,
     port,
+    hostname: "0.0.0.0"
 });
