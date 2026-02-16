@@ -1,4 +1,4 @@
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { Context } from "hono";
 import superjson from "superjson";
@@ -44,13 +44,11 @@ export const router = t.router;
 export const publicProcedure = t.procedure;
 
 export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
-    // Placeholder for auth check
 	if (!ctx.user) {
-        // Uncomment to enforce auth
-		// throw new TRPCError({
-		// 	code: "UNAUTHORIZED",
-		// 	message: "You must be logged in to access this resource",
-		// });
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "You must be logged in to access this resource",
+		});
 	}
 	return next({
 		ctx: {

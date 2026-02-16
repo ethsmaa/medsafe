@@ -4,7 +4,7 @@ import { createAuthClient } from "better-auth/react";
 
 const getBaseURL = () => {
 	if (__DEV__) {
-		const hostname =  "esma-macbook-pro.local"; 
+		const hostname =  "192.168.1.121"; 
 		
 		return `http://${hostname}:3001/api/auth`;
 	}

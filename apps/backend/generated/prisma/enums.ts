@@ -9,7 +9,51 @@
 * 🟢 You can import this file directly.
 */
 
+export const CareTeamStatus = {
+  INVITED: 'INVITED',
+  ACTIVE: 'ACTIVE',
+  REJECTED: 'REJECTED'
+} as const
+
+export type CareTeamStatus = (typeof CareTeamStatus)[keyof typeof CareTeamStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const MedicationFrequency = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  AS_NEEDED: 'AS_NEEDED',
+  PERIODIC: 'PERIODIC'
+} as const
+
+export type MedicationFrequency = (typeof MedicationFrequency)[keyof typeof MedicationFrequency]
+
+
+export const MealStatus = {
+  BEFORE_MEAL: 'BEFORE_MEAL',
+  AFTER_MEAL: 'AFTER_MEAL',
+  WITH_FOOD: 'WITH_FOOD',
+  ANY: 'ANY'
+} as const
+
+export type MealStatus = (typeof MealStatus)[keyof typeof MealStatus]
+
+
+export const MedicationForm = {
+  TABLET: 'TABLET',
+  CAPSULE: 'CAPSULE',
+  SYRUP: 'SYRUP',
+  CREAM: 'CREAM',
+  INJECTION: 'INJECTION',
+  OTHER: 'OTHER'
+} as const
+
+export type MedicationForm = (typeof MedicationForm)[keyof typeof MedicationForm]
+
+
+export const IntakeStatus = {
+  TAKEN: 'TAKEN',
+  SKIPPED: 'SKIPPED',
+  MISSED: 'MISSED'
+} as const
+
+export type IntakeStatus = (typeof IntakeStatus)[keyof typeof IntakeStatus]

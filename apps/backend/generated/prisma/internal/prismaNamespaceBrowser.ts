@@ -52,6 +52,14 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  PatientProfile: 'PatientProfile',
+  CaregiverProfile: 'CaregiverProfile',
+  CareTeamMember: 'CareTeamMember',
+  Medication: 'Medication',
+  Prescription: 'Prescription',
+  PrescriptionMedication: 'PrescriptionMedication',
+  DoseSchedule: 'DoseSchedule',
+  IntakeEvent: 'IntakeEvent',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification'
@@ -84,6 +92,118 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const PatientProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  birthDate: 'birthDate',
+  gender: 'gender',
+  medicalHistory: 'medicalHistory',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PatientProfileScalarFieldEnum = (typeof PatientProfileScalarFieldEnum)[keyof typeof PatientProfileScalarFieldEnum]
+
+
+export const CaregiverProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  specialty: 'specialty',
+  institution: 'institution',
+  licenseNumber: 'licenseNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CaregiverProfileScalarFieldEnum = (typeof CaregiverProfileScalarFieldEnum)[keyof typeof CaregiverProfileScalarFieldEnum]
+
+
+export const CareTeamMemberScalarFieldEnum = {
+  id: 'id',
+  patientId: 'patientId',
+  caregiverId: 'caregiverId',
+  status: 'status',
+  initiatedBy: 'initiatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CareTeamMemberScalarFieldEnum = (typeof CareTeamMemberScalarFieldEnum)[keyof typeof CareTeamMemberScalarFieldEnum]
+
+
+export const MedicationScalarFieldEnum = {
+  id: 'id',
+  nameGeneric: 'nameGeneric',
+  nameBrand: 'nameBrand',
+  description: 'description',
+  manufacturer: 'manufacturer',
+  packageSize: 'packageSize',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MedicationScalarFieldEnum = (typeof MedicationScalarFieldEnum)[keyof typeof MedicationScalarFieldEnum]
+
+
+export const PrescriptionScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  issuedBy: 'issuedBy',
+  issuedAt: 'issuedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PrescriptionScalarFieldEnum = (typeof PrescriptionScalarFieldEnum)[keyof typeof PrescriptionScalarFieldEnum]
+
+
+export const PrescriptionMedicationScalarFieldEnum = {
+  id: 'id',
+  patientId: 'patientId',
+  medicationId: 'medicationId',
+  prescriptionId: 'prescriptionId',
+  dosageAmount: 'dosageAmount',
+  frequency: 'frequency',
+  instructions: 'instructions',
+  mealStatus: 'mealStatus',
+  currentStock: 'currentStock',
+  restockThreshold: 'restockThreshold',
+  totalPrescribed: 'totalPrescribed',
+  form: 'form',
+  isActive: 'isActive',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PrescriptionMedicationScalarFieldEnum = (typeof PrescriptionMedicationScalarFieldEnum)[keyof typeof PrescriptionMedicationScalarFieldEnum]
+
+
+export const DoseScheduleScalarFieldEnum = {
+  id: 'id',
+  prescriptionMedicationId: 'prescriptionMedicationId',
+  timeOfDay: 'timeOfDay',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DoseScheduleScalarFieldEnum = (typeof DoseScheduleScalarFieldEnum)[keyof typeof DoseScheduleScalarFieldEnum]
+
+
+export const IntakeEventScalarFieldEnum = {
+  id: 'id',
+  prescriptionMedicationId: 'prescriptionMedicationId',
+  takenAt: 'takenAt',
+  status: 'status',
+  isOnTime: 'isOnTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type IntakeEventScalarFieldEnum = (typeof IntakeEventScalarFieldEnum)[keyof typeof IntakeEventScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {

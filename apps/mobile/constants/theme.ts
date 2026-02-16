@@ -1,53 +1,57 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
 export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
+    light: {
+        background: "#f9fafb",
+        text: "#111827",
+        textSecondary: "#6b7280",
+        primary: "#06b6d4", // Cyan
+        cardBg: "white",
+        border: "#f3f4f6",
+        success: "#10b981",
+        error: "#ef4444",
+        warning: "#f59e0b",
+        info: "#3b82f6",
+        icon: "#4b5563",
+        tint: "#06b6d4",
+    },
+    highContrast: {
+        background: "#ffffff",
+        text: "#000000",
+        textSecondary: "#000000",
+        primary: "#000000",
+        cardBg: "#ffffff",
+        border: "#000000",
+        success: "#000000", // or distinct pattern/text
+        error: "#000000",
+        warning: "#000000",
+        info: "#000000",
+        icon: "#000000",
+        tint: "#000000",
+    },
+    dark: {
+        background: "#111827",
+        text: "#f9fafb",
+        textSecondary: "#9ca3af",
+        primary: "#22d3ee", 
+        cardBg: "#1f2937",
+        border: "#374151",
+        success: "#34d399",
+        error: "#f87171",
+        warning: "#fbbf24",
+        info: "#60a5fa",
+        icon: "#9ca3af",
+        tint: "#22d3ee",
+    }
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+export const Layout = {
+    padding: 20,
+    borderRadius: 16,
+};
+
+export const Fonts = {
+    regular: "Inter-Regular",
+    medium: "Inter-Medium",
+    bold: "Inter-Bold",
+    rounded: "Inter-Regular", // Fallback
+    mono: "SpaceMono-Regular",  // Fallback
+};

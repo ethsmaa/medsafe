@@ -7,8 +7,7 @@ import {
 } from "@trpc/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import * as Device from "expo-device";
-import { Platform } from "react-native";
+
 import EventSource from "react-native-sse";
 import superjson from "superjson";
 import { authClient } from "./auth-client";
@@ -18,7 +17,7 @@ export const { TRPCProvider, useTRPC, useTRPCClient } =
 
 const getBaseURL = () => {
 	if (__DEV__) {
-		const hostname = "esma-macbook-pro.local";
+		const hostname = "192.168.1.121";
 		return `http://${hostname}:3001/trpc`;
 	}
 	// TODO: Update for production

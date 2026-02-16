@@ -19,7 +19,207 @@ model User {
   sessions      Session[]
   accounts      Account[]
   
+  // Phase 1: Profiles
+  patientProfile   PatientProfile?
+  caregiverProfile CaregiverProfile?
+
   @@map("user")
+}
+
+// Phase 1: Enums
+enum CareTeamStatus {
+  INVITED
+  ACTIVE
+  REJECTED
+}
+
+enum MedicationFrequency {
+  DAILY
+  WEEKLY
+  AS_NEEDED
+  PERIODIC
+}
+
+// Phase 1: Profiles
+model PatientProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  birthDate DateTime?
+  gender    String?
+  medicalHistory String? // Simple text for now
+
+  careTeam  CareTeamMember[] @relation("PatientToCareTeam")
+  prescriptions PrescriptionMedication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("patient_profile")
+}
+
+model CaregiverProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  specialty       String?
+  institution     String?
+  licenseNumber   String?
+
+  careTeam  CareTeamMember[] @relation("CaregiverToCareTeam")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("caregiver_profile")
+}
+
+// Phase 1: Care Team Handshake
+model CareTeamMember {
+  id          String   @id @default(cuid())
+  
+  patientId   String
+  patient     PatientProfile @relation("PatientToCareTeam", fields: [patientId], references: [id], onDelete: Cascade)
+  
+  caregiverId String
+  caregiver   CaregiverProfile @relation("CaregiverToCareTeam", fields: [caregiverId], references: [id], onDelete: Cascade)
+  
+  status      CareTeamStatus @default(INVITED)
+  initiatedBy String         @default("CAREGIVER") // "PATIENT" or "CAREGIVER"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([patientId, caregiverId])
+  @@map("care_team_member")
+}
+
+// Phase 1: Medication Management
+model Medication {
+  id          String   @id @default(cuid())
+  nameGeneric String   // Official name
+  nameBrand   String? 
+  description String?
+  
+  // OCR fields placeholder
+  manufacturer String?
+  packageSize  String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  prescriptions PrescriptionMedication[]
+
+  @@map("medication")
+}
+
+model Prescription {
+  id          String   @id @default(cuid())
+  
+  // Could link to a Patient if we want prescription history directly,
+  // but usually it's tied to specific logic. keeping simple for now.
+  code        String?  @unique // e.g. Rx number
+  issuedBy    String?  // Doctor name
+  issuedAt    DateTime @default(now())
+  
+  medications PrescriptionMedication[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("prescription")
+}
+
+// Phase 5: Enums
+enum MealStatus {
+  BEFORE_MEAL
+  AFTER_MEAL
+  WITH_FOOD
+  ANY
+}
+
+enum MedicationForm {
+  TABLET
+  CAPSULE
+  SYRUP
+  CREAM
+  INJECTION
+  OTHER
+}
+
+model PrescriptionMedication {
+  id             String   @id @default(cuid())
+  
+  patientId      String
+  patient        PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  medicationId   String
+  medication     Medication @relation(fields: [medicationId], references: [id])
+  
+  prescriptionId String?
+  prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+
+  // Dosage & Schedule
+  dosageAmount   String   // e.g. "500mg" or "1 tablet"
+  frequency      MedicationFrequency
+  instructions   String?  // "Take with food" (legacy, keep for now)
+  mealStatus     MealStatus @default(ANY)
+  
+  doseSchedules  DoseSchedule[]
+
+  // Inventory
+  currentStock   Int      @default(0)
+  restockThreshold Int    @default(5)
+  totalPrescribed Int?    // Total amount in the prescription
+  
+  form           MedicationForm @default(TABLET)
+  
+  isActive       Boolean  @default(true)
+  startDate      DateTime @default(now())
+  endDate        DateTime?
+  
+  intakeEvents   IntakeEvent[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("prescription_medication")
+}
+
+model DoseSchedule {
+  id                      String @id @default(cuid())
+  prescriptionMedicationId String
+  prescriptionMedication  PrescriptionMedication @relation(fields: [prescriptionMedicationId], references: [id], onDelete: Cascade)
+  
+  timeOfDay               String // "08:00", "20:00" (24h format)
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("dose_schedule")
+}
+
+enum IntakeStatus {
+  TAKEN
+  SKIPPED
+  MISSED
+}
+
+model IntakeEvent {
+  id                      String @id @default(cuid())
+  prescriptionMedicationId String
+  prescriptionMedication  PrescriptionMedication @relation(fields: [prescriptionMedicationId], references: [id], onDelete: Cascade)
+  
+  takenAt                 DateTime @default(now())
+  status                  IntakeStatus
+  isOnTime                Boolean @default(true)
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("intake_event")
 }
 
 model Session {

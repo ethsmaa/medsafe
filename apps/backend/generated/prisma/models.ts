@@ -9,6 +9,14 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User.js'
+export type * from './models/PatientProfile.js'
+export type * from './models/CaregiverProfile.js'
+export type * from './models/CareTeamMember.js'
+export type * from './models/Medication.js'
+export type * from './models/Prescription.js'
+export type * from './models/PrescriptionMedication.js'
+export type * from './models/DoseSchedule.js'
+export type * from './models/IntakeEvent.js'
 export type * from './models/Session.js'
 export type * from './models/Account.js'
 export type * from './models/Verification.js'

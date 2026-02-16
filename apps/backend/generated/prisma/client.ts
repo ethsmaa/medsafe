@@ -45,6 +45,46 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model PatientProfile
+ * 
+ */
+export type PatientProfile = Prisma.PatientProfileModel
+/**
+ * Model CaregiverProfile
+ * 
+ */
+export type CaregiverProfile = Prisma.CaregiverProfileModel
+/**
+ * Model CareTeamMember
+ * 
+ */
+export type CareTeamMember = Prisma.CareTeamMemberModel
+/**
+ * Model Medication
+ * 
+ */
+export type Medication = Prisma.MedicationModel
+/**
+ * Model Prescription
+ * 
+ */
+export type Prescription = Prisma.PrescriptionModel
+/**
+ * Model PrescriptionMedication
+ * 
+ */
+export type PrescriptionMedication = Prisma.PrescriptionMedicationModel
+/**
+ * Model DoseSchedule
+ * 
+ */
+export type DoseSchedule = Prisma.DoseScheduleModel
+/**
+ * Model IntakeEvent
+ * 
+ */
+export type IntakeEvent = Prisma.IntakeEventModel
+/**
  * Model Session
  * 
  */
