@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { format, getHours } from "date-fns";
-import { Text, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { useMedicationAction } from "@/hooks/useMedicationAction";
+import { useRouter } from "expo-router";
 
 import type { ScheduleItem } from "@/hooks/useMedicationSchedule";
 
@@ -49,6 +51,34 @@ export function TimelineItem({
 		circleBorder = "border-gray-200";
 	}
 
+	// Action Handler
+	const { deleteMedication } = useMedicationAction();
+	const router = useRouter();
+
+	const handleLongPress = () => {
+		Alert.alert(
+			"Medication Options",
+			`Choose an action for ${item.medication?.name || "Medication"}`,
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Edit",
+					onPress: () => {
+						router.push({
+							pathname: "/(patient)/add-medication",
+							params: { id: item.prescriptionMedicationId },
+						});
+					},
+				},
+				{
+					text: "Delete",
+					style: "destructive",
+					onPress: () => deleteMedication(item.prescriptionMedicationId),
+				},
+			],
+		);
+	};
+
 	return (
 		<View className="flex-row">
 			{/* Left Column: Timeline */}
@@ -68,7 +98,9 @@ export function TimelineItem({
 
 			{/* Right Column: Card */}
 			<View className="flex-1 pb-6">
-				<View
+				<TouchableOpacity
+					onLongPress={handleLongPress}
+					activeOpacity={0.7}
 					className={`flex-1 flex-row items-center justify-between rounded-2xl bg-white p-5 shadow-sm dark:bg-surface-dark ${
 						isNext ? "border-l-4 border-l-cyan-400" : ""
 					}`}
@@ -107,7 +139,7 @@ export function TimelineItem({
 							{/* {item.medication.instructions ? ` • ${item.medication.instructions}` : ""} */}
 						</Text>
 					</View>
-				</View>
+				</TouchableOpacity>
 			</View>
 		</View>
 	);

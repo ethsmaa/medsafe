@@ -359,5 +359,120 @@ export const medicationRouter = router({
 				},
 				orderBy: { createdAt: "desc" },
 			});
-        }),
+		}),
+
+	/**
+	 * Soft delete a medication (set isActive = false).
+	 */
+	delete: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id } = input;
+			const user = ctx.user;
+
+			const pm = await prisma.prescriptionMedication.findUnique({
+				where: { id },
+				include: { patient: true },
+			});
+
+			if (!pm) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Medication not found",
+				});
+			}
+
+			if (pm.patient.userId !== user.id) {
+				const caregiver = await prisma.caregiverProfile.findUnique({
+					where: { userId: user.id },
+				});
+				if (!caregiver) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "You do not have permission to delete this medication.",
+					});
+				}
+			}
+
+			return await prisma.prescriptionMedication.update({
+				where: { id },
+				data: { isActive: false },
+			});
+		}),
+
+	/**
+	 * Update a medication.
+	 */
+	update: protectedProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				dosageAmount: z.string().optional(),
+				frequency: z
+					.enum(["DAILY", "WEEKLY", "AS_NEEDED", "PERIODIC"])
+					.optional(),
+				currentStock: z.number().min(0).optional(),
+				restockThreshold: z.number().min(0).optional(),
+				instructions: z.string().optional(),
+				form: z
+					.enum(["TABLET", "CAPSULE", "SYRUP", "CREAM", "INJECTION", "OTHER"])
+					.optional(),
+				mealStatus: z
+					.enum(["BEFORE_MEAL", "AFTER_MEAL", "WITH_FOOD", "ANY"])
+					.optional(),
+				times: z.array(z.string()).optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, times, ...updates } = input;
+			const user = ctx.user;
+
+			const pm = await prisma.prescriptionMedication.findUnique({
+				where: { id },
+				include: { patient: true },
+			});
+
+			if (!pm) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Medication not found",
+				});
+			}
+
+			if (pm.patient.userId !== user.id) {
+				const caregiver = await prisma.caregiverProfile.findUnique({
+					where: { userId: user.id },
+				});
+				if (!caregiver) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "You do not have permission to update this medication.",
+					});
+				}
+			}
+
+			return await prisma.$transaction(async (tx) => {
+				const updatedPm = await tx.prescriptionMedication.update({
+					where: { id },
+					data: { ...updates },
+				});
+
+				if (times !== undefined) {
+					await tx.doseSchedule.deleteMany({
+						where: { prescriptionMedicationId: id },
+					});
+
+					if (times.length > 0) {
+						await tx.doseSchedule.createMany({
+							data: times.map((time) => ({
+								prescriptionMedicationId: id,
+								timeOfDay: time,
+							})),
+						});
+					}
+				}
+
+				return updatedPm;
+			});
+		}),
 });

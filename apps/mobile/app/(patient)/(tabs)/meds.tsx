@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
 	ActivityIndicator,
+	Alert,
 	FlatList,
 	RefreshControl,
 	StyleSheet,
@@ -12,12 +13,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
+import { useMedicationAction } from "@/hooks/useMedicationAction";
 import { useTRPC } from "@/lib/trpc";
 
 export default function CabinetScreen() {
 	const { isHighContrast, textSize } = useAccessibility();
 	const router = useRouter();
 	const trpc = useTRPC();
+	const { deleteMedication } = useMedicationAction();
 	const styles = makeStyles(isHighContrast, textSize);
 
 	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
@@ -63,7 +66,33 @@ export default function CabinetScreen() {
 						/>
 					}
 					renderItem={({ item }) => (
-						<View style={styles.medCard}>
+						<TouchableOpacity
+							activeOpacity={0.7}
+							onLongPress={() => {
+								Alert.alert(
+									"Medication Options",
+									`Choose an action for ${item.medication.nameGeneric}`,
+									[
+										{ text: "Cancel", style: "cancel" },
+										{
+											text: "Edit",
+											onPress: () => {
+												router.push({
+													pathname: "/(patient)/add-medication",
+													params: { id: item.id },
+												});
+											},
+										},
+										{
+											text: "Delete",
+											style: "destructive",
+											onPress: () => deleteMedication(item.id),
+										},
+									],
+								);
+							}}
+							style={styles.medCard}
+						>
 							<View style={styles.medIconPlaceholder}>
 								<Text style={styles.medIconText}>💊</Text>
 							</View>
@@ -75,10 +104,46 @@ export default function CabinetScreen() {
 									{item.dosageAmount} • {item.frequency}
 								</Text>
 							</View>
-							<View style={styles.stockBadge}>
-								<Text style={styles.stockText}>{item.currentStock} left</Text>
+							<View style={{ alignItems: "flex-end", gap: 8 }}>
+								<View style={styles.stockBadge}>
+									<Text style={styles.stockText}>{item.currentStock} left</Text>
+								</View>
+								<TouchableOpacity
+									accessibilityLabel={`Options for ${item.medication.nameGeneric}`}
+									accessibilityHint="Double tap to edit or delete this medication"
+									hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+									onPress={() => {
+										Alert.alert(
+											"Medication Options",
+											`Choose an action for ${item.medication.nameGeneric}`,
+											[
+												{ text: "Cancel", style: "cancel" },
+												{
+													text: "Edit",
+													onPress: () => {
+														router.push({
+															pathname: "/(patient)/add-medication",
+															params: { id: item.id },
+														});
+													},
+												},
+												{
+													text: "Delete",
+													style: "destructive",
+													onPress: () => deleteMedication(item.id),
+												},
+											],
+										);
+									}}
+								>
+									<Ionicons
+										name="ellipsis-horizontal"
+										size={24}
+										color={isHighContrast ? "black" : "#9ca3af"}
+									/>
+								</TouchableOpacity>
 							</View>
-						</View>
+						</TouchableOpacity>
 					)}
 				/>
 			)}

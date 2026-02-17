@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -43,10 +43,19 @@ export default function AddMedicationScreen() {
 	const queryClient = useQueryClient();
 	const { isHighContrast, textSize } = useAccessibility();
 	const styles = makeStyles(isHighContrast, textSize);
+	// Parse ID if editing
+	const { id } = useLocalSearchParams<{ id: string }>();
+	const isEditing = !!id;
+
 	const { scheduleMedicationReminder } = useNotifications();
 
+	// Fetch data if editing
+	// ideally we use a specific query, but for now we can find from cache if available or fetch cabinet
+	// simpler to just use cabinet query finding
+	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
+	const existingMed = cabinetQuery.data?.find((m) => m.id === id);
+
 	// Form State
-	// todo: burlari constata atacagim/
 	const [name, setName] = useState("");
 	const [dosage, setDosage] = useState("");
 	const [stock, setStock] = useState("");
@@ -60,7 +69,30 @@ export default function AddMedicationScreen() {
 	const [times, setTimes] = useState<Date[]>([]);
 	const [showTimePicker, setShowTimePicker] = useState(false);
 
-	// buralari da ayri bi klasore tasiyacagim
+	// Pre-fill effect
+	useEffect(() => {
+		if (isEditing && existingMed) {
+			setName(existingMed.medication.nameGeneric);
+			setDosage(existingMed.dosageAmount);
+			setStock(existingMed.currentStock.toString());
+			setThreshold(existingMed.restockThreshold.toString());
+			// Cast types if needed or ensuring backend matches frontend enums
+			setSelectedFreq(existingMed.frequency as any);
+			setSelectedForm(existingMed.form as any);
+			setSelectedMeal(existingMed.mealStatus as any);
+
+			if (existingMed.doseSchedules) {
+				const loadedTimes = existingMed.doseSchedules.map((s) => {
+					const [h, m] = s.timeOfDay.split(":").map(Number);
+					const d = new Date();
+					d.setHours(h, m, 0, 0);
+					return d;
+				});
+				setTimes(loadedTimes);
+			}
+		}
+	}, [isEditing, existingMed]);
+
 	const addMutation = useMutation({
 		...trpc.medication.addMedicationManual.mutationOptions(),
 		onSuccess: (data, variables) => {
@@ -85,6 +117,18 @@ export default function AddMedicationScreen() {
 		},
 	});
 
+	const updateMutation = useMutation({
+		...trpc.medication.update.mutationOptions(),
+		onSuccess: () => {
+			Alert.alert("Success", "Medication updated.");
+			queryClient.invalidateQueries(trpc.medication.getMyCabinet.pathFilter());
+			router.back();
+		},
+		onError: (err) => {
+			Alert.alert("Error", err.message);
+		},
+	});
+
 	const handleSave = () => {
 		if (!name || !dosage) {
 			Alert.alert(
@@ -101,17 +145,31 @@ export default function AddMedicationScreen() {
 			return `${hours}:${minutes}`;
 		});
 
-		addMutation.mutate({
-			nameGeneric: name,
-			dosageAmount: dosage,
-			frequency: selectedFreq,
-			currentStock: Number.parseInt(stock) || 0,
-			restockThreshold: Number.parseInt(threshold) || 5,
-			form: selectedForm,
-			mealStatus: selectedMeal,
-			times: formattedTimes,
-			instructions: "", // Optional
-		});
+		if (isEditing && id) {
+			updateMutation.mutate({
+				id,
+				dosageAmount: dosage,
+				frequency: selectedFreq,
+				currentStock: Number.parseInt(stock) || 0,
+				restockThreshold: Number.parseInt(threshold) || 5,
+				form: selectedForm,
+				mealStatus: selectedMeal,
+				times: formattedTimes,
+				instructions: "",
+			});
+		} else {
+			addMutation.mutate({
+				nameGeneric: name,
+				dosageAmount: dosage,
+				frequency: selectedFreq,
+				currentStock: Number.parseInt(stock) || 0,
+				restockThreshold: Number.parseInt(threshold) || 5,
+				form: selectedForm,
+				mealStatus: selectedMeal,
+				times: formattedTimes,
+				instructions: "", // Optional
+			});
+		}
 	};
 
 	const onTimeChange = (event: any, selectedDate?: Date) => {
