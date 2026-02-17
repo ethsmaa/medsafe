@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { View, Text, StyleSheet, Modal, TouchableOpacity } from "react-native";
-import * as Speech from "expo-speech";
 import { Ionicons } from "@expo/vector-icons";
+import * as Speech from "expo-speech";
+import { useEffect } from "react";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAccessibility } from "@/context/AccessibilityContext";
 
 interface ActiveAlertModalProps {

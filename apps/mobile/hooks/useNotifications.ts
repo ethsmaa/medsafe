@@ -11,18 +11,20 @@ configureNotifications();
 */
 
 export function useNotifications() {
-    // const [lastNotification, setLastNotification] = useState<Notifications.Notification | null>(null);
-    const [lastNotification, setLastNotification] = useState<any | null>(null);
+	// const [lastNotification, setLastNotification] = useState<Notifications.Notification | null>(null);
+	const [lastNotification, setLastNotification] = useState<unknown | null>(
+		null,
+	);
 
 	useEffect(() => {
-        // Mock listener
-        console.log("Notifications disabled in Expo Go SDK 53");
+		// Mock listener
+		console.log("Notifications disabled in Expo Go SDK 53");
 		// registerForLocalNotificationsAsync();
 
 		return () => {
-            // responseListener.remove();
-            // notificationListener.remove();
-        };
+			// responseListener.remove();
+			// notificationListener.remove();
+		};
 	}, []);
 
 	async function scheduleMedicationReminder(
@@ -30,9 +32,9 @@ export function useNotifications() {
 		body: string,
 		hour: number,
 		minute: number,
-        data: Record<string, unknown> = {}
+		data: Record<string, unknown> = {},
 	) {
-        console.log("Mock schedule:", title, body, hour, minute, data);
+		console.log("Mock schedule:", title, body, hour, minute, data);
 	}
 
 	async function clearNotificationState() {

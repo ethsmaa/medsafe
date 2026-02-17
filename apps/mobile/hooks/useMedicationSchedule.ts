@@ -21,9 +21,38 @@ export interface ScheduleItem {
 	scheduledTime: string; // ISO string for date-fns
 }
 
-export const useMedicationSchedule = (cabinetData: any[]) => {
+export interface DoseSchedule {
+	timeOfDay: string;
+}
+
+export interface IntakeEvent {
+	id: string;
+	takenAt: string | Date;
+	status: string;
+}
+
+export interface CabinetItem {
+	id: string;
+	frequency: string;
+	startDate?: string | Date;
+	createdAt: string | Date;
+	doseSchedules?: DoseSchedule[];
+	medication: {
+		name?: string; // Opt in case it exists, but focus on others
+		nameGeneric?: string;
+		nameBrand?: string | null;
+	};
+	form?: string;
+	instructions?: string;
+	mealStatus?: string;
+	dosageAmount: string;
+	intakeEvents?: IntakeEvent[];
+}
+
+export const useMedicationSchedule = (cabinetData: CabinetItem[]) => {
 	return useMemo(() => {
-		if (!cabinetData) return { nextDose: null, schedule: [], flexibleItems: [] };
+		if (!cabinetData)
+			return { nextDose: null, schedule: [], flexibleItems: [] };
 
 		const now = new Date();
 		let schedule: ScheduleItem[] = [];
@@ -39,14 +68,19 @@ export const useMedicationSchedule = (cabinetData: any[]) => {
 				}
 			}
 
-			// @ts-ignore
 			const schedules = med.doseSchedules || [];
 
 			if (schedules.length === 0) {
 				// Handle "No Time" / As Needed medications -> Flexible List
 				flexibleItems.push({
 					id: `${med.id}-any-time`,
-					medication: med.medication,
+					medication: {
+						...med.medication,
+						name:
+							med.medication.nameBrand ||
+							med.medication.nameGeneric ||
+							"Medication",
+					},
 					prescriptionMedicationId: med.id,
 					timeOfDay: "Any Time", // Placeholder
 					doseMinutes: 9999, // Irrelevant
@@ -54,23 +88,29 @@ export const useMedicationSchedule = (cabinetData: any[]) => {
 					instructions: med.instructions,
 					mealStatus: med.mealStatus,
 					taken: false, // Will be updated below
-					genericName: med.medication?.nameGeneric || "Medication",
+					genericName: med.medication.nameGeneric || "Medication",
 					dosage: med.dosageAmount,
 					status: "PENDING",
 					scheduledTime: new Date().toISOString(), // Default to now for ease
 				});
 			} else {
-				schedules.forEach((msg: any) => {
+				schedules.forEach((msg: DoseSchedule) => {
 					const [h, m] = msg.timeOfDay.split(":").map(Number);
 					const doseMinutes = h * 60 + m;
-                    
-                    // Create date for today at this time
-                    const scheduledDate = new Date(now);
-                    scheduledDate.setHours(h, m, 0, 0);
+
+					// Create date for today at this time
+					const scheduledDate = new Date(now);
+					scheduledDate.setHours(h, m, 0, 0);
 
 					schedule.push({
 						id: `${med.id}-${msg.timeOfDay}`,
-						medication: med.medication,
+						medication: {
+							...med.medication,
+							name:
+								med.medication.nameBrand ||
+								med.medication.nameGeneric ||
+								"Medication",
+						},
 						prescriptionMedicationId: med.id,
 						timeOfDay: msg.timeOfDay,
 						doseMinutes,
@@ -78,7 +118,7 @@ export const useMedicationSchedule = (cabinetData: any[]) => {
 						instructions: med.instructions,
 						mealStatus: med.mealStatus,
 						taken: false, // initial
-						genericName: med.medication?.nameGeneric || "Medication",
+						genericName: med.medication.nameGeneric || "Medication",
 						dosage: med.dosageAmount,
 						status: "PENDING",
 						scheduledTime: scheduledDate.toISOString(),
@@ -93,7 +133,6 @@ export const useMedicationSchedule = (cabinetData: any[]) => {
 		// Apply "Taken" status based on generic counts
 		const takenCounts: Record<string, number> = {};
 		cabinetData.forEach((med) => {
-			// @ts-ignore
 			takenCounts[med.id] = (med.intakeEvents || []).length;
 		});
 

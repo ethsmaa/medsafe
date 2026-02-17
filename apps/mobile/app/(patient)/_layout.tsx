@@ -47,19 +47,15 @@ export default function PatientLayout() {
 	// Detect Notification -> Open Alarm
 	useEffect(() => {
 		if (lastNotification) {
-			const data = lastNotification.request.content.data as any; // We passed data here?
-			// Since we didn't strictly pass data in schedule yet, let's parse body/title fallback
-			const title = lastNotification.request.content.title || "";
-			const body = lastNotification.request.content.body || "";
-
-			// Simple parsing or use data if available.
-			// In verification we will ensure add-medication passes data.
-			// For now, let's assume body has dosage to show.
+			const notification = lastNotification as any;
+			const data = notification.request?.content?.data;
+			const title = notification.request?.content?.title || "";
+			const body = notification.request?.content?.body || "";
 
 			setActiveMedication({
 				name: title.replace("Time to take ", "") || "Medication",
 				dosage: body.replace("Dosage: ", "") || "",
-				id: data?.medicationId, // Ideally we pass this
+				id: data?.medicationId,
 			});
 			setAlertVisible(true);
 		}

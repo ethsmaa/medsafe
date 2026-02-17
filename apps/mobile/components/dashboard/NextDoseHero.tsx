@@ -34,7 +34,7 @@ export function NextDoseHero({
 					size={48}
 					color={Colors.light.primary}
 				/>
-				<Text className="mt-4 font-bold text-xl text-primary dark:text-primary">
+				<Text className="mt-4 font-bold text-primary text-xl dark:text-primary">
 					You're all set!
 				</Text>
 				<Text className="text-base text-text-sub-light dark:text-text-sub-dark">
@@ -52,7 +52,7 @@ export function NextDoseHero({
 	return (
 		<View className="mb-8 overflow-hidden rounded-3xl bg-surface-light shadow-sm dark:bg-surface-dark">
 			<View className="bg-primary p-6">
-				<Text className="mb-1 font-semibold text-white/80 text-xs tracking-widest uppercase">
+				<Text className="mb-1 font-semibold text-white/80 text-xs uppercase tracking-widest">
 					Next Dose
 				</Text>
 				<Text className="font-bold text-4xl text-white">{time}</Text>

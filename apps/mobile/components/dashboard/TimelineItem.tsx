@@ -52,7 +52,7 @@ export function TimelineItem({
 	return (
 		<View className="flex-row">
 			{/* Left Column: Timeline */}
-			<View className="w-16 mr-4 items-center">
+			<View className="mr-4 w-16 items-center">
 				{/* Vertical Line */}
 				{!isLast && (
 					<View className="absolute top-0 bottom-[-24] w-[2px] bg-gray-200 dark:bg-gray-700" />
@@ -74,9 +74,9 @@ export function TimelineItem({
 					}`}
 				>
 					<View className="flex-1">
-						<View className="flex-row justify-between items-start mb-1">
+						<View className="mb-1 flex-row items-start justify-between">
 							<Text
-								className={`text-lg font-bold ${
+								className={`font-bold text-lg ${
 									isTaken
 										? "text-gray-400 line-through dark:text-gray-500"
 										: "text-text-main-light dark:text-text-main-dark"

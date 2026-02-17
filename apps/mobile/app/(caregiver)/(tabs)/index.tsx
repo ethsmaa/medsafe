@@ -131,7 +131,7 @@ export default function CaregiverDashboard() {
 								Patient Email
 							</Text>
 							<TextInput
-								className="h-14 w-full rounded-xl border border-border-light bg-background-light px-4 text-text-main-light text-base shadow-sm focus:border-primary dark:border-border-dark dark:bg-background-dark dark:text-text-main-dark"
+								className="h-14 w-full rounded-xl border border-border-light bg-background-light px-4 text-base text-text-main-light shadow-sm focus:border-primary dark:border-border-dark dark:bg-background-dark dark:text-text-main-dark"
 								placeholder="patient@example.com"
 								value={inviteEmail}
 								onChangeText={setInviteEmail}

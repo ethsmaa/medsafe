@@ -1,4 +1,4 @@
-import { View, Text, type DimensionValue } from "react-native";
+import { type DimensionValue, Text, View } from "react-native";
 
 interface AdherenceSummaryProps {
 	taken: number;
@@ -35,7 +35,7 @@ export function AdherenceSummary({
 					<Text className="font-bold text-lg text-text-main-light dark:text-text-main-dark">
 						Daily Progress
 					</Text>
-					<Text className={`text-sm font-medium ${statusColor}`}>
+					<Text className={`font-medium text-sm ${statusColor}`}>
 						{statusMessage}
 					</Text>
 				</View>
@@ -43,7 +43,7 @@ export function AdherenceSummary({
 					<Text className="font-bold text-2xl text-primary dark:text-primary">
 						{taken} <Text className="text-base text-gray-400">/ {total}</Text>
 					</Text>
-					<Text className="text-xs text-text-sub-light dark:text-text-sub-dark">
+					<Text className="text-text-sub-light text-xs dark:text-text-sub-dark">
 						Meds Taken
 					</Text>
 				</View>
@@ -53,7 +53,7 @@ export function AdherenceSummary({
 			<View className="h-4 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
 				{/* Active Progress */}
 				<View
-					className="h-full bg-primary rounded-full"
+					className="h-full rounded-full bg-primary"
 					style={{ width: progressWidth as DimensionValue }}
 				/>
 			</View>

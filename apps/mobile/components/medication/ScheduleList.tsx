@@ -1,7 +1,7 @@
-import { useAccessibility } from "@/context/AccessibilityContext";
-import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "@/constants/theme";
+import { useAccessibility } from "@/context/AccessibilityContext";
 
 interface ScheduleItem {
 	id: string;

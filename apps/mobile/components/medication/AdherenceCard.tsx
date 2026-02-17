@@ -1,7 +1,7 @@
-import { useAccessibility } from "@/context/AccessibilityContext";
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Colors } from "@/constants/theme";
+import { useAccessibility } from "@/context/AccessibilityContext";
 
 interface AdherenceCardProps {
 	takenCount: number;

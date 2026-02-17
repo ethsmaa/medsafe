@@ -1,12 +1,12 @@
-import { useAccessibility } from "@/context/AccessibilityContext";
 import {
+	ScrollView,
 	StyleSheet,
 	Text,
-	View,
 	TouchableOpacity,
-	ScrollView,
+	View,
 } from "react-native";
 import { Colors } from "@/constants/theme";
+import { useAccessibility } from "@/context/AccessibilityContext";
 
 interface WeekStripProps {
 	dates: Date[];

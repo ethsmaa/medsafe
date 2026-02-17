@@ -1,7 +1,6 @@
-import { useTRPC } from "@/lib/trpc";
 import { useQuery } from "@tanstack/react-query";
-
 import { useUser } from "@/hooks/use-user";
+import { useTRPC } from "@/lib/trpc";
 
 export function useUserRole() {
 	const trpc = useTRPC();

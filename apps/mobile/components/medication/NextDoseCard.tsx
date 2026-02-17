@@ -1,13 +1,13 @@
-import { useAccessibility } from "@/context/AccessibilityContext";
+import { Ionicons } from "@expo/vector-icons";
 import {
+	ActivityIndicator,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
-	ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
+import { useAccessibility } from "@/context/AccessibilityContext";
 
 interface NextDose {
 	id: string;
@@ -21,7 +21,7 @@ interface NextDose {
 
 interface NextDoseCardProps {
 	nextDose: NextDose | null; // Use specific type ideally
-	onTakeNow: (med: any) => void;
+	onTakeNow: (med: NextDose) => void;
 	isTaking: boolean;
 }
 

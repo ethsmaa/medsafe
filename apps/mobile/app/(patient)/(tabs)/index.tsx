@@ -1,11 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
+import { useRouter } from "expo-router";
 import {
-	ActivityIndicator,
-	Alert,
 	RefreshControl,
 	ScrollView,
 	Text,
@@ -13,17 +9,11 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { useTRPC } from "@/lib/trpc";
-
 import { AdherenceSummary } from "@/components/dashboard/AdherenceSummary";
 import { DashboardInvite } from "@/components/dashboard/DashboardInvite";
 import { TimelineItem } from "@/components/dashboard/TimelineItem";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import {
-	type ScheduleItem,
-	useMedicationSchedule,
-} from "@/hooks/useMedicationSchedule";
+import type { ScheduleItem } from "@/hooks/useMedicationSchedule";
 
 export default function PatientDashboard() {
 	const router = useRouter();
@@ -85,7 +75,7 @@ export default function PatientDashboard() {
 				))}
 
 				{/* NEXT DOSE - SIMPLE CARD (No complex Hero) */}
-				<Text className="mb-4 mt-6 font-bold text-text-main-light text-xl dark:text-text-main-dark">
+				<Text className="mt-6 mb-4 font-bold text-text-main-light text-xl dark:text-text-main-dark">
 					Up Next
 				</Text>
 
@@ -94,7 +84,7 @@ export default function PatientDashboard() {
 						<View className="p-6">
 							<View className="flex-row items-start justify-between">
 								<View>
-									<Text className="font-semibold text-white/80 text-xs tracking-widest uppercase">
+									<Text className="font-semibold text-white/80 text-xs uppercase tracking-widest">
 										Scheduled for{" "}
 										{format(new Date(nextDose.scheduledTime), "h:mm a")}
 									</Text>
@@ -103,7 +93,7 @@ export default function PatientDashboard() {
 											nextDose.genericName ||
 											"Medication"}
 									</Text>
-									<Text className="text-white/90 text-lg">
+									<Text className="text-lg text-white/90">
 										{nextDose.medication?.dosage ||
 											nextDose.dosage ||
 											"No dosage info"}
@@ -169,7 +159,7 @@ export default function PatientDashboard() {
 						No scheduled medications for today.
 					</Text>
 				) : (
-					<View className="gap-y-0 relative">
+					<View className="relative gap-y-0">
 						{/* Continuous vertical line background if needed, but handled per item for now */}
 						{schedule.map((item: ScheduleItem, index: number) => (
 							<TimelineItem
