@@ -74,7 +74,7 @@ function RootLayoutNav() {
 		if (user && !role) {
 			refetchRole();
 		}
-	}, [user, role]);
+	}, [user, role, refetchRole]);
 
 	const rootNavigationState = useRootNavigationState();
 	const isNavigationReady = rootNavigationState?.key;
@@ -125,7 +125,7 @@ function RootLayoutNav() {
 				}, 0);
 			}
 		}
-	}, [user, role, segments, isLoading, isNavigationReady]);
+	}, [user, role, segments, isLoading, isNavigationReady, router]);
 
 	return (
 		<Stack screenOptions={{ headerShown: false }}>

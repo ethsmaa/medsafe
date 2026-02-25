@@ -88,7 +88,7 @@ export default function AddMedicationScreen() {
 				// Invalid scan result, ignore
 			}
 		}
-	}, [scanResult]);
+	}, [scanResult, isEditing]);
 
 	// Pre-fill from existing medication (editing)
 	useEffect(() => {
