@@ -7,6 +7,7 @@ import {
 	ActivityIndicator,
 	Alert,
 	KeyboardAvoidingView,
+	Modal,
 	Platform,
 	ScrollView,
 	StyleSheet,
@@ -17,34 +18,28 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
-import { useTRPC } from "@/lib/trpc";
-
-const FREQUENCIES = ["DAILY", "WEEKLY", "AS_NEEDED", "PERIODIC"] as const;
-const FORMS = [
-	"TABLET",
-	"CAPSULE",
-	"SYRUP",
-	"CREAM",
-	"INJECTION",
-	"OTHER",
-] as const;
-const MEAL_STATUSES = [
-	"BEFORE_MEAL",
-	"AFTER_MEAL",
-	"WITH_FOOD",
-	"ANY",
-] as const;
-
+import { useLanguage } from "@/context/LanguageContext";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useTRPC } from "@/lib/trpc";
+import { suggestTimes, DOSE_COUNT_OPTIONS } from "@/constants/time-suggestions";
+import {
+	MEDICATION_FORMS as FORMS,
+	MEDICATION_FREQUENCIES as FREQUENCIES,
+	MEAL_STATUSES,
+} from "@/constants/medication";
 
 export default function AddMedicationScreen() {
 	const router = useRouter();
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { isHighContrast, textSize } = useAccessibility();
+	const { t } = useLanguage();
 	const styles = makeStyles(isHighContrast, textSize);
-	// Parse ID if editing
-	const { id } = useLocalSearchParams<{ id: string }>();
+	// Parse ID if editing, or scanResult if coming from scanner
+	const { id, scanResult } = useLocalSearchParams<{
+		id: string;
+		scanResult: string;
+	}>();
 	const isEditing = !!id;
 
 	const { scheduleMedicationReminder } = useNotifications();
@@ -57,9 +52,11 @@ export default function AddMedicationScreen() {
 
 	// Form State
 	const [name, setName] = useState("");
+	const [brandName, setBrandName] = useState("");
 	const [dosage, setDosage] = useState("");
 	const [stock, setStock] = useState("");
 	const [threshold, setThreshold] = useState("5");
+	const [doseCount, setDoseCount] = useState(1);
 	const [selectedFreq, setSelectedFreq] =
 		useState<(typeof FREQUENCIES)[number]>("DAILY");
 	const [selectedForm, setSelectedForm] =
@@ -67,12 +64,37 @@ export default function AddMedicationScreen() {
 	const [selectedMeal, setSelectedMeal] =
 		useState<(typeof MEAL_STATUSES)[number]>("ANY");
 	const [times, setTimes] = useState<Date[]>([]);
-	const [showTimePicker, setShowTimePicker] = useState(false);
+	const [timesManuallyEdited, setTimesManuallyEdited] = useState(false);
 
-	// Pre-fill effect
+	// Pre-fill from scan result (OCR)
+	useEffect(() => {
+		if (scanResult && !isEditing) {
+			try {
+				const scan = JSON.parse(scanResult);
+				if (scan.nameGeneric) setName(scan.nameGeneric);
+				if (scan.nameBrand) setBrandName(scan.nameBrand);
+				if (scan.dosageAmount) setDosage(scan.dosageAmount);
+				if (scan.form && FORMS.includes(scan.form)) setSelectedForm(scan.form);
+				if (scan.frequency && FREQUENCIES.includes(scan.frequency))
+					setSelectedFreq(scan.frequency);
+				if (scan.mealStatus && MEAL_STATUSES.includes(scan.mealStatus))
+					setSelectedMeal(scan.mealStatus);
+				const count = scan.dailyDoseCount ?? 1;
+				setDoseCount(count);
+				// Auto-suggest times from scan data
+				const meal = scan.mealStatus ?? "ANY";
+				setTimes(suggestTimes(count, meal));
+			} catch {
+				// Invalid scan result, ignore
+			}
+		}
+	}, [scanResult]);
+
+	// Pre-fill from existing medication (editing)
 	useEffect(() => {
 		if (isEditing && existingMed) {
-			setName(existingMed.medication.nameGeneric);
+			setName(existingMed.medication.nameGeneric || "");
+			setBrandName(existingMed.medication.nameBrand || "");
 			setDosage(existingMed.dosageAmount);
 			setStock(existingMed.currentStock.toString());
 			setThreshold(existingMed.restockThreshold.toString());
@@ -100,7 +122,7 @@ export default function AddMedicationScreen() {
 			variables.times.forEach((time) => {
 				const [h, m] = time.split(":").map(Number);
 				scheduleMedicationReminder(
-					`Time to take ${variables.nameGeneric}`,
+					`Time to take ${variables.nameBrand || variables.nameGeneric}`,
 					`Dosage: ${variables.dosageAmount}`,
 					h,
 					m,
@@ -130,18 +152,19 @@ export default function AddMedicationScreen() {
 	});
 
 	const handleSave = () => {
-		if (!name || !dosage) {
-			Alert.alert(
-				"Error",
-				"Please fill in the required fields (Name, Dosage).",
-			);
+		if (!brandName && !name) {
+			Alert.alert(t("validation.error"), t("validation.nameRequired"));
+			return;
+		}
+		if (!dosage) {
+			Alert.alert(t("validation.error"), t("validation.dosageRequired"));
 			return;
 		}
 
 		// Convert times to HH:mm strings
-		const formattedTimes = times.map((t) => {
-			const hours = t.getHours().toString().padStart(2, "0");
-			const minutes = t.getMinutes().toString().padStart(2, "0");
+		const formattedTimes = times.map((d) => {
+			const hours = d.getHours().toString().padStart(2, "0");
+			const minutes = d.getMinutes().toString().padStart(2, "0");
 			return `${hours}:${minutes}`;
 		});
 
@@ -159,7 +182,8 @@ export default function AddMedicationScreen() {
 			});
 		} else {
 			addMutation.mutate({
-				nameGeneric: name,
+				nameGeneric: name || undefined,
+				nameBrand: brandName || undefined,
 				dosageAmount: dosage,
 				frequency: selectedFreq,
 				currentStock: Number.parseInt(stock) || 0,
@@ -167,84 +191,146 @@ export default function AddMedicationScreen() {
 				form: selectedForm,
 				mealStatus: selectedMeal,
 				times: formattedTimes,
-				instructions: "", // Optional
+				instructions: "",
 			});
 		}
 	};
 
+	const [showTimePicker, setShowTimePicker] = useState(false);
+	const [tempDate, setTempDate] = useState(new Date());
+
 	const onTimeChange = (event: any, selectedDate?: Date) => {
-		const currentDate = selectedDate || new Date();
-		setShowTimePicker(Platform.OS === "ios"); // Keep open on iOS, close on Android
-		if (event.type === "set" || Platform.OS === "ios") {
-			// Add to list if not strictly duplicate (basic check)
-			// For better UX we might want to replace the last one if editing
-			// But here we just add new ones via a generic button flow
-			if (event.type === "set") {
-				setTimes([...times, currentDate]);
-				if (Platform.OS !== "ios") setShowTimePicker(false);
+		if (Platform.OS === "android") {
+			setShowTimePicker(false);
+			if (event.type === "set" && selectedDate) {
+				setTimes([...times, selectedDate]);
 			}
 		} else {
-			setShowTimePicker(false);
+			// iOS (Spinner in Modal)
+			if (selectedDate) {
+				setTempDate(selectedDate);
+			}
 		}
 	};
 
 	const addTime = () => {
+		setTempDate(new Date());
 		setShowTimePicker(true);
+	};
+
+	const confirmTime = () => {
+		setTimes([...times, tempDate]);
+		setTimesManuallyEdited(true);
+		setShowTimePicker(false);
 	};
 
 	const removeTime = (index: number) => {
 		const newTimes = [...times];
 		newTimes.splice(index, 1);
 		setTimes(newTimes);
+		setTimesManuallyEdited(true);
 	};
 
 	return (
 		<SafeAreaView style={styles.container} edges={["top"]}>
+			{/* Header */}
 			<View style={styles.header}>
 				<TouchableOpacity
 					onPress={() => router.back()}
 					style={styles.backButton}
+					hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 				>
-					<Text style={styles.backText}>Cancel</Text>
+					<Ionicons
+						name="arrow-back"
+						size={24}
+						color={isHighContrast ? "black" : "#374151"}
+					/>
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>Add Medication</Text>
-				<View style={{ width: 60 }} />
+				<Text style={styles.headerTitle}>
+					{isEditing ? t("med.edit") : t("med.new")}
+				</Text>
+				<View style={{ width: 40 }} />
 			</View>
 
 			<KeyboardAvoidingView
 				behavior={Platform.OS === "ios" ? "padding" : "height"}
 				style={{ flex: 1 }}
 			>
-				<ScrollView contentContainerStyle={styles.content}>
-					{/* Basic Info */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Basic Info</Text>
-						<View style={styles.formGroup}>
-							<Text style={styles.label}>Name</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="e.g. Aspirin"
-								value={name}
-								onChangeText={setName}
-								placeholderTextColor={isHighContrast ? "#666" : "#9ca3af"}
-							/>
+				<ScrollView
+					contentContainerStyle={styles.content}
+					showsVerticalScrollIndicator={false}
+				>
+					{/* Hero Icon */}
+					<View style={styles.heroContainer}>
+						<View style={styles.heroIconCircle}>
+							<Ionicons name="medkit" size={40} color="#d99696" />
 						</View>
-						<View style={styles.formGroup}>
-							<Text style={styles.label}>Dosage / Strength</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="e.g. 500mg"
-								value={dosage}
-								onChangeText={setDosage}
-								placeholderTextColor={isHighContrast ? "#666" : "#9ca3af"}
-							/>
+						<Text style={styles.heroText}>
+							{isEditing
+								? "Update your medication details below."
+								: "Add a new medication to your schedule."}
+						</Text>
+					</View>
+
+					{/* 1. Basic Info Card */}
+					<View style={styles.card}>
+						<Text style={styles.cardTitle}>{t("med.infoTitle")}</Text>
+
+						{/* Brand Name Input — first, most recognizable */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.brandName")}</Text>
+							<View style={styles.inputWrapper}>
+								<Ionicons
+									name="pricetag-outline"
+									size={20}
+									color="#9ca3af"
+									style={styles.inputIcon}
+								/>
+								<TextInput
+									style={[
+										styles.input,
+										{ fontSize: 18 * textSize, fontWeight: "600" },
+									]}
+									placeholder={t("med.brandPlaceholder")}
+									value={brandName}
+									onChangeText={setBrandName}
+									placeholderTextColor="#9ca3af"
+								/>
+							</View>
 						</View>
-						<View style={styles.formGroup}>
-							<Text style={styles.label}>Form</Text>
+
+						{/* Generic Name Input — secondary */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>
+								{t("med.genericName")}{" "}
+								<Text style={{ color: "#9ca3af", fontWeight: "400" }}>
+									{t("med.genericOptional")}
+								</Text>
+							</Text>
+							<View style={styles.inputWrapper}>
+								<Ionicons
+									name="flask-outline"
+									size={20}
+									color="#9ca3af"
+									style={styles.inputIcon}
+								/>
+								<TextInput
+									style={styles.input}
+									placeholder={t("med.genericPlaceholder")}
+									value={name}
+									onChangeText={setName}
+									placeholderTextColor="#9ca3af"
+								/>
+							</View>
+						</View>
+
+						{/* Form Selection */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.form")}</Text>
 							<ScrollView
 								horizontal
 								showsHorizontalScrollIndicator={false}
-								contentContainerStyle={styles.chipContainer}
+								contentContainerStyle={styles.chipScroll}
 							>
 								{FORMS.map((form) => (
 									<TouchableOpacity
@@ -267,17 +353,112 @@ export default function AddMedicationScreen() {
 								))}
 							</ScrollView>
 						</View>
+
+						{/* Dosage Input */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.dosage")}</Text>
+							<View style={styles.inputWrapper}>
+								<Ionicons
+									name="eyedrop-outline"
+									size={20}
+									color="#9ca3af"
+									style={styles.inputIcon}
+								/>
+								<TextInput
+									style={styles.input}
+									placeholder={t("med.dosagePlaceholder")}
+									value={dosage}
+									onChangeText={setDosage}
+									placeholderTextColor="#9ca3af"
+								/>
+							</View>
+						</View>
 					</View>
 
-					{/* Scheduling */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Scheduling</Text>
-						<View style={styles.formGroup}>
-							<Text style={styles.label}>Frequency</Text>
+					{/* 2. Schedule Card */}
+					<View style={styles.card}>
+						<Text style={styles.cardTitle}>{t("med.scheduleTitle")}</Text>
+
+						{/* Dose Count Stepper */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.doseCount")}</Text>
+							<View style={styles.chipScroll}>
+								{DOSE_COUNT_OPTIONS.map((count) => (
+									<TouchableOpacity
+										key={count}
+										style={[
+											styles.chip,
+											{ minWidth: 56, alignItems: "center" },
+											doseCount === count && styles.chipSelected,
+										]}
+										onPress={() => {
+											setDoseCount(count);
+											if (!timesManuallyEdited) {
+												setTimes(suggestTimes(count, selectedMeal));
+											}
+										}}
+									>
+										<Text
+											style={[
+												styles.chipText,
+												doseCount === count && styles.chipTextSelected,
+											]}
+										>
+											{count}x
+										</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+						</View>
+
+						{/* Meal Status */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.mealStatus")}</Text>
 							<ScrollView
 								horizontal
 								showsHorizontalScrollIndicator={false}
-								contentContainerStyle={styles.chipContainer}
+								contentContainerStyle={styles.chipScroll}
+							>
+								{MEAL_STATUSES.map((status) => (
+									<TouchableOpacity
+										key={status}
+										style={[
+											styles.chip,
+											selectedMeal === status && styles.chipSelected,
+										]}
+										onPress={() => {
+											setSelectedMeal(status);
+											if (!timesManuallyEdited) {
+												setTimes(suggestTimes(doseCount, status));
+											}
+										}}
+									>
+										<Text
+											style={[
+												styles.chipText,
+												selectedMeal === status && styles.chipTextSelected,
+											]}
+										>
+											{status === "BEFORE_MEAL"
+												? t("med.mealBefore")
+												: status === "AFTER_MEAL"
+													? t("med.mealAfter")
+													: status === "WITH_FOOD"
+														? t("med.mealWith")
+														: t("med.mealAny")}
+										</Text>
+									</TouchableOpacity>
+								))}
+							</ScrollView>
+						</View>
+
+						{/* Frequency (hidden if DAILY — most common) */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.frequency")}</Text>
+							<ScrollView
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								contentContainerStyle={styles.chipScroll}
 							>
 								{FREQUENCIES.map((freq) => (
 									<TouchableOpacity
@@ -294,131 +475,165 @@ export default function AddMedicationScreen() {
 												selectedFreq === freq && styles.chipTextSelected,
 											]}
 										>
-											{freq.replace("_", " ")}
+											{freq === "DAILY"
+												? t("med.freqDaily")
+												: freq === "WEEKLY"
+													? t("med.freqWeekly")
+													: freq === "AS_NEEDED"
+														? t("med.freqAsNeeded")
+														: t("med.freqPeriodic")}
 										</Text>
 									</TouchableOpacity>
 								))}
 							</ScrollView>
 						</View>
 
-						<View style={styles.formGroup}>
-							<Text style={styles.label}>Time of Day</Text>
-							<View style={styles.timesList}>
-								{times.map((t, index) => (
-									<View key={index} style={styles.timeBadge}>
-										<Text style={styles.timeText}>
-											{t.toLocaleTimeString([], {
+						{/* Times */}
+						<View style={styles.inputContainer}>
+							<View style={styles.rowBetween}>
+								<Text style={styles.label}>{t("med.reminderTimes")}</Text>
+								<TouchableOpacity onPress={addTime}>
+									<Text style={styles.addLink}>{t("med.addTime")}</Text>
+								</TouchableOpacity>
+							</View>
+
+							<View style={styles.timesContainer}>
+								{times.length === 0 && (
+									<Text style={styles.emptyTimesText}>{t("med.noTimes")}</Text>
+								)}
+								{times.map((time, index) => (
+									<View key={index} style={styles.timeChip}>
+										<Ionicons name="time-outline" size={16} color="#374151" />
+										<Text style={styles.timeChipText}>
+											{time.toLocaleTimeString([], {
 												hour: "2-digit",
 												minute: "2-digit",
 											})}
 										</Text>
-										<TouchableOpacity onPress={() => removeTime(index)}>
-											<Ionicons
-												name="close-circle"
-												size={20}
-												color={isHighContrast ? "black" : "#6b7280"}
-											/>
+										<TouchableOpacity
+											onPress={() => removeTime(index)}
+											hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+										>
+											<Ionicons name="close" size={16} color="#ef4444" />
 										</TouchableOpacity>
 									</View>
 								))}
-								<TouchableOpacity
-									style={styles.addTimeButton}
-									onPress={addTime}
-								>
-									<Ionicons
-										name="add"
-										size={20}
-										color={isHighContrast ? "black" : "#2563eb"}
-									/>
-									<Text style={styles.addTimeText}>Add Time</Text>
-								</TouchableOpacity>
 							</View>
-							{showTimePicker && (
+
+							{/* Android: Native Picker (No Modal) */}
+							{Platform.OS === "android" && showTimePicker && (
 								<DateTimePicker
-									value={new Date()}
+									value={tempDate}
 									mode="time"
 									display="default"
 									onChange={onTimeChange}
 								/>
 							)}
-						</View>
 
-						<View style={styles.formGroup}>
-							<Text style={styles.label}>Details</Text>
-							<ScrollView
-								horizontal
-								showsHorizontalScrollIndicator={false}
-								contentContainerStyle={styles.chipContainer}
-							>
-								{MEAL_STATUSES.map((status) => (
+							{/* iOS: Custom Bottom Sheet Modal */}
+							{Platform.OS === "ios" && (
+								<Modal
+									transparent={true}
+									visible={showTimePicker}
+									animationType="fade"
+									onRequestClose={() => setShowTimePicker(false)}
+								>
 									<TouchableOpacity
-										key={status}
-										style={[
-											styles.chip,
-											selectedMeal === status && styles.chipSelected,
-										]}
-										onPress={() => setSelectedMeal(status)}
+										style={styles.modalOverlay}
+										activeOpacity={1}
+										onPress={() => setShowTimePicker(false)}
 									>
-										<Text
-											style={[
-												styles.chipText,
-												selectedMeal === status && styles.chipTextSelected,
-											]}
+										<View
+											style={styles.modalContent}
+											onStartShouldSetResponder={() => true}
 										>
-											{status.replace("_", " ")}
-										</Text>
+											<View style={styles.modalHeader}>
+												<TouchableOpacity
+													onPress={() => setShowTimePicker(false)}
+												>
+													<Text style={styles.modalCancelText}>
+														{t("timePicker.cancel")}
+													</Text>
+												</TouchableOpacity>
+												<Text style={styles.modalTitle}>
+													{t("timePicker.title")}
+												</Text>
+												<TouchableOpacity onPress={confirmTime}>
+													<Text style={styles.modalConfirmText}>
+														{t("timePicker.confirm")}
+													</Text>
+												</TouchableOpacity>
+											</View>
+
+											<View style={styles.pickerContainer}>
+												<DateTimePicker
+													value={tempDate}
+													mode="time"
+													display="spinner"
+													onChange={onTimeChange}
+													textColor={isHighContrast ? "black" : undefined}
+												/>
+											</View>
+										</View>
 									</TouchableOpacity>
-								))}
-							</ScrollView>
+								</Modal>
+							)}
 						</View>
 					</View>
 
-					{/* Inventory */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Inventory</Text>
+					{/* 3. Inventory Card */}
+					<View style={styles.card}>
+						<Text style={styles.cardTitle}>{t("med.stockTitle")}</Text>
 						<View style={styles.row}>
-							<View style={[styles.formGroup, { flex: 1 }]}>
-								<Text style={styles.label}>Current Stock</Text>
-								<TextInput
-									style={styles.input}
-									placeholder="0"
-									value={stock}
-									onChangeText={setStock}
-									keyboardType="numeric"
-									placeholderTextColor={isHighContrast ? "#666" : "#9ca3af"}
-								/>
+							<View style={[styles.inputContainer, { flex: 1 }]}>
+								<Text style={styles.label}>{t("med.currentStock")}</Text>
+								<View style={styles.inputWrapper}>
+									<TextInput
+										style={styles.input}
+										placeholder="0"
+										value={stock}
+										onChangeText={setStock}
+										keyboardType="numeric"
+										placeholderTextColor="#9ca3af"
+									/>
+								</View>
 							</View>
-							<View style={[styles.formGroup, { flex: 1 }]}>
-								<Text style={styles.label}>Restock Alert At</Text>
-								<TextInput
-									style={styles.input}
-									placeholder="5"
-									value={threshold}
-									onChangeText={setThreshold}
-									keyboardType="numeric"
-									placeholderTextColor={isHighContrast ? "#666" : "#9ca3af"}
-								/>
+							<View style={[styles.inputContainer, { flex: 1 }]}>
+								<Text style={styles.label}>{t("med.alertLimit")}</Text>
+								<View style={styles.inputWrapper}>
+									<TextInput
+										style={styles.input}
+										placeholder="5"
+										value={threshold}
+										onChangeText={setThreshold}
+										keyboardType="numeric"
+										placeholderTextColor="#9ca3af"
+									/>
+								</View>
 							</View>
 						</View>
 					</View>
 
-					{/* Spacer for button */}
-					<View style={{ height: 40 }} />
+					<View style={{ height: 100 }} />
 				</ScrollView>
 
+				{/* Footer Button */}
 				<View style={styles.footer}>
 					<TouchableOpacity
 						style={[
 							styles.saveButton,
-							addMutation.isPending && styles.disabled,
+							(addMutation.isPending || updateMutation.isPending) &&
+								styles.disabled,
 						]}
 						onPress={handleSave}
-						disabled={addMutation.isPending}
+						disabled={addMutation.isPending || updateMutation.isPending}
 					>
-						{addMutation.isPending ? (
+						{addMutation.isPending || updateMutation.isPending ? (
 							<ActivityIndicator color={isHighContrast ? "black" : "white"} />
 						) : (
-							<Text style={styles.saveText}>Save Medication</Text>
+							<Text style={styles.saveText}>
+								{isEditing ? t("med.saveChanges") : t("med.save")}
+							</Text>
 						)}
 					</TouchableOpacity>
 				</View>
@@ -431,7 +646,7 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 	StyleSheet.create({
 		container: {
 			flex: 1,
-			backgroundColor: isHighContrast ? "#ffffff" : "white",
+			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6",
 		},
 		header: {
 			flexDirection: "row",
@@ -439,135 +654,184 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 			justifyContent: "space-between",
 			paddingHorizontal: 16,
 			paddingVertical: 12,
-			borderBottomWidth: 1,
-			borderBottomColor: isHighContrast ? "#000000" : "#f3f4f6",
+			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6",
 		},
 		backButton: {
-			padding: 8,
-			width: 70,
-		},
-		backText: {
-			color: isHighContrast ? "#000000" : "#6b7280",
-			fontSize: 16 * textSize,
+			width: 40,
+			height: 40,
+			justifyContent: "center",
+			alignItems: "center",
+			borderRadius: 20,
+			backgroundColor: isHighContrast ? "#e5e5e5" : "white",
 		},
 		headerTitle: {
 			fontSize: 18 * textSize,
-			fontWeight: "bold",
+			fontWeight: "700",
 			color: isHighContrast ? "#000000" : "#111827",
 		},
 		content: {
-			padding: 24,
-			gap: 24,
+			padding: 16,
+			gap: 20,
 		},
-		section: {
-			gap: 16,
+		heroContainer: {
+			alignItems: "center",
+			marginBottom: 10,
 		},
-		sectionTitle: {
+		heroIconCircle: {
+			width: 80,
+			height: 80,
+			borderRadius: 40,
+			backgroundColor: "#dbeafe",
+			alignItems: "center",
+			justifyContent: "center",
+			marginBottom: 12,
+		},
+		heroText: {
+			fontSize: 14 * textSize,
+			color: isHighContrast ? "#000000" : "#6b7280",
+			textAlign: "center",
+		},
+		card: {
+			backgroundColor: isHighContrast ? "#ffffff" : "white",
+			borderRadius: 24,
+			padding: 20,
+			borderWidth: isHighContrast ? 2 : 0,
+			borderColor: "black",
+			shadowColor: "#000",
+			shadowOffset: { width: 0, height: 2 },
+			shadowOpacity: 0.05,
+			shadowRadius: 8,
+			elevation: 2,
+			gap: 20,
+		},
+		cardTitle: {
 			fontSize: 18 * textSize,
 			fontWeight: "bold",
 			color: isHighContrast ? "#000000" : "#1f2937",
-			marginBottom: 8,
+			marginBottom: 4,
 		},
-		formGroup: {
-			marginBottom: 8,
+		inputContainer: {
+			gap: 8,
 		},
 		label: {
-			fontSize: 14 * textSize,
+			fontSize: 13 * textSize,
 			fontWeight: "600",
-			color: isHighContrast ? "#000000" : "#374151",
-			marginBottom: 8,
+			color: isHighContrast ? "#000000" : "#6b7280",
 			textTransform: "uppercase",
 			letterSpacing: 0.5,
 		},
-		input: {
-			borderWidth: 1,
-			borderColor: isHighContrast ? "#000000" : "#e5e7eb",
-			borderRadius: 12,
-			padding: 16,
-			fontSize: 18 * textSize,
-			color: isHighContrast ? "#000000" : "#111827",
-			backgroundColor: isHighContrast ? "#ffffff" : "#f9fafb",
-		},
-		chipContainer: {
+		inputWrapper: {
 			flexDirection: "row",
-			gap: 10,
+			alignItems: "center",
+			backgroundColor: isHighContrast ? "#ffffff" : "#f9fafb",
+			borderWidth: isHighContrast ? 2 : 1,
+			borderColor: isHighContrast ? "#000000" : "#e5e7eb",
+			borderRadius: 16,
+			paddingHorizontal: 16,
+			height: 56, // Fixed height for consistency
+		},
+		inputIcon: {
+			marginRight: 10,
+		},
+		input: {
+			flex: 1,
+			fontSize: 16 * textSize,
+			color: isHighContrast ? "#000000" : "#111827",
+			height: "100%",
+		},
+		chipScroll: {
+			gap: 8,
 			paddingRight: 20,
 		},
 		chip: {
 			paddingHorizontal: 16,
 			paddingVertical: 10,
 			borderRadius: 20,
-			borderWidth: isHighContrast ? 2 : 1,
-			borderColor: isHighContrast ? "#000000" : "#e5e7eb",
-			backgroundColor: isHighContrast ? "#ffffff" : "white",
-			marginRight: 8,
+			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6", // Default gray
+			borderWidth: isHighContrast ? 2 : 0,
+			borderColor: "black",
 		},
 		chipSelected: {
-			backgroundColor: isHighContrast ? "#ffcc00" : "#d1fae5",
-			borderColor: isHighContrast ? "#000000" : "#10b981",
+			backgroundColor: isHighContrast ? "#ffcc00" : "#d99696", // Primary Blue
 		},
 		chipText: {
 			fontSize: 14 * textSize,
+			fontWeight: "600",
 			color: isHighContrast ? "#000000" : "#4b5563",
-			fontWeight: "500",
 		},
 		chipTextSelected: {
-			color: isHighContrast ? "#000000" : "#065f46",
-			fontWeight: "bold",
+			color: isHighContrast ? "#000000" : "white",
 		},
-		timesList: {
+		rowBetween: {
+			flexDirection: "row",
+			justifyContent: "space-between",
+			alignItems: "center",
+		},
+		addLink: {
+			fontSize: 14 * textSize,
+			fontWeight: "bold",
+			color: "#d99696",
+		},
+		timesContainer: {
 			flexDirection: "row",
 			flexWrap: "wrap",
 			gap: 10,
+			marginTop: 8,
 		},
-		timeBadge: {
+		emptyTimesText: {
+			fontSize: 14 * textSize,
+			color: "#9ca3af",
+			fontStyle: "italic",
+		},
+		timeChip: {
 			flexDirection: "row",
 			alignItems: "center",
-			backgroundColor: isHighContrast ? "#e5e5e5" : "#f3f4f6",
+			backgroundColor: "#eff6ff", // Light blue bg
 			paddingHorizontal: 12,
 			paddingVertical: 8,
-			borderRadius: 20,
-			borderWidth: isHighContrast ? 1 : 0,
-			borderColor: "black",
+			borderRadius: 12,
+			borderWidth: 1,
+			borderColor: "#bfdbfe",
 			gap: 6,
 		},
-		timeText: {
-			fontSize: 16 * textSize,
-			color: isHighContrast ? "#000000" : "#1f2937",
+		timeChipText: {
+			fontSize: 14 * textSize,
 			fontWeight: "600",
-		},
-		addTimeButton: {
-			flexDirection: "row",
-			alignItems: "center",
-			paddingHorizontal: 12,
-			paddingVertical: 8,
-			// borderRadius: 20,
-			// borderWidth: 1,
-			// borderColor: "#2563eb",
-			gap: 4,
-		},
-		addTimeText: {
-			color: isHighContrast ? "#000000" : "#2563eb",
-			fontWeight: "600",
-			fontSize: 16 * textSize,
+			color: "#1e3a8a",
 		},
 		row: {
 			flexDirection: "row",
 			gap: 16,
 		},
 		footer: {
-			padding: 24,
-			borderTopWidth: 1,
-			borderTopColor: isHighContrast ? "#000000" : "#f3f4f6",
+			position: "absolute",
+			bottom: 0,
+			left: 0,
+			right: 0,
 			backgroundColor: isHighContrast ? "#ffffff" : "white",
+			paddingHorizontal: 24,
+			paddingTop: 20,
+			paddingBottom: 40,
+			borderTopLeftRadius: 24,
+			borderTopRightRadius: 24,
+			shadowColor: "#000",
+			shadowOffset: { width: 0, height: -4 },
+			shadowOpacity: 0.05,
+			shadowRadius: 10,
+			elevation: 10,
 		},
 		saveButton: {
-			backgroundColor: isHighContrast ? "#ffcc00" : "#10b981",
+			backgroundColor: isHighContrast ? "#ffcc00" : "#d99696",
 			borderRadius: 16,
 			paddingVertical: 18,
 			alignItems: "center",
 			borderWidth: isHighContrast ? 2 : 0,
 			borderColor: "black",
+			shadowColor: "#d99696",
+			shadowOffset: { width: 0, height: 4 },
+			shadowOpacity: 0.2,
+			shadowRadius: 8,
+			elevation: 4,
 		},
 		disabled: {
 			opacity: 0.7,
@@ -576,5 +840,48 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 			color: isHighContrast ? "black" : "white",
 			fontSize: 18 * textSize,
 			fontWeight: "bold",
+		},
+		modalOverlay: {
+			flex: 1,
+			backgroundColor: "rgba(0,0,0,0.5)",
+			justifyContent: "flex-end",
+		},
+		modalContent: {
+			backgroundColor: isHighContrast ? "#ffffff" : "white",
+			borderTopLeftRadius: 20,
+			borderTopRightRadius: 20,
+			paddingBottom: 40,
+			shadowColor: "#000",
+			shadowOffset: { width: 0, height: -2 },
+			shadowOpacity: 0.1,
+			shadowRadius: 10,
+			elevation: 10,
+		},
+		modalHeader: {
+			flexDirection: "row",
+			justifyContent: "space-between",
+			alignItems: "center",
+			padding: 16,
+			borderBottomWidth: 1,
+			borderBottomColor: isHighContrast ? "#000000" : "#f3f4f6",
+		},
+		modalTitle: {
+			fontSize: 16 * textSize,
+			fontWeight: "600",
+			color: isHighContrast ? "#000000" : "#1f2937",
+		},
+		modalCancelText: {
+			fontSize: 16 * textSize,
+			color: isHighContrast ? "#000000" : "#6b7280",
+		},
+		modalConfirmText: {
+			fontSize: 16 * textSize,
+			fontWeight: "bold",
+			color: "#d99696",
+		},
+		pickerContainer: {
+			alignItems: "center",
+			justifyContent: "center",
+			paddingVertical: 20,
 		},
 	});

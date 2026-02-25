@@ -1,20 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PatientTabsLayout() {
-	const { isHighContrast, textSize } = useAccessibility();
+	const { isHighContrast, isDarkMode, textSize } = useAccessibility();
+	const { t } = useLanguage();
+	const insets = useSafeAreaInsets();
 
-	// Using consistent colors for the tab bar
-	const tabBarActiveTintColor = "#5D9C9B"; // Primary Teal
-	const tabBarInactiveTintColor = "#9ca3af"; // Gray-400
-	const tabBarStyle = {
-		backgroundColor: isHighContrast ? "#ffffff" : "#ffffff",
-		borderTopWidth: 1,
-		borderTopColor: "#e5e7eb",
-		paddingTop: 8,
-		height: 88, // Taller tab bar
-	};
+	const tabBarActiveTintColor = "#d99696";
+	const tabBarInactiveTintColor = isDarkMode ? "#6b5e5e" : "#9ca3af";
 
 	return (
 		<Tabs
@@ -27,13 +23,24 @@ export default function PatientTabsLayout() {
 					fontWeight: "500",
 					marginBottom: 4,
 				},
-				tabBarStyle,
+				tabBarStyle: {
+					backgroundColor: isHighContrast
+						? "#ffffff"
+						: isDarkMode
+							? "#2d2424"
+							: "#ffffff",
+					borderTopWidth: 1,
+					borderTopColor: isDarkMode ? "#4a3e3e" : "#e5e7eb",
+					paddingTop: 8,
+					paddingBottom: Math.max(insets.bottom, 8),
+					height: 60 + Math.max(insets.bottom, 8),
+				},
 			}}
 		>
 			<Tabs.Screen
 				name="index"
 				options={{
-					title: "Home",
+					title: t("tab.home"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="home" size={size} color={color} />
 					),
@@ -42,7 +49,7 @@ export default function PatientTabsLayout() {
 			<Tabs.Screen
 				name="meds"
 				options={{
-					title: "Cabinet",
+					title: t("tab.cabinet"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="medkit" size={size} color={color} />
 					),
@@ -51,7 +58,7 @@ export default function PatientTabsLayout() {
 			<Tabs.Screen
 				name="calendar"
 				options={{
-					title: "Calendar",
+					title: t("tab.calendar"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="calendar" size={size} color={color} />
 					),
@@ -60,7 +67,7 @@ export default function PatientTabsLayout() {
 			<Tabs.Screen
 				name="profile"
 				options={{
-					title: "Profile",
+					title: t("tab.profile"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="person" size={size} color={color} />
 					),

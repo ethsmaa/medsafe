@@ -14,6 +14,7 @@ import { useRootNavigationState, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useUser } from "@/hooks/use-user";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -31,16 +32,18 @@ export default function RootLayout() {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<SafeAreaProvider>
 				<AccessibilityProvider>
-					<TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-						<QueryClientProvider client={queryClient}>
-							<ThemeProvider
-								value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-							>
-								<RootLayoutNav />
-								<StatusBar style="auto" />
-							</ThemeProvider>
-						</QueryClientProvider>
-					</TRPCProvider>
+					<LanguageProvider>
+						<TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
+							<QueryClientProvider client={queryClient}>
+								<ThemeProvider
+									value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+								>
+									<RootLayoutNav />
+									<StatusBar style="auto" />
+								</ThemeProvider>
+							</QueryClientProvider>
+						</TRPCProvider>
+					</LanguageProvider>
 				</AccessibilityProvider>
 			</SafeAreaProvider>
 		</GestureHandlerRootView>

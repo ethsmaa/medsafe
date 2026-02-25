@@ -1,20 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function CaregiverTabsLayout() {
 	const { isHighContrast, textSize } = useAccessibility();
+	const { t } = useLanguage();
+	const insets = useSafeAreaInsets();
 
-	// Using consistent colors for the tab bar
-	const tabBarActiveTintColor = "#5D9C9B"; // Primary Teal
-	const tabBarInactiveTintColor = "#9ca3af"; // Gray-400
-	const tabBarStyle = {
-		backgroundColor: isHighContrast ? "#ffffff" : "#ffffff", // Keep white for clean look
-		borderTopWidth: 1,
-		borderTopColor: "#e5e7eb",
-		paddingTop: 8,
-		height: 88, // Taller tab bar for modern look
-	};
+	const tabBarActiveTintColor = "#d99696";
+	const tabBarInactiveTintColor = "#9ca3af";
 
 	return (
 		<Tabs
@@ -27,13 +23,20 @@ export default function CaregiverTabsLayout() {
 					fontWeight: "500",
 					marginBottom: 4,
 				},
-				tabBarStyle,
+				tabBarStyle: {
+					backgroundColor: isHighContrast ? "#ffffff" : "#ffffff",
+					borderTopWidth: 1,
+					borderTopColor: "#e5e7eb",
+					paddingTop: 8,
+					paddingBottom: Math.max(insets.bottom, 8),
+					height: 60 + Math.max(insets.bottom, 8),
+				},
 			}}
 		>
 			<Tabs.Screen
 				name="index"
 				options={{
-					title: "Dashboard",
+					title: t("tab.home"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="grid" size={size} color={color} />
 					),
@@ -42,7 +45,7 @@ export default function CaregiverTabsLayout() {
 			<Tabs.Screen
 				name="patients"
 				options={{
-					title: "Patients",
+					title: t("tab.cabinet"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="people" size={size} color={color} />
 					),
@@ -51,7 +54,7 @@ export default function CaregiverTabsLayout() {
 			<Tabs.Screen
 				name="alerts"
 				options={{
-					title: "Alerts",
+					title: t("tab.calendar"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="notifications" size={size} color={color} />
 					),
@@ -60,7 +63,7 @@ export default function CaregiverTabsLayout() {
 			<Tabs.Screen
 				name="profile"
 				options={{
-					title: "Profile",
+					title: t("tab.profile"),
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="person" size={size} color={color} />
 					),
