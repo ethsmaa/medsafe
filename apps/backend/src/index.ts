@@ -14,7 +14,13 @@ const app = new Hono();
 app.use(
     "*",
     cors({
-        origin: ["http://localhost:3000", "http://localhost:3001"],
+        origin: (origin) => {
+            // In development, allow all origins (mobile IP changes frequently)
+            if (process.env.NODE_ENV !== "production") return origin;
+            // In production, whitelist specific origins
+            const allowed = ["https://medsafe.app", "https://api.medsafe.app"];
+            return allowed.includes(origin) ? origin : null;
+        },
         allowHeaders: ["Content-Type", "Authorization"],
         allowMethods: ["POST", "GET", "OPTIONS"],
         exposeHeaders: ["Content-Length"],

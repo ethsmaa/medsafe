@@ -2,8 +2,34 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../database/prisma.js";
 import { protectedProcedure, router } from "../trpc/index.js";
+import { MEDICATION_FORMS, MEDICATION_FREQUENCIES, MEAL_STATUSES } from "./constants.js";
+import { scanMedicationImage } from "./scan-medication.js";
 
 export const medicationRouter = router({
+	/**
+	 * Scan a medication box image using AI (Gemini Vision).
+	 * Returns structured medication data to pre-fill the form.
+	 */
+	scanBox: protectedProcedure
+		.input(
+			z.object({
+				imageBase64: z.string().min(1, "Image data is required"),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			try {
+				return await scanMedicationImage(input.imageBase64);
+			} catch (error) {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message:
+						error instanceof Error
+							? error.message
+							: "Failed to scan medication image",
+				});
+			}
+		}),
+
 	/**
 	 * Add a medication manually (Patient or Caregiver for active patient).
 	 */
@@ -11,21 +37,15 @@ export const medicationRouter = router({
 		.input(
 			z.object({
 				patientId: z.string().optional(), // If not provided, assumes self
-				nameGeneric: z.string().min(1),
+				nameGeneric: z.string().optional(),
+				nameBrand: z.string().optional(),
 				dosageAmount: z.string().min(1),
-				frequency: z.enum(["DAILY", "WEEKLY", "AS_NEEDED", "PERIODIC"]),
+				frequency: z.enum(MEDICATION_FREQUENCIES),
 				currentStock: z.number().min(0).default(0),
 				restockThreshold: z.number().min(0).default(5),
 				instructions: z.string().optional(),
-				form: z.enum([
-					"TABLET",
-					"CAPSULE",
-					"SYRUP",
-					"CREAM",
-					"INJECTION",
-					"OTHER",
-				]),
-				mealStatus: z.enum(["BEFORE_MEAL", "AFTER_MEAL", "WITH_FOOD", "ANY"]),
+				form: z.enum(MEDICATION_FORMS),
+				mealStatus: z.enum(MEAL_STATUSES),
 				times: z.array(z.string()), // Array of "HH:mm" strings
 			}),
 		)
@@ -33,6 +53,7 @@ export const medicationRouter = router({
 			const {
 				patientId: inputPatientId,
 				nameGeneric,
+				nameBrand,
 				dosageAmount,
 				frequency,
 				currentStock,
@@ -92,14 +113,34 @@ export const medicationRouter = router({
 				targetPatientId = patientProfile.id;
 			}
 
-			// Create Medication record (if not exists - usually we'd search first but strictly manual now)
-			let medication = await prisma.medication.findFirst({
-				where: { nameGeneric: { equals: nameGeneric, mode: "insensitive" } },
-			});
+			// Create Medication record (if not exists)
+			const searchName = nameGeneric || nameBrand;
+			if (!searchName) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Either generic name or brand name is required.",
+				});
+			}
+
+			let medication = nameGeneric
+				? await prisma.medication.findFirst({
+						where: { nameGeneric: { equals: nameGeneric, mode: "insensitive" } },
+					})
+				: await prisma.medication.findFirst({
+						where: { nameBrand: { equals: nameBrand, mode: "insensitive" } },
+					});
 
 			if (!medication) {
 				medication = await prisma.medication.create({
-					data: { nameGeneric },
+					data: {
+						nameGeneric: nameGeneric ?? nameBrand ?? "",
+						nameBrand,
+					},
+				});
+			} else if (nameBrand && !medication.nameBrand) {
+				medication = await prisma.medication.update({
+					where: { id: medication.id },
+					data: { nameBrand },
 				});
 			}
 
@@ -408,18 +449,12 @@ export const medicationRouter = router({
 			z.object({
 				id: z.string(),
 				dosageAmount: z.string().optional(),
-				frequency: z
-					.enum(["DAILY", "WEEKLY", "AS_NEEDED", "PERIODIC"])
-					.optional(),
+				frequency: z.enum(MEDICATION_FREQUENCIES).optional(),
 				currentStock: z.number().min(0).optional(),
 				restockThreshold: z.number().min(0).optional(),
 				instructions: z.string().optional(),
-				form: z
-					.enum(["TABLET", "CAPSULE", "SYRUP", "CREAM", "INJECTION", "OTHER"])
-					.optional(),
-				mealStatus: z
-					.enum(["BEFORE_MEAL", "AFTER_MEAL", "WITH_FOOD", "ANY"])
-					.optional(),
+				form: z.enum(MEDICATION_FORMS).optional(),
+				mealStatus: z.enum(MEAL_STATUSES).optional(),
 				times: z.array(z.string()).optional(),
 			}),
 		)
