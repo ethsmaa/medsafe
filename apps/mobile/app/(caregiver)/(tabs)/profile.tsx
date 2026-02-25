@@ -67,7 +67,7 @@ export default function ProfileScreen() {
 						<Switch
 							value={isHighContrast}
 							onValueChange={toggleHighContrast}
-							trackColor={{ false: "#d1d5db", true: "#2563eb" }}
+							trackColor={{ false: "#d1d5db", true: "#d99696" }}
 							thumbColor={isHighContrast ? "#ffffff" : "#f4f3f4"}
 						/>
 					</View>
@@ -88,7 +88,7 @@ export default function ProfileScreen() {
 						step={0.1}
 						value={textSize}
 						onSlidingComplete={setTextSize}
-						minimumTrackTintColor="#2563eb"
+						minimumTrackTintColor="#d99696"
 						maximumTrackTintColor="#d1d5db"
 					/>
 				</View>

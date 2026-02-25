@@ -6,11 +6,17 @@ import {
 	useEffect,
 	useState,
 } from "react";
+import { useColorScheme as useNativeWindColorScheme } from "nativewind";
+
+type ThemeMode = "light" | "dark" | "system";
 
 type AccessibilityContextType = {
 	isHighContrast: boolean;
-	textSize: number; // 1 = normal, 1.2 = large, 1.5 = extra large
+	isDarkMode: boolean;
+	themeMode: ThemeMode;
+	textSize: number;
 	toggleHighContrast: () => void;
+	setThemeMode: (mode: ThemeMode) => void;
 	setTextSize: (size: number) => void;
 };
 
@@ -21,19 +27,43 @@ const AccessibilityContext = createContext<
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
 	const [isHighContrast, setIsHighContrast] = useState(false);
 	const [textSize, setTextSizeState] = useState(1);
+	const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
+
+	const { colorScheme: systemScheme, setColorScheme } =
+		useNativeWindColorScheme();
+
+	// Derived: actual dark mode state
+	const isDarkMode =
+		themeMode === "dark" || (themeMode === "system" && systemScheme === "dark");
+
+	// Sync NativeWind color scheme with our setting
+	useEffect(() => {
+		if (themeMode === "system") {
+			setColorScheme("system");
+		} else {
+			setColorScheme(themeMode);
+		}
+	}, [themeMode, setColorScheme]);
 
 	useEffect(() => {
-		// Load saved settings
 		const loadSettings = async () => {
 			try {
 				const savedContrast = await AsyncStorage.getItem("isHighContrast");
 				const savedSize = await AsyncStorage.getItem("textSize");
+				const savedTheme = await AsyncStorage.getItem("themeMode");
 
 				if (savedContrast !== null) {
 					setIsHighContrast(JSON.parse(savedContrast));
 				}
 				if (savedSize !== null) {
 					setTextSizeState(Number.parseFloat(savedSize));
+				}
+				if (
+					savedTheme === "light" ||
+					savedTheme === "dark" ||
+					savedTheme === "system"
+				) {
+					setThemeModeState(savedTheme);
 				}
 			} catch (e) {
 				console.error("Failed to load accessibility settings", e);
@@ -54,12 +84,20 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 		await AsyncStorage.setItem("textSize", size.toString());
 	};
 
+	const setThemeMode = async (mode: ThemeMode) => {
+		setThemeModeState(mode);
+		await AsyncStorage.setItem("themeMode", mode);
+	};
+
 	return (
 		<AccessibilityContext.Provider
 			value={{
 				isHighContrast,
+				isDarkMode,
+				themeMode,
 				textSize,
 				toggleHighContrast,
+				setThemeMode,
 				setTextSize,
 			}}
 		>

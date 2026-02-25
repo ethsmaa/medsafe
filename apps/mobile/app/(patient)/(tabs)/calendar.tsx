@@ -21,8 +21,8 @@ const isSameDay = (d1: Date, d2: Date) => formatDate(d1) === formatDate(d2);
 
 export default function CalendarScreen() {
 	const trpc = useTRPC();
-	const { isHighContrast, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, textSize);
+	const { isHighContrast, isDarkMode, textSize } = useAccessibility();
+	const styles = makeStyles(isHighContrast, isDarkMode, textSize);
 
 	const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -85,7 +85,7 @@ export default function CalendarScreen() {
 					id: `sched-${med.id}-${sched.timeOfDay}`,
 					type: "SCHEDULE",
 					time: sched.timeOfDay,
-					medName: med.medication.nameGeneric,
+					medName: med.medication.nameBrand || med.medication.nameGeneric,
 					dosage: med.dosageAmount,
 					status,
 					medId: med.id,
@@ -156,8 +156,16 @@ export default function CalendarScreen() {
 	);
 }
 
-const makeStyles = (isHighContrast: boolean, textSize: number) => {
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
+const makeStyles = (
+	isHighContrast: boolean,
+	isDark: boolean,
+	textSize: number,
+) => {
+	const theme = isHighContrast
+		? Colors.highContrast
+		: isDark
+			? Colors.dark
+			: Colors.light;
 	return StyleSheet.create({
 		container: {
 			flex: 1,

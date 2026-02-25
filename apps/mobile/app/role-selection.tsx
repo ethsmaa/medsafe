@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
 	},
 	cardSelected: {
 		borderColor: "#10b981", // emerald-500
-		backgroundColor: "#ecfdf5", // emerald-50
+		backgroundColor: "#f5e0e0", // emerald-50
 	},
 	cardIcon: {
 		fontSize: 32,

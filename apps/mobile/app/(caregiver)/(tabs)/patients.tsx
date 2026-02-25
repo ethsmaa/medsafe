@@ -34,7 +34,7 @@ export default function PatientsScreen() {
 			{patientsQuery.isLoading ? (
 				<ActivityIndicator
 					size="large"
-					color={isHighContrast ? "black" : "#2563eb"}
+					color={isHighContrast ? "black" : "#d99696"}
 				/>
 			) : patientsQuery.data?.length === 0 ? (
 				<View style={styles.emptyState}>
@@ -140,7 +140,7 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 			borderColor: "#000000",
 		},
 		viewButtonText: {
-			color: isHighContrast ? "#000000" : "#2563eb",
+			color: isHighContrast ? "#000000" : "#d99696",
 			fontSize: 14 * textSize,
 			fontWeight: "600",
 		},

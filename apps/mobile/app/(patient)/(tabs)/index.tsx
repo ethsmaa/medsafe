@@ -33,7 +33,10 @@ export default function PatientDashboard() {
 	} = useDashboardData();
 
 	return (
-		<SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]} // Only top to avoid double padding with Tabs
+		>
 			<View className="mb-6 flex-row items-center justify-between px-6 pt-2">
 				<View>
 					<Text className="font-semibold text-text-sub-light text-xs uppercase tracking-widest dark:text-text-sub-dark">
@@ -52,7 +55,7 @@ export default function PatientDashboard() {
 			</View>
 
 			<ScrollView
-				contentContainerClassName="px-6 pb-24"
+				contentContainerClassName="px-6 pb-32" // Increased padding for scroll clearance
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={refresh} />
 				}

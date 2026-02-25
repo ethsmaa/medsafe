@@ -161,7 +161,7 @@ const makeStyles = (isHighContrast: boolean, textSize: number) => {
 			fontSize: 15 * textSize,
 		},
 		takeNowButton: {
-			backgroundColor: isHighContrast ? "black" : "#06b6d4",
+			backgroundColor: isHighContrast ? "black" : "#d99696",
 			borderRadius: 16,
 			paddingVertical: 16,
 			flexDirection: "row",
