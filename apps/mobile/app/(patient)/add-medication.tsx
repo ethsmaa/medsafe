@@ -1,242 +1,40 @@
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
 import {
-	ActivityIndicator,
-	Alert,
-	KeyboardAvoidingView,
-	Modal,
-	Platform,
-	ScrollView,
-	StyleSheet,
+	View,
 	Text,
 	TextInput,
 	TouchableOpacity,
-	View,
+	ScrollView,
+	StyleSheet,
+	KeyboardAvoidingView,
+	Platform,
+	Modal,
+	ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { useNotifications } from "@/hooks/useNotifications";
-import { useTRPC } from "@/lib/trpc";
-import { suggestTimes, DOSE_COUNT_OPTIONS } from "@/constants/time-suggestions";
 import {
-	MEDICATION_FORMS as FORMS,
-	MEDICATION_FREQUENCIES as FREQUENCIES,
+	useMedicationForm,
+	FORMS,
+	FREQUENCIES,
 	MEAL_STATUSES,
-} from "@/constants/medication";
+	DOSE_COUNT_OPTIONS,
+} from "@/hooks/useMedicationForm";
 
 export default function AddMedicationScreen() {
-	const router = useRouter();
-	const trpc = useTRPC();
-	const queryClient = useQueryClient();
 	const { isHighContrast, textSize } = useAccessibility();
 	const { t } = useLanguage();
 	const styles = makeStyles(isHighContrast, textSize);
-	// Parse ID if editing, or scanResult if coming from scanner
-	const { id, scanResult } = useLocalSearchParams<{
-		id: string;
-		scanResult: string;
-	}>();
-	const isEditing = !!id;
-
-	const { scheduleMedicationReminder } = useNotifications();
-
-	// Fetch data if editing
-	// ideally we use a specific query, but for now we can find from cache if available or fetch cabinet
-	// simpler to just use cabinet query finding
-	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
-	const existingMed = cabinetQuery.data?.find((m) => m.id === id);
-
-	// Form State
-	const [name, setName] = useState("");
-	const [brandName, setBrandName] = useState("");
-	const [dosage, setDosage] = useState("");
-	const [stock, setStock] = useState("");
-	const [threshold, setThreshold] = useState("5");
-	const [doseCount, setDoseCount] = useState(1);
-	const [selectedFreq, setSelectedFreq] =
-		useState<(typeof FREQUENCIES)[number]>("DAILY");
-	const [selectedForm, setSelectedForm] =
-		useState<(typeof FORMS)[number]>("TABLET");
-	const [selectedMeal, setSelectedMeal] =
-		useState<(typeof MEAL_STATUSES)[number]>("ANY");
-	const [times, setTimes] = useState<Date[]>([]);
-	const [timesManuallyEdited, setTimesManuallyEdited] = useState(false);
-
-	// Pre-fill from scan result (OCR)
-	useEffect(() => {
-		if (scanResult && !isEditing) {
-			try {
-				const scan = JSON.parse(scanResult);
-				if (scan.nameGeneric) setName(scan.nameGeneric);
-				if (scan.nameBrand) setBrandName(scan.nameBrand);
-				if (scan.dosageAmount) setDosage(scan.dosageAmount);
-				if (scan.form && FORMS.includes(scan.form)) setSelectedForm(scan.form);
-				if (scan.frequency && FREQUENCIES.includes(scan.frequency))
-					setSelectedFreq(scan.frequency);
-				if (scan.mealStatus && MEAL_STATUSES.includes(scan.mealStatus))
-					setSelectedMeal(scan.mealStatus);
-				const count = scan.dailyDoseCount ?? 1;
-				setDoseCount(count);
-				// Auto-suggest times from scan data
-				const meal = scan.mealStatus ?? "ANY";
-				setTimes(suggestTimes(count, meal));
-			} catch {
-				// Invalid scan result, ignore
-			}
-		}
-	}, [scanResult, isEditing]);
-
-	// Pre-fill from existing medication (editing)
-	useEffect(() => {
-		if (isEditing && existingMed) {
-			setName(existingMed.medication.nameGeneric || "");
-			setBrandName(existingMed.medication.nameBrand || "");
-			setDosage(existingMed.dosageAmount);
-			setStock(existingMed.currentStock.toString());
-			setThreshold(existingMed.restockThreshold.toString());
-			// Cast types if needed or ensuring backend matches frontend enums
-			setSelectedFreq(existingMed.frequency as any);
-			setSelectedForm(existingMed.form as any);
-			setSelectedMeal(existingMed.mealStatus as any);
-
-			if (existingMed.doseSchedules) {
-				const loadedTimes = existingMed.doseSchedules.map((s) => {
-					const [h, m] = s.timeOfDay.split(":").map(Number);
-					const d = new Date();
-					d.setHours(h, m, 0, 0);
-					return d;
-				});
-				setTimes(loadedTimes);
-			}
-		}
-	}, [isEditing, existingMed]);
-
-	const addMutation = useMutation({
-		...trpc.medication.addMedicationManual.mutationOptions(),
-		onSuccess: (data, variables) => {
-			// Schedule notifications
-			variables.times.forEach((time) => {
-				const [h, m] = time.split(":").map(Number);
-				scheduleMedicationReminder(
-					`Time to take ${variables.nameBrand || variables.nameGeneric}`,
-					`Dosage: ${variables.dosageAmount}`,
-					h,
-					m,
-					{ medicationId: data.id },
-				);
-			});
-
-			Alert.alert("Success", "Medication added and reminders set.");
-			queryClient.invalidateQueries(trpc.medication.getMyCabinet.pathFilter());
-			router.back();
-		},
-		onError: (err) => {
-			Alert.alert("Error", err.message);
-		},
-	});
-
-	const updateMutation = useMutation({
-		...trpc.medication.update.mutationOptions(),
-		onSuccess: () => {
-			Alert.alert("Success", "Medication updated.");
-			queryClient.invalidateQueries(trpc.medication.getMyCabinet.pathFilter());
-			router.back();
-		},
-		onError: (err) => {
-			Alert.alert("Error", err.message);
-		},
-	});
-
-	const handleSave = () => {
-		if (!brandName && !name) {
-			Alert.alert(t("validation.error"), t("validation.nameRequired"));
-			return;
-		}
-		if (!dosage) {
-			Alert.alert(t("validation.error"), t("validation.dosageRequired"));
-			return;
-		}
-
-		// Convert times to HH:mm strings
-		const formattedTimes = times.map((d) => {
-			const hours = d.getHours().toString().padStart(2, "0");
-			const minutes = d.getMinutes().toString().padStart(2, "0");
-			return `${hours}:${minutes}`;
-		});
-
-		if (isEditing && id) {
-			updateMutation.mutate({
-				id,
-				dosageAmount: dosage,
-				frequency: selectedFreq,
-				currentStock: Number.parseInt(stock) || 0,
-				restockThreshold: Number.parseInt(threshold) || 5,
-				form: selectedForm,
-				mealStatus: selectedMeal,
-				times: formattedTimes,
-				instructions: "",
-			});
-		} else {
-			addMutation.mutate({
-				nameGeneric: name || undefined,
-				nameBrand: brandName || undefined,
-				dosageAmount: dosage,
-				frequency: selectedFreq,
-				currentStock: Number.parseInt(stock) || 0,
-				restockThreshold: Number.parseInt(threshold) || 5,
-				form: selectedForm,
-				mealStatus: selectedMeal,
-				times: formattedTimes,
-				instructions: "",
-			});
-		}
-	};
-
-	const [showTimePicker, setShowTimePicker] = useState(false);
-	const [tempDate, setTempDate] = useState(new Date());
-
-	const onTimeChange = (event: any, selectedDate?: Date) => {
-		if (Platform.OS === "android") {
-			setShowTimePicker(false);
-			if (event.type === "set" && selectedDate) {
-				setTimes([...times, selectedDate]);
-			}
-		} else {
-			// iOS (Spinner in Modal)
-			if (selectedDate) {
-				setTempDate(selectedDate);
-			}
-		}
-	};
-
-	const addTime = () => {
-		setTempDate(new Date());
-		setShowTimePicker(true);
-	};
-
-	const confirmTime = () => {
-		setTimes([...times, tempDate]);
-		setTimesManuallyEdited(true);
-		setShowTimePicker(false);
-	};
-
-	const removeTime = (index: number) => {
-		const newTimes = [...times];
-		newTimes.splice(index, 1);
-		setTimes(newTimes);
-		setTimesManuallyEdited(true);
-	};
+	const form = useMedicationForm();
 
 	return (
 		<SafeAreaView style={styles.container} edges={["top"]}>
 			{/* Header */}
 			<View style={styles.header}>
 				<TouchableOpacity
-					onPress={() => router.back()}
+					onPress={() => form.router.back()}
 					style={styles.backButton}
 					hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 				>
@@ -247,7 +45,7 @@ export default function AddMedicationScreen() {
 					/>
 				</TouchableOpacity>
 				<Text style={styles.headerTitle}>
-					{isEditing ? t("med.edit") : t("med.new")}
+					{form.isEditing ? t("med.edit") : t("med.new")}
 				</Text>
 				<View style={{ width: 40 }} />
 			</View>
@@ -266,7 +64,7 @@ export default function AddMedicationScreen() {
 							<Ionicons name="medkit" size={40} color="#d99696" />
 						</View>
 						<Text style={styles.heroText}>
-							{isEditing
+							{form.isEditing
 								? "Update your medication details below."
 								: "Add a new medication to your schedule."}
 						</Text>
@@ -276,7 +74,7 @@ export default function AddMedicationScreen() {
 					<View style={styles.card}>
 						<Text style={styles.cardTitle}>{t("med.infoTitle")}</Text>
 
-						{/* Brand Name Input — first, most recognizable */}
+						{/* Brand Name Input */}
 						<View style={styles.inputContainer}>
 							<Text style={styles.label}>{t("med.brandName")}</Text>
 							<View style={styles.inputWrapper}>
@@ -292,14 +90,14 @@ export default function AddMedicationScreen() {
 										{ fontSize: 18 * textSize, fontWeight: "600" },
 									]}
 									placeholder={t("med.brandPlaceholder")}
-									value={brandName}
-									onChangeText={setBrandName}
+									value={form.brandName}
+									onChangeText={form.setBrandName}
 									placeholderTextColor="#9ca3af"
 								/>
 							</View>
 						</View>
 
-						{/* Generic Name Input — secondary */}
+						{/* Generic Name Input */}
 						<View style={styles.inputContainer}>
 							<Text style={styles.label}>
 								{t("med.genericName")}{" "}
@@ -317,8 +115,8 @@ export default function AddMedicationScreen() {
 								<TextInput
 									style={styles.input}
 									placeholder={t("med.genericPlaceholder")}
-									value={name}
-									onChangeText={setName}
+									value={form.name}
+									onChangeText={form.setName}
 									placeholderTextColor="#9ca3af"
 								/>
 							</View>
@@ -332,22 +130,22 @@ export default function AddMedicationScreen() {
 								showsHorizontalScrollIndicator={false}
 								contentContainerStyle={styles.chipScroll}
 							>
-								{FORMS.map((form) => (
+								{FORMS.map((f) => (
 									<TouchableOpacity
-										key={form}
+										key={f}
 										style={[
 											styles.chip,
-											selectedForm === form && styles.chipSelected,
+											form.selectedForm === f && styles.chipSelected,
 										]}
-										onPress={() => setSelectedForm(form)}
+										onPress={() => form.setSelectedForm(f)}
 									>
 										<Text
 											style={[
 												styles.chipText,
-												selectedForm === form && styles.chipTextSelected,
+												form.selectedForm === f && styles.chipTextSelected,
 											]}
 										>
-											{form}
+											{f}
 										</Text>
 									</TouchableOpacity>
 								))}
@@ -367,8 +165,8 @@ export default function AddMedicationScreen() {
 								<TextInput
 									style={styles.input}
 									placeholder={t("med.dosagePlaceholder")}
-									value={dosage}
-									onChangeText={setDosage}
+									value={form.dosage}
+									onChangeText={form.setDosage}
 									placeholderTextColor="#9ca3af"
 								/>
 							</View>
@@ -389,19 +187,16 @@ export default function AddMedicationScreen() {
 										style={[
 											styles.chip,
 											{ minWidth: 56, alignItems: "center" },
-											doseCount === count && styles.chipSelected,
+											form.doseCount === count && styles.chipSelected,
 										]}
 										onPress={() => {
-											setDoseCount(count);
-											if (!timesManuallyEdited) {
-												setTimes(suggestTimes(count, selectedMeal));
-											}
+											form.setDoseCount(count);
 										}}
 									>
 										<Text
 											style={[
 												styles.chipText,
-												doseCount === count && styles.chipTextSelected,
+												form.doseCount === count && styles.chipTextSelected,
 											]}
 										>
 											{count}x
@@ -424,19 +219,16 @@ export default function AddMedicationScreen() {
 										key={status}
 										style={[
 											styles.chip,
-											selectedMeal === status && styles.chipSelected,
+											form.selectedMeal === status && styles.chipSelected,
 										]}
 										onPress={() => {
-											setSelectedMeal(status);
-											if (!timesManuallyEdited) {
-												setTimes(suggestTimes(doseCount, status));
-											}
+											form.setSelectedMeal(status);
 										}}
 									>
 										<Text
 											style={[
 												styles.chipText,
-												selectedMeal === status && styles.chipTextSelected,
+												form.selectedMeal === status && styles.chipTextSelected,
 											]}
 										>
 											{status === "BEFORE_MEAL"
@@ -452,7 +244,7 @@ export default function AddMedicationScreen() {
 							</ScrollView>
 						</View>
 
-						{/* Frequency (hidden if DAILY — most common) */}
+						{/* Frequency */}
 						<View style={styles.inputContainer}>
 							<Text style={styles.label}>{t("med.frequency")}</Text>
 							<ScrollView
@@ -465,14 +257,14 @@ export default function AddMedicationScreen() {
 										key={freq}
 										style={[
 											styles.chip,
-											selectedFreq === freq && styles.chipSelected,
+											form.selectedFreq === freq && styles.chipSelected,
 										]}
-										onPress={() => setSelectedFreq(freq)}
+										onPress={() => form.setSelectedFreq(freq)}
 									>
 										<Text
 											style={[
 												styles.chipText,
-												selectedFreq === freq && styles.chipTextSelected,
+												form.selectedFreq === freq && styles.chipTextSelected,
 											]}
 										>
 											{freq === "DAILY"
@@ -492,16 +284,16 @@ export default function AddMedicationScreen() {
 						<View style={styles.inputContainer}>
 							<View style={styles.rowBetween}>
 								<Text style={styles.label}>{t("med.reminderTimes")}</Text>
-								<TouchableOpacity onPress={addTime}>
+								<TouchableOpacity onPress={form.addTime}>
 									<Text style={styles.addLink}>{t("med.addTime")}</Text>
 								</TouchableOpacity>
 							</View>
 
 							<View style={styles.timesContainer}>
-								{times.length === 0 && (
+								{form.times.length === 0 && (
 									<Text style={styles.emptyTimesText}>{t("med.noTimes")}</Text>
 								)}
-								{times.map((time, index) => (
+								{form.times.map((time, index) => (
 									<View key={index} style={styles.timeChip}>
 										<Ionicons name="time-outline" size={16} color="#374151" />
 										<Text style={styles.timeChipText}>
@@ -511,7 +303,7 @@ export default function AddMedicationScreen() {
 											})}
 										</Text>
 										<TouchableOpacity
-											onPress={() => removeTime(index)}
+											onPress={() => form.removeTime(index)}
 											hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 										>
 											<Ionicons name="close" size={16} color="#ef4444" />
@@ -520,13 +312,13 @@ export default function AddMedicationScreen() {
 								))}
 							</View>
 
-							{/* Android: Native Picker (No Modal) */}
-							{Platform.OS === "android" && showTimePicker && (
+							{/* Android: Native Picker */}
+							{Platform.OS === "android" && form.showTimePicker && (
 								<DateTimePicker
-									value={tempDate}
+									value={form.tempDate}
 									mode="time"
 									display="default"
-									onChange={onTimeChange}
+									onChange={form.onTimeChange}
 								/>
 							)}
 
@@ -534,14 +326,14 @@ export default function AddMedicationScreen() {
 							{Platform.OS === "ios" && (
 								<Modal
 									transparent={true}
-									visible={showTimePicker}
+									visible={form.showTimePicker}
 									animationType="fade"
-									onRequestClose={() => setShowTimePicker(false)}
+									onRequestClose={() => form.setShowTimePicker(false)}
 								>
 									<TouchableOpacity
 										style={styles.modalOverlay}
 										activeOpacity={1}
-										onPress={() => setShowTimePicker(false)}
+										onPress={() => form.setShowTimePicker(false)}
 									>
 										<View
 											style={styles.modalContent}
@@ -549,7 +341,7 @@ export default function AddMedicationScreen() {
 										>
 											<View style={styles.modalHeader}>
 												<TouchableOpacity
-													onPress={() => setShowTimePicker(false)}
+													onPress={() => form.setShowTimePicker(false)}
 												>
 													<Text style={styles.modalCancelText}>
 														{t("timePicker.cancel")}
@@ -558,7 +350,7 @@ export default function AddMedicationScreen() {
 												<Text style={styles.modalTitle}>
 													{t("timePicker.title")}
 												</Text>
-												<TouchableOpacity onPress={confirmTime}>
+												<TouchableOpacity onPress={form.confirmTime}>
 													<Text style={styles.modalConfirmText}>
 														{t("timePicker.confirm")}
 													</Text>
@@ -567,10 +359,10 @@ export default function AddMedicationScreen() {
 
 											<View style={styles.pickerContainer}>
 												<DateTimePicker
-													value={tempDate}
+													value={form.tempDate}
 													mode="time"
 													display="spinner"
-													onChange={onTimeChange}
+													onChange={form.onTimeChange}
 													textColor={isHighContrast ? "black" : undefined}
 												/>
 											</View>
@@ -591,8 +383,8 @@ export default function AddMedicationScreen() {
 									<TextInput
 										style={styles.input}
 										placeholder="0"
-										value={stock}
-										onChangeText={setStock}
+										value={form.stock}
+										onChangeText={form.setStock}
 										keyboardType="numeric"
 										placeholderTextColor="#9ca3af"
 									/>
@@ -604,8 +396,8 @@ export default function AddMedicationScreen() {
 									<TextInput
 										style={styles.input}
 										placeholder="5"
-										value={threshold}
-										onChangeText={setThreshold}
+										value={form.threshold}
+										onChangeText={form.setThreshold}
 										keyboardType="numeric"
 										placeholderTextColor="#9ca3af"
 									/>
@@ -620,19 +412,15 @@ export default function AddMedicationScreen() {
 				{/* Footer Button */}
 				<View style={styles.footer}>
 					<TouchableOpacity
-						style={[
-							styles.saveButton,
-							(addMutation.isPending || updateMutation.isPending) &&
-								styles.disabled,
-						]}
-						onPress={handleSave}
-						disabled={addMutation.isPending || updateMutation.isPending}
+						style={[styles.saveButton, form.isSaving && styles.disabled]}
+						onPress={form.handleSave}
+						disabled={form.isSaving}
 					>
-						{addMutation.isPending || updateMutation.isPending ? (
+						{form.isSaving ? (
 							<ActivityIndicator color={isHighContrast ? "black" : "white"} />
 						) : (
 							<Text style={styles.saveText}>
-								{isEditing ? t("med.saveChanges") : t("med.save")}
+								{form.isEditing ? t("med.saveChanges") : t("med.save")}
 							</Text>
 						)}
 					</TouchableOpacity>
@@ -728,7 +516,7 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 			borderColor: isHighContrast ? "#000000" : "#e5e7eb",
 			borderRadius: 16,
 			paddingHorizontal: 16,
-			height: 56, // Fixed height for consistency
+			height: 56,
 		},
 		inputIcon: {
 			marginRight: 10,
@@ -747,12 +535,12 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 			paddingHorizontal: 16,
 			paddingVertical: 10,
 			borderRadius: 20,
-			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6", // Default gray
+			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6",
 			borderWidth: isHighContrast ? 2 : 0,
 			borderColor: "black",
 		},
 		chipSelected: {
-			backgroundColor: isHighContrast ? "#ffcc00" : "#d99696", // Primary Blue
+			backgroundColor: isHighContrast ? "#ffcc00" : "#d99696",
 		},
 		chipText: {
 			fontSize: 14 * textSize,
@@ -786,7 +574,7 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 		timeChip: {
 			flexDirection: "row",
 			alignItems: "center",
-			backgroundColor: "#eff6ff", // Light blue bg
+			backgroundColor: "#eff6ff",
 			paddingHorizontal: 12,
 			paddingVertical: 8,
 			borderRadius: 12,
