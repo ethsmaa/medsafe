@@ -88,7 +88,7 @@ export const useMedicationSchedule = (cabinetData: CabinetItem[]) => {
 					instructions: med.instructions,
 					mealStatus: med.mealStatus,
 					taken: false, // Will be updated below
-					genericName: med.medication.nameGeneric || "Medication",
+					genericName: med.medication.nameBrand || med.medication.nameGeneric || "Medication",
 					dosage: med.dosageAmount,
 					status: "PENDING",
 					scheduledTime: new Date().toISOString(), // Default to now for ease
@@ -118,7 +118,7 @@ export const useMedicationSchedule = (cabinetData: CabinetItem[]) => {
 						instructions: med.instructions,
 						mealStatus: med.mealStatus,
 						taken: false, // initial
-						genericName: med.medication.nameGeneric || "Medication",
+						genericName: med.medication.nameBrand || med.medication.nameGeneric || "Medication",
 						dosage: med.dosageAmount,
 						status: "PENDING",
 						scheduledTime: scheduledDate.toISOString(),

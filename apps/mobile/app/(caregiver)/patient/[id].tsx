@@ -72,7 +72,8 @@ export default function PatientDetailScreen() {
 								<View key={prescription.id} style={styles.medCard}>
 									<View style={styles.medHeader}>
 										<Text style={styles.medName}>
-											{prescription.medication.nameGeneric}
+											{prescription.medication.nameBrand ||
+												prescription.medication.nameGeneric}
 										</Text>
 										<Text style={styles.medDosage}>
 											{prescription.dosageAmount}
