@@ -8,6 +8,7 @@ import {
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 
+import Constants from "expo-constants";
 import EventSource from "react-native-sse";
 import superjson from "superjson";
 import { authClient } from "./auth-client";
@@ -17,10 +18,10 @@ export const { TRPCProvider, useTRPC, useTRPCClient } =
 
 const getBaseURL = () => {
 	if (__DEV__) {
-		const hostname = "192.168.1.121";
+		const debuggerHost = Constants.expoConfig?.hostUri ?? Constants.manifest2?.extra?.expoGo?.debuggerHost;
+		const hostname = debuggerHost?.split(":")[0] ?? "localhost";
 		return `http://${hostname}:3001/trpc`;
 	}
-	// TODO: Update for production
 	return "https://api.medsafe.app/trpc";
 };
 
