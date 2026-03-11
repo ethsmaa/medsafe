@@ -12,7 +12,10 @@ import {
 	Modal,
 	ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+	SafeAreaView,
+	useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -22,12 +25,28 @@ import {
 	MEAL_STATUSES,
 	DOSE_COUNT_OPTIONS,
 } from "@/hooks/useMedicationForm";
+import { useAiNote } from "@/hooks/useAiNote";
 
 export default function AddMedicationScreen() {
 	const { isHighContrast, textSize } = useAccessibility();
 	const { t } = useLanguage();
 	const styles = makeStyles(isHighContrast, textSize);
 	const form = useMedicationForm();
+	const ai = useAiNote();
+	const insets = useSafeAreaInsets();
+	// footer sits ~88px tall; add insets.bottom for home-bar devices
+	const scrollBottomPad = 88 + insets.bottom + 24;
+
+	// Keep form.notes in sync when AI generates or user edits the note
+	const handleAiNoteChange = (text: string) => {
+		ai.setAiNote(text);
+		form.setNotes(text);
+	};
+
+	const handleGenerateNote = () => {
+		const drugName = form.brandName || form.name;
+		ai.generateNote(drugName);
+	};
 
 	return (
 		<SafeAreaView style={styles.container} edges={["top"]}>
@@ -55,7 +74,10 @@ export default function AddMedicationScreen() {
 				style={{ flex: 1 }}
 			>
 				<ScrollView
-					contentContainerStyle={styles.content}
+					contentContainerStyle={[
+						styles.content,
+						{ paddingBottom: scrollBottomPad },
+					]}
 					showsVerticalScrollIndicator={false}
 				>
 					{/* Hero Icon */}
@@ -406,7 +428,109 @@ export default function AddMedicationScreen() {
 						</View>
 					</View>
 
-					<View style={{ height: 100 }} />
+					{/* 4. AI Note Card */}
+					<View style={[styles.card, styles.aiCard]}>
+						{/* Card header */}
+						<View style={styles.aiCardHeader}>
+							<View style={styles.aiIconBadge}>
+								<Ionicons name="sparkles" size={18} color="#7c3aed" />
+							</View>
+							<View style={{ flex: 1 }}>
+								<Text style={styles.cardTitle}>{t("med.aiNote.title")}</Text>
+								<Text style={styles.aiCardSubtitle}>
+									{t("med.aiNote.subtitle")}
+								</Text>
+							</View>
+						</View>
+
+						{/* Generate button */}
+						<TouchableOpacity
+							style={[
+								styles.aiGenerateButton,
+								(ai.isGenerating || (!form.brandName && !form.name)) &&
+									styles.aiGenerateButtonDisabled,
+							]}
+							onPress={handleGenerateNote}
+							disabled={ai.isGenerating || (!form.brandName && !form.name)}
+						>
+							{ai.isGenerating ? (
+								<>
+									<ActivityIndicator
+										size="small"
+										color="#7c3aed"
+										style={{ marginRight: 8 }}
+									/>
+									<Text style={styles.aiGenerateButtonText}>
+										{t("med.aiNote.generating")}
+									</Text>
+								</>
+							) : (
+								<>
+									<Ionicons
+										name="sparkles"
+										size={16}
+										color="#7c3aed"
+										style={{ marginRight: 6 }}
+									/>
+									<Text style={styles.aiGenerateButtonText}>
+										{ai.isAiGenerated
+											? t("med.aiNote.regenerate")
+											: t("med.aiNote.generate")}
+									</Text>
+								</>
+							)}
+						</TouchableOpacity>
+
+						{/* Error state */}
+						{ai.aiError && (
+							<View style={styles.aiErrorBox}>
+								<Ionicons
+									name="alert-circle-outline"
+									size={16}
+									color="#dc2626"
+								/>
+								<Text style={[styles.aiErrorText, { fontSize: 13 * textSize }]}>
+									{ai.aiError}
+								</Text>
+							</View>
+						)}
+
+						{/* Editable note area */}
+						<View style={styles.inputContainer}>
+							<Text style={styles.label}>{t("med.aiNote.label")}</Text>
+							<TextInput
+								style={[
+									styles.aiNoteInput,
+									{ fontSize: 15 * textSize },
+									ai.isAiGenerated && styles.aiNoteInputPopulated,
+								]}
+								value={ai.aiNote || form.notes}
+								onChangeText={handleAiNoteChange}
+								placeholder={t("med.aiNote.placeholder")}
+								placeholderTextColor="#9ca3af"
+								multiline
+								numberOfLines={5}
+								textAlignVertical="top"
+								editable
+							/>
+						</View>
+
+						{/* AI disclaimer — only visible after generation */}
+						{ai.isAiGenerated && (
+							<View style={styles.aiDisclaimerBox}>
+								<Ionicons
+									name="information-circle-outline"
+									size={14}
+									color="#6b7280"
+								/>
+								<Text
+									style={[styles.aiDisclaimerText, { fontSize: 11 * textSize }]}
+								>
+									{t("med.aiNote.disclaimer")}
+								</Text>
+							</View>
+						)}
+					</View>
 				</ScrollView>
 
 				{/* Footer Button */}
@@ -430,6 +554,7 @@ export default function AddMedicationScreen() {
 	);
 }
 
+// todo: buradaki cssler nativewind;e cevrilsin
 const makeStyles = (isHighContrast: boolean, textSize: number) =>
 	StyleSheet.create({
 		container: {
@@ -671,5 +796,90 @@ const makeStyles = (isHighContrast: boolean, textSize: number) =>
 			alignItems: "center",
 			justifyContent: "center",
 			paddingVertical: 20,
+		},
+
+		// ── AI Note Card ──────────────────────────────────────────────────────
+		aiCard: {
+			borderLeftWidth: 3,
+			borderLeftColor: isHighContrast ? "#000000" : "#7c3aed",
+		},
+		aiCardHeader: {
+			flexDirection: "row",
+			alignItems: "center",
+			gap: 12,
+		},
+		aiIconBadge: {
+			width: 40,
+			height: 40,
+			borderRadius: 20,
+			backgroundColor: isHighContrast ? "#e5e5e5" : "#ede9fe",
+			alignItems: "center",
+			justifyContent: "center",
+		},
+		aiCardSubtitle: {
+			fontSize: 12 * textSize,
+			color: isHighContrast ? "#000000" : "#6b7280",
+			marginTop: 2,
+		},
+		aiGenerateButton: {
+			flexDirection: "row",
+			alignItems: "center",
+			justifyContent: "center",
+			backgroundColor: isHighContrast ? "#e5e5e5" : "#ede9fe",
+			borderRadius: 14,
+			paddingVertical: 14,
+			paddingHorizontal: 20,
+			borderWidth: isHighContrast ? 2 : 0,
+			borderColor: "#7c3aed",
+		},
+		aiGenerateButtonDisabled: {
+			opacity: 0.5,
+		},
+		aiGenerateButtonText: {
+			fontSize: 15 * textSize,
+			fontWeight: "700",
+			color: isHighContrast ? "#000000" : "#7c3aed",
+		},
+		aiErrorBox: {
+			flexDirection: "row",
+			alignItems: "flex-start",
+			gap: 8,
+			backgroundColor: isHighContrast ? "#fff0f0" : "#fef2f2",
+			borderRadius: 12,
+			padding: 12,
+			borderWidth: 1,
+			borderColor: isHighContrast ? "#000000" : "#fecaca",
+		},
+		aiErrorText: {
+			flex: 1,
+			color: "#dc2626",
+			fontWeight: "500",
+		},
+		aiNoteInput: {
+			backgroundColor: isHighContrast ? "#ffffff" : "#f9fafb",
+			borderWidth: isHighContrast ? 2 : 1,
+			borderColor: isHighContrast ? "#000000" : "#e5e7eb",
+			borderRadius: 16,
+			padding: 16,
+			color: isHighContrast ? "#000000" : "#111827",
+			minHeight: 130,
+			lineHeight: 24,
+		},
+		aiNoteInputPopulated: {
+			borderColor: isHighContrast ? "#000000" : "#c4b5fd",
+			backgroundColor: isHighContrast ? "#f9f9f9" : "#faf5ff",
+		},
+		aiDisclaimerBox: {
+			flexDirection: "row",
+			alignItems: "flex-start",
+			gap: 6,
+			backgroundColor: isHighContrast ? "#f5f5f5" : "#f3f4f6",
+			borderRadius: 10,
+			padding: 10,
+		},
+		aiDisclaimerText: {
+			flex: 1,
+			color: isHighContrast ? "#000000" : "#6b7280",
+			lineHeight: 16,
 		},
 	});

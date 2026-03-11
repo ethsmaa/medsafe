@@ -22,14 +22,18 @@ export function useMedicationForm() {
 	const { t } = useLanguage();
 	const { scheduleMedicationReminder } = useNotifications();
 
-	const { id, scanResult } = useLocalSearchParams<{
+	const { id, scanResult, patientId } = useLocalSearchParams<{
 		id: string;
 		scanResult: string;
+		patientId: string;
 	}>();
 	const isEditing = !!id;
 
 	// Fetch existing med for editing
-	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
+	// patientId is forwarded so caregivers can see the right patient's cabinet
+	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions(
+		patientId ? { patientId } : {},
+	));
 	const existingMed = cabinetQuery.data?.find((m) => m.id === id);
 
 	// Form state
@@ -47,6 +51,7 @@ export function useMedicationForm() {
 		useState<(typeof MEAL_STATUSES)[number]>("ANY");
 	const [times, setTimes] = useState<Date[]>([]);
 	const [timesManuallyEdited, setTimesManuallyEdited] = useState(false);
+	const [notes, setNotes] = useState("");
 
 	// Time picker state
 	const [showTimePicker, setShowTimePicker] = useState(false);
@@ -95,6 +100,9 @@ export function useMedicationForm() {
 					return d;
 				});
 				setTimes(loadedTimes);
+			}
+			if (existingMed.instructions) {
+				setNotes(existingMed.instructions);
 			}
 		}
 	}, [isEditing, existingMed]);
@@ -161,10 +169,11 @@ export function useMedicationForm() {
 				form: selectedForm,
 				mealStatus: selectedMeal,
 				times: formattedTimes,
-				instructions: "",
+				instructions: notes,
 			});
 		} else {
 			addMutation.mutate({
+				...(patientId ? { patientId } : {}),
 				nameGeneric: name,
 				nameBrand: brandName,
 				dosageAmount: dosage,
@@ -174,7 +183,7 @@ export function useMedicationForm() {
 				form: selectedForm,
 				mealStatus: selectedMeal,
 				times: formattedTimes,
-				instructions: "",
+				instructions: notes,
 			});
 		}
 	};
@@ -232,6 +241,7 @@ export function useMedicationForm() {
 		selectedForm, setSelectedForm,
 		selectedMeal, setSelectedMeal,
 		times,
+		notes, setNotes,
 		// Time picker
 		showTimePicker, setShowTimePicker,
 		tempDate,
