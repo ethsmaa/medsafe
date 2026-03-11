@@ -5,6 +5,7 @@ export default function CaregiverLayout() {
 		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Screen name="(tabs)" />
 			<Stack.Screen name="patient/[id]" options={{ headerShown: false }} />
+			<Stack.Screen name="add-medication" options={{ headerShown: false }} />
 		</Stack>
 	);
 }

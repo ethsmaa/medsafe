@@ -26,7 +26,7 @@ export default function PatientsScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} edges={["top"]}>
 			<View style={styles.header}>
 				<Text style={styles.title}>All Patients</Text>
 			</View>

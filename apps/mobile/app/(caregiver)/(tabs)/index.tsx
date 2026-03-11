@@ -14,18 +14,23 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLanguage } from "@/context/LanguageContext";
 import { authClient } from "@/lib/auth-client";
 import { queryClient } from "@/lib/react-query";
 import { useTRPC } from "@/lib/trpc";
+import { useActivityLogStore } from "@/stores/activityLogStore";
 
 export default function CaregiverDashboard() {
 	const trpc = useTRPC();
+	const { t } = useLanguage();
 	const [inviteEmail, setInviteEmail] = useState("");
 	const router = useRouter();
 
 	const patientsQuery = useQuery(trpc.careTeam.getMyPatients.queryOptions());
-	// TODO: Implement getPendingAlerts on backend
-	const alertsQuery = { data: [] as { id: string; title: string }[] };
+	const logQuery = useQuery(trpc.careTeam.getActivityLog.queryOptions());
+	const allLogEntries = (logQuery.data ?? []) as Array<{ id: string }>;
+	const { getUnreadCount } = useActivityLogStore();
+	const pendingCount = getUnreadCount(allLogEntries);
 
 	// Mutations
 	const inviteMutation = useMutation({
@@ -59,16 +64,19 @@ export default function CaregiverDashboard() {
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
 			<ScrollView contentContainerClassName="p-6 pb-20">
 				{/* Header */}
 				<View className="mb-8 flex-row items-center justify-between">
 					<View>
 						<Text className="font-bold text-3xl text-text-main-light dark:text-text-main-dark">
-							Dashboard
+							{t("cg.dashboard")}
 						</Text>
 						<Text className="text-base text-text-sub-light dark:text-text-sub-dark">
-							Manage your patients
+							{t("cg.managePatients")}
 						</Text>
 					</View>
 					<TouchableOpacity
@@ -81,7 +89,10 @@ export default function CaregiverDashboard() {
 
 				{/* Stats Cards */}
 				<View className="mb-8 flex-row gap-4">
-					<View className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark">
+					<TouchableOpacity
+						className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark active:opacity-80"
+						onPress={() => router.push("/(caregiver)/(tabs)/patients")}
+					>
 						<View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-primary/10">
 							<Ionicons name="people" size={20} className="text-primary" />
 						</View>
@@ -89,21 +100,24 @@ export default function CaregiverDashboard() {
 							{patientsQuery.data?.length || 0}
 						</Text>
 						<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
-							Active Patients
+							{t("cg.activePatients")}
 						</Text>
-					</View>
+					</TouchableOpacity>
 
-					<View className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark">
+					<TouchableOpacity
+						className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark active:opacity-80"
+						onPress={() => router.push("/(caregiver)/(tabs)/alerts")}
+					>
 						<View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
 							<Ionicons name="notifications" size={20} color="#ef4444" />
 						</View>
 						<Text className="font-bold text-2xl text-text-main-light dark:text-text-main-dark">
-							{alertsQuery.data?.length || 0}
+							{pendingCount}
 						</Text>
 						<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
-							Pending Alerts
+							{t("cg.pendingAlerts")}
 						</Text>
-					</View>
+					</TouchableOpacity>
 				</View>
 
 				{/* Invite Section */}
@@ -114,10 +128,10 @@ export default function CaregiverDashboard() {
 						</View>
 						<View>
 							<Text className="font-bold text-lg text-text-main-light dark:text-text-main-dark">
-								Invite Patient
+								{t("cg.invitePatient")}
 							</Text>
 							<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
-								Send an invitation via email
+								{t("cg.inviteDesc")}
 							</Text>
 						</View>
 					</View>
@@ -128,7 +142,7 @@ export default function CaregiverDashboard() {
 					>
 						<View className="gap-2">
 							<Text className="font-medium text-sm text-text-main-light dark:text-text-main-dark">
-								Patient Email
+								{t("cg.patientEmail")}
 							</Text>
 							<TextInput
 								className="h-14 w-full rounded-xl border border-border-light bg-background-light px-4 text-base text-text-main-light shadow-sm focus:border-primary dark:border-border-dark dark:bg-background-dark dark:text-text-main-dark"
@@ -152,7 +166,7 @@ export default function CaregiverDashboard() {
 								<ActivityIndicator color="white" />
 							) : (
 								<Text className="font-bold text-lg text-white">
-									Send Invite
+									{t("cg.sendInvite")}
 								</Text>
 							)}
 						</TouchableOpacity>
@@ -162,7 +176,7 @@ export default function CaregiverDashboard() {
 				{/* Quick Links */}
 				<View className="gap-4">
 					<Text className="font-bold text-lg text-text-main-light dark:text-text-main-dark">
-						Quick Actions
+						{t("cg.quickActions")}
 					</Text>
 					<TouchableOpacity
 						onPress={() => router.push("/(caregiver)/(tabs)/patients")}
@@ -173,7 +187,7 @@ export default function CaregiverDashboard() {
 								<Ionicons name="list" size={20} color="#3b82f6" />
 							</View>
 							<Text className="font-medium text-base text-text-main-light dark:text-text-main-dark">
-								View All Patients
+								{t("cg.viewAllPatients")}
 							</Text>
 						</View>
 						<Ionicons
@@ -192,7 +206,7 @@ export default function CaregiverDashboard() {
 								<Ionicons name="warning-outline" size={20} color="#f97316" />
 							</View>
 							<Text className="font-medium text-base text-text-main-light dark:text-text-main-dark">
-								Check Alerts
+								{t("cg.checkAlerts")}
 							</Text>
 						</View>
 						<Ionicons
