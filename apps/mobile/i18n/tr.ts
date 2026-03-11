@@ -60,7 +60,17 @@ const tr = {
 	"med.edit": "İlacı Düzenle",
 	"med.new": "Yeni İlaç",
 
-	// Validation
+	// AI Not Kartı
+	"med.aiNote.title": "AI İlaç Notu",
+	"med.aiNote.subtitle": "Prospektüs bilgisini otomatik sadeleştirir",
+	"med.aiNote.generate": "AI İlaç Notu Oluştur",
+	"med.aiNote.regenerate": "Yeniden Oluştur",
+	"med.aiNote.generating": "AI Notu Oluşturuluyor...",
+	"med.aiNote.label": "Notlar",
+	"med.aiNote.placeholder": "Not oluşturmak için butona basın...",
+	"med.aiNote.disclaimer": "Bu not AI tarafından üretilmiştir. Doktorunuza veya eczacınıza danışın.",
+	"med.aiNote.noName": "Lütfen önce bir marka adı veya etken madde girin.",
+
 	"validation.nameRequired": "Lütfen marka adı veya etken madde giriniz.",
 	"validation.dosageRequired": "Lütfen doz/miktar alanını doldurunuz.",
 	"validation.error": "Hata",
@@ -78,6 +88,9 @@ const tr = {
 	"cabinet.addFirst": "İlk ilacınızı ekleyin",
 	"cabinet.scanBox": "Kutu Tara",
 	"cabinet.addManual": "Manuel Ekle",
+	"cabinet.selected": "Seçili",
+	"cabinet.deleteSelected": "Seçilenleri Sil",
+	"cabinet.cancelSelection": "İptal",
 
 	// Calendar
 	"calendar.title": "Takvim",
@@ -104,6 +117,37 @@ const tr = {
 	"common.delete": "Sil",
 	"common.edit": "Düzenle",
 	"common.loading": "Yükleniyor...",
+
+	// Bakıcı Aktivite Günlüğü
+	"log.title": "Aktivite Günlüğü",
+	"log.subtitle": "Hastalarınızın son aksiyonları",
+	"log.empty": "Henüz aktivite yok",
+	"log.emptyDesc": "Hastalarınızdan gelen aktiviteler burada görünecek",
+	"log.statusTaken": "Aldı",
+	"log.statusSkipped": "Atladı",
+	"log.statusMissed": "Kaçırdı",
+	"log.onTime": "Zamanında",
+	"log.late": "Geç",
+	"log.today": "Bugün",
+	"log.yesterday": "Dün",
+
+	// Bakıcı Dashboard
+	"cg.dashboard": "Kontrol Paneli",
+	"cg.managePatients": "Hastalarınızı yönetin",
+	"cg.activePatients": "Aktif Hastalalar",
+	"cg.pendingAlerts": "Bekleyen Uyarılar",
+	"cg.invitePatient": "Hasta Davet Et",
+	"cg.inviteDesc": "E-posta ile davet gönderin",
+	"cg.patientEmail": "Hasta E-posta",
+	"cg.sendInvite": "Davet Gönder",
+	"cg.quickActions": "Hızlı İşlemler",
+	"cg.viewAllPatients": "Tüm Hastaları Gör",
+	"cg.checkAlerts": "Uyarıları Kontrol Et",
+	"cg.allPatients": "Tüm Hastalar",
+	"cg.addMedication": "İlaç Ekle",
+	"cg.patientDetails": "Hasta Detayları",
+	"cg.medications": "İlaçlar",
+	"cg.noMedications": "Henüz ilaç eklenmemiş",
 } as const;
 
 export type TranslationKey = keyof typeof tr;
