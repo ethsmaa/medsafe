@@ -19,3 +19,39 @@ Rules:
 Respond ONLY with the JSON object, nothing else.`;
 
 export const GEMINI_MODEL = "gemini-2.5-flash";
+
+/**
+ * System prompt for AI-powered medication note generation.
+ * Language is injected at call time via buildAiNoteUserPrompt.
+ */
+export const AI_NOTE_SYSTEM_PROMPT = `You are a health assistant that simplifies medication prospectus information for elderly patients and their caregivers.
+Your task: Take the given technical medication information (or drug name) and produce a concise 3-bullet note.
+
+Rules:
+- Each bullet MUST be at most 20 words (60-word total limit)
+- Use plain everyday language — no medical jargon
+- If unsure about a fact, say "Consult your doctor" instead of guessing
+- Reply with ONLY the 3 lines below and absolutely nothing else
+- The language of your response MUST match the language specified in the user prompt
+
+Format (output these exact 3 lines and nothing else):
+\uD83D\uDCCC How to Use: [usage instructions]
+\u26A0\uFE0F Important Warnings: [key warnings]
+\uD83D\uDCA1 Small Note: [useful tip or additional info]`;
+
+/**
+ * Builds the user-turn prompt for the AI note generation.
+ * @param drugName - Brand or generic name of the medication
+ * @param fdaText - Raw text from OpenFDA (indications or dosage), or null if unavailable
+ * @param language - "tr" for Turkish, "en" for English
+ */
+export function buildAiNoteUserPrompt(drugName: string, fdaText: string | null, language: string): string {
+	const langInstruction = language === "tr"
+		? "IMPORTANT: Write your entire response in Turkish (Türkçe)."
+		: "IMPORTANT: Write your entire response in English.";
+
+	if (fdaText) {
+		return `Drug Name: ${drugName}\n\nProspectus Information:\n${fdaText.slice(0, 3000)}\n\nGenerate the 3-bullet note based on the prospectus above.\n${langInstruction}`;
+	}
+	return `Drug Name: ${drugName}\n\nGenerate the 3-bullet note based on your general medical knowledge about this medication.\nFor anything uncertain, write "Consult your doctor."\n${langInstruction}`;
+}
