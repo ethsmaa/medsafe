@@ -48,7 +48,7 @@ export default function ProfileScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} edges={["top"]}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				<Text style={styles.title}>Profile & Settings</Text>
 

@@ -103,6 +103,10 @@ export default function PatientLayout() {
 					name="scan-medication"
 					options={{ presentation: "fullScreenModal" }}
 				/>
+				<Stack.Screen
+					name="medication-detail"
+					options={{ presentation: "card" }}
+				/>
 			</Stack>
 
 			{activeMedication && (

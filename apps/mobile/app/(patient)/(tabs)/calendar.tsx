@@ -108,7 +108,7 @@ export default function CalendarScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} edges={["top"]}>
 			{/* Header */}
 			<View style={styles.header}>
 				<Text style={styles.title}>History & Schedule</Text>
