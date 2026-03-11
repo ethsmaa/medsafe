@@ -303,6 +303,10 @@ export const careTeamRouter = router({
 							where: { isActive: true },
 							include: {
 								medication: true,
+								intakeEvents: {
+									orderBy: { takenAt: "desc" },
+									take: 5,
+								},
 							},
 						},
 					},
@@ -411,6 +415,59 @@ export const careTeamRouter = router({
 					status: "INVITED",
 					initiatedBy: "PATIENT",
 				},
+			});
+		}),
+	
+	/**
+	 * Get activity log: intake events across all active patients for this caregiver.
+	 * Ordered by most recent first, limited to last 100 events.
+	 */
+	getActivityLog: protectedProcedure
+		.input(
+			z.object({
+				limit: z.number().min(1).max(200).default(100),
+			}).optional(),
+		)
+		.query(async ({ ctx, input }) => {
+			const caregiverProfile = await prisma.caregiverProfile.findUnique({
+				where: { userId: ctx.user.id },
+			});
+
+			if (!caregiverProfile) return [];
+
+			// Get all active patient IDs for this caregiver
+			const connections = await prisma.careTeamMember.findMany({
+				where: { caregiverId: caregiverProfile.id, status: "ACTIVE" },
+				select: { patientId: true },
+			});
+
+			if (connections.length === 0) return [];
+
+			const patientIds = connections.map((c) => c.patientId);
+
+			return await prisma.intakeEvent.findMany({
+				where: {
+					prescriptionMedication: {
+						patientId: { in: patientIds },
+					},
+				},
+				include: {
+					prescriptionMedication: {
+						include: {
+							medication: {
+								select: { nameGeneric: true, nameBrand: true },
+							},
+							patient: {
+								include: {
+									user: { select: { name: true } },
+								},
+							},
+							doseSchedules: { select: { timeOfDay: true } },
+						},
+					},
+				},
+				orderBy: { takenAt: "desc" },
+				take: input?.limit ?? 100,
 			});
 		}),
 });

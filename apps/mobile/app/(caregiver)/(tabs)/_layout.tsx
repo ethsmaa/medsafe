@@ -1,13 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTRPC } from "@/lib/trpc";
+import { useActivityLogStore } from "@/stores/activityLogStore";
 
 export default function CaregiverTabsLayout() {
 	const { isHighContrast, textSize } = useAccessibility();
 	const { t } = useLanguage();
 	const insets = useSafeAreaInsets();
+	const trpc = useTRPC();
+
+	// Unread badge: fetch all logs and compute how many the caregiver hasn't seen
+	const logQuery = useQuery(trpc.careTeam.getActivityLog.queryOptions());
+	const allEntries = (logQuery.data ?? []) as Array<{ id: string }>;
+	const { getUnreadCount } = useActivityLogStore();
+	const unreadCount = getUnreadCount(allEntries);
+	const showBadge = unreadCount > 0;
 
 	const tabBarActiveTintColor = "#d99696";
 	const tabBarInactiveTintColor = "#9ca3af";
@@ -54,9 +65,20 @@ export default function CaregiverTabsLayout() {
 			<Tabs.Screen
 				name="alerts"
 				options={{
-					title: t("tab.calendar"),
+					title: t("log.title"),
+					tabBarBadge: showBadge ? unreadCount : undefined,
+					tabBarBadgeStyle: showBadge
+						? {
+								backgroundColor: "#ef4444",
+								minWidth: 16,
+								height: 16,
+								borderRadius: 8,
+								fontSize: 10,
+								fontWeight: "700",
+							}
+						: undefined,
 					tabBarIcon: ({ color, size }) => (
-						<Ionicons name="notifications" size={size} color={color} />
+						<Ionicons name="list" size={size} color={color} />
 					),
 				}}
 			/>
