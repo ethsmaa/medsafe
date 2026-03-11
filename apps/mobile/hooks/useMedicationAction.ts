@@ -44,6 +44,21 @@ export function useMedicationAction({
 		},
 	});
 
+	const deleteManyMutation = useMutation({
+		...trpc.medication.deleteMany.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries(trpc.medication.getMyCabinet.pathFilter());
+			queryClient.invalidateQueries(
+				trpc.medication.getAdherenceStats.pathFilter(),
+			);
+			Alert.alert("Success", "Selected medications deleted.");
+			onSuccess?.();
+		},
+		onError: (err) => {
+			Alert.alert("Error", "Failed to delete medications: " + err.message);
+		},
+	});
+
 	const takeMedication = (prescriptionMedicationId: string) => {
 		confirmIntakeMutation.mutate({
 			prescriptionMedicationId,
@@ -70,10 +85,28 @@ export function useMedicationAction({
 		);
 	};
 
+	const deleteManyMedications = (ids: string[]) => {
+		Alert.alert(
+			"Delete Multiple",
+			`Are you sure you want to delete ${ids.length} medications? This action cannot be undone.`,
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Delete All",
+					style: "destructive",
+					onPress: () => {
+						deleteManyMutation.mutate({ ids });
+					},
+				},
+			],
+		);
+	};
+
 	return {
 		takeMedication,
 		deleteMedication,
+		deleteManyMedications,
 		isTaking: confirmIntakeMutation.isPending,
-		isDeleting: deleteMutation.isPending,
+		isDeleting: deleteMutation.isPending || deleteManyMutation.isPending,
 	};
 }

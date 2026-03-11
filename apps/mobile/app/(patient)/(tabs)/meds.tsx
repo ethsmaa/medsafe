@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useState, useCallback } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -13,15 +14,25 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useMedicationAction } from "@/hooks/useMedicationAction";
 import { useTRPC } from "@/lib/trpc";
 
 export default function CabinetScreen() {
 	const { isHighContrast, isDarkMode, textSize } = useAccessibility();
+	const { t } = useLanguage();
 	const router = useRouter();
 	const trpc = useTRPC();
-	const { deleteMedication } = useMedicationAction();
+	const { deleteMedication, deleteManyMedications } = useMedicationAction({
+		onSuccess: () => {
+			setIsSelectionMode(false);
+			setSelectedIds(new Set());
+		},
+	});
 	const styles = makeStyles(isHighContrast, isDarkMode, textSize);
+
+	const [isSelectionMode, setIsSelectionMode] = useState(false);
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
 	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
 
@@ -29,32 +40,99 @@ export default function CabinetScreen() {
 		await cabinetQuery.refetch();
 	};
 
+	const toggleSelection = useCallback((id: string) => {
+		setSelectedIds((prev) => {
+			const newSet = new Set(prev);
+			if (newSet.has(id)) {
+				newSet.delete(id);
+			} else {
+				newSet.add(id);
+			}
+			if (newSet.size === 0) {
+				setIsSelectionMode(false);
+			}
+			return newSet;
+		});
+	}, []);
+
+	const handleLongPress = (id: string) => {
+		if (!isSelectionMode) {
+			setIsSelectionMode(true);
+			setSelectedIds(new Set([id]));
+		}
+	};
+
+	const handlePress = (id: string) => {
+		if (isSelectionMode) {
+			toggleSelection(id);
+		} else {
+			router.push({
+				pathname: "/(patient)/medication-detail",
+				params: { id },
+			});
+		}
+	};
+
+	const handleDeleteSelected = () => {
+		if (selectedIds.size === 0) return;
+		deleteManyMedications(Array.from(selectedIds));
+	};
+
+	const cancelSelection = () => {
+		setIsSelectionMode(false);
+		setSelectedIds(new Set());
+	};
+
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} edges={["top"]}>
 			<View style={styles.header}>
-				<Text style={styles.title}>Medicine Cabinet</Text>
-				<TouchableOpacity
-					style={styles.addButton}
-					onPress={() =>
-						Alert.alert("İlaç Ekle", "Nasıl eklemek istersiniz?", [
-							{
-								text: "📝 Manuel Giriş",
-								onPress: () => router.push("/(patient)/add-medication"),
-							},
-							{
-								text: "📷 Kutudan Tara (AI)",
-								onPress: () => router.push("/(patient)/scan-medication"),
-							},
-							{ text: "İptal", style: "cancel" },
-						])
-					}
-				>
-					<Ionicons
-						name="add"
-						size={24}
-						color={isHighContrast ? "black" : "white"}
-					/>
-				</TouchableOpacity>
+				{isSelectionMode ? (
+					<View style={styles.selectionHeader}>
+						<TouchableOpacity
+							onPress={cancelSelection}
+							style={styles.cancelButton}
+						>
+							<Text style={styles.cancelText}>
+								{t("cabinet.cancelSelection")}
+							</Text>
+						</TouchableOpacity>
+						<Text style={styles.title}>
+							{selectedIds.size} {t("cabinet.selected")}
+						</Text>
+						<TouchableOpacity
+							onPress={handleDeleteSelected}
+							style={styles.deleteButtonHeader}
+						>
+							<Ionicons name="trash" size={24} color="#ef4444" />
+						</TouchableOpacity>
+					</View>
+				) : (
+					<>
+						<Text style={styles.title}>{t("cabinet.title")}</Text>
+						<TouchableOpacity
+							style={styles.addButton}
+							onPress={() =>
+								Alert.alert(t("med.new"), t("cabinet.addFirst"), [
+									{
+										text: `📝 ${t("cabinet.addManual")}`,
+										onPress: () => router.push("/(patient)/add-medication"),
+									},
+									{
+										text: `📷 ${t("cabinet.scanBox")}`,
+										onPress: () => router.push("/(patient)/scan-medication"),
+									},
+									{ text: t("common.cancel"), style: "cancel" },
+								])
+							}
+						>
+							<Ionicons
+								name="add"
+								size={24}
+								color={isHighContrast ? "black" : "white"}
+							/>
+						</TouchableOpacity>
+					</>
+				)}
 			</View>
 
 			{cabinetQuery.isLoading ? (
@@ -64,7 +142,7 @@ export default function CabinetScreen() {
 				/>
 			) : cabinetQuery.data?.length === 0 ? (
 				<View style={styles.emptyContent}>
-					<Text style={styles.emptyText}>Your medications will live here.</Text>
+					<Text style={styles.emptyText}>{t("cabinet.empty")}</Text>
 				</View>
 			) : (
 				<FlatList
@@ -77,92 +155,98 @@ export default function CabinetScreen() {
 							onRefresh={onRefresh}
 						/>
 					}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							activeOpacity={0.7}
-							onLongPress={() => {
-								Alert.alert(
-									"Medication Options",
-									`Choose an action for ${item.medication.nameBrand || item.medication.nameGeneric}`,
-									[
-										{ text: "Cancel", style: "cancel" },
-										{
-											text: "Edit",
-											onPress: () => {
-												router.push({
-													pathname: "/(patient)/add-medication",
-													params: { id: item.id },
-												});
-											},
-										},
-										{
-											text: "Delete",
-											style: "destructive",
-											onPress: () => deleteMedication(item.id),
-										},
-									],
-								);
-							}}
-							style={styles.medCard}
-						>
-							<View style={styles.medIconPlaceholder}>
-								<Text style={styles.medIconText}>💊</Text>
-							</View>
-							<View style={styles.medInfo}>
-								<Text style={styles.medName}>
-									{item.medication.nameBrand || item.medication.nameGeneric}
-								</Text>
-								<Text style={styles.medDetails}>
-									{item.dosageAmount} • {item.frequency}
-								</Text>
-							</View>
-							<View style={{ alignItems: "flex-end", gap: 8 }}>
-								<View style={styles.stockBadge}>
-									<Text style={styles.stockText}>{item.currentStock} left</Text>
-								</View>
-								<TouchableOpacity
-									accessibilityLabel={`Options for ${item.medication.nameBrand || item.medication.nameGeneric}`}
-									accessibilityHint="Double tap to edit or delete this medication"
-									hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-									onPress={() => {
-										Alert.alert(
-											"Medication Options",
-											`Choose an action for ${item.medication.nameBrand || item.medication.nameGeneric}`,
-											[
-												{ text: "Cancel", style: "cancel" },
-												{
-													text: "Edit",
-													onPress: () => {
-														router.push({
-															pathname: "/(patient)/add-medication",
-															params: { id: item.id },
-														});
-													},
-												},
-												{
-													text: "Delete",
-													style: "destructive",
-													onPress: () => deleteMedication(item.id),
-												},
-											],
-										);
-									}}
-								>
+					renderItem={({ item }) => {
+						const isSelected = selectedIds.has(item.id);
+						return (
+							<TouchableOpacity
+								activeOpacity={0.7}
+								onPress={() => handlePress(item.id)}
+								onLongPress={() => handleLongPress(item.id)}
+								style={[styles.medCard, isSelected && styles.medCardSelected]}
+							>
+								{isSelectionMode && (
+									<View style={styles.selectionIndicator}>
+										<Ionicons
+											name={isSelected ? "checkbox" : "square-outline"}
+											size={24}
+											color={isSelected ? "#d99696" : "#9ca3af"}
+										/>
+									</View>
+								)}
+								<View style={styles.medIconPlaceholder}>
 									<Ionicons
-										name="ellipsis-horizontal"
+										name="medkit"
 										size={24}
-										color={
-											isHighContrast
-												? "black"
-												: isDarkMode
-													? "#a09090"
-													: "#9ca3af"
-										}
+										color={isHighContrast ? "black" : "#d99696"}
 									/>
-								</TouchableOpacity>
-							</View>
-						</TouchableOpacity>
-					)}
+								</View>
+								<View style={styles.medInfo}>
+									<Text style={styles.medName}>
+										{item.medication.nameBrand || item.medication.nameGeneric}
+									</Text>
+									<Text style={styles.medDetails}>
+										{item.dosageAmount} • {item.frequency}
+									</Text>
+								</View>
+								{!isSelectionMode && (
+									<View style={{ alignItems: "flex-end", gap: 8 }}>
+										<View style={styles.stockBadge}>
+											<Text style={styles.stockText}>
+												{item.currentStock} left
+											</Text>
+										</View>
+										{item.instructions ? (
+											<Ionicons
+												name="document-text"
+												size={16}
+												color="#d99696"
+											/>
+										) : null}
+										<TouchableOpacity
+											accessibilityLabel={`Options for ${item.medication.nameBrand || item.medication.nameGeneric}`}
+											accessibilityHint="Double tap to edit or delete this medication"
+											hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+											onPress={() => {
+												Alert.alert(
+													t("med.infoTitle"),
+													`${item.medication.nameBrand || item.medication.nameGeneric}`,
+													[
+														{ text: t("common.cancel"), style: "cancel" },
+														{
+															text: t("common.edit"),
+															onPress: () => {
+																router.push({
+																	pathname: "/(patient)/add-medication",
+																	params: { id: item.id },
+																});
+															},
+														},
+														{
+															text: t("common.delete"),
+															style: "destructive",
+															onPress: () => deleteMedication(item.id),
+														},
+													],
+												);
+											}}
+										>
+											<Ionicons
+												name="ellipsis-horizontal"
+												size={24}
+												color={
+													isHighContrast
+														? "black"
+														: isDarkMode
+															? "#a09090"
+															: "#9ca3af"
+												}
+											/>
+										</TouchableOpacity>
+									</View>
+								)}
+							</TouchableOpacity>
+						);
+					}}
 				/>
 			)}
 		</SafeAreaView>
@@ -257,9 +341,6 @@ const makeStyles = (
 			borderWidth: isHighContrast ? 1 : 0,
 			borderColor: "black",
 		},
-		medIconText: {
-			fontSize: 24,
-		},
 		medInfo: {
 			flex: 1,
 		},
@@ -289,5 +370,30 @@ const makeStyles = (
 			fontSize: 12 * textSize,
 			fontWeight: "600",
 			color: isHighContrast ? "#000000" : isDark ? "#a09090" : "#4b5563",
+		},
+		selectionHeader: {
+			flex: 1,
+			flexDirection: "row",
+			justifyContent: "space-between",
+			alignItems: "center",
+		},
+		cancelButton: {
+			padding: 8,
+		},
+		cancelText: {
+			fontSize: 16 * textSize,
+			color: "#ef4444",
+			fontWeight: "600",
+		},
+		deleteButtonHeader: {
+			padding: 8,
+		},
+		medCardSelected: {
+			borderColor: "#d99696",
+			backgroundColor: isDark ? "#3d2a2a" : "#fdf2f2",
+			borderWidth: 2,
+		},
+		selectionIndicator: {
+			marginRight: 12,
 		},
 	});

@@ -5,6 +5,7 @@ import { protectedProcedure, router } from "../trpc/index.js";
 import { MEDICATION_FORMS, MEDICATION_FREQUENCIES, MEAL_STATUSES } from "./constants.js";
 import { resolveTargetPatient } from "./resolve-patient.js";
 import { scanMedicationImage } from "./scan-medication.js";
+import { generateMedicationNote } from "./generate-note.js";
 
 export const medicationRouter = router({
 	/**
@@ -31,8 +32,31 @@ export const medicationRouter = router({
 		}),
 
 	/**
-	 * Add a medication manually (Patient or Caregiver for active patient).
+	 * Generate an AI-powered, elderly-friendly medication note.
+	 * Fetches prospectus data from OpenFDA, then summarises it with Gemini.
 	 */
+	generateNote: protectedProcedure
+		.input(
+			z.object({
+				drugName: z.string().min(1, "Drug name is required"),
+				language: z.enum(["en", "tr"]).default("en"),
+			}),
+		)
+		.mutation(async ({ input }) => {
+			try {
+				const result = await generateMedicationNote(input.drugName, input.language);
+				return result; // { note: string; source: "fda" | "ai_only" }
+			} catch (error) {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message:
+						error instanceof Error
+							? error.message
+							: "Failed to generate medication note",
+				});
+			}
+		}),
+
 	addMedicationManual: protectedProcedure
 		.input(
 			z.object({
@@ -185,21 +209,47 @@ export const medicationRouter = router({
 			const { prescriptionMedicationId, status } = input;
 
 			return await prisma.$transaction(async (tx) => {
+				// Compute isOnTime: within 30 min of the nearest scheduled dose
+				const pm = await tx.prescriptionMedication.findUnique({
+					where: { id: prescriptionMedicationId },
+					include: { doseSchedules: true },
+				});
+
+				const now = new Date();
+				let isOnTime = true;
+				let minutesDelta = 0;
+
+				if (pm?.doseSchedules && pm.doseSchedules.length > 0) {
+					const nowMinutes = now.getHours() * 60 + now.getMinutes();
+					const deltas = pm.doseSchedules.map((s) => {
+						const parts = s.timeOfDay.split(":").map(Number);
+						const scheduled = (parts[0] ?? 0) * 60 + (parts[1] ?? 0);
+						return Math.abs(nowMinutes - scheduled);
+					});
+					minutesDelta = Math.min(...deltas);
+					isOnTime = minutesDelta <= 30; // within 30 minutes = on time
+				}
+
 				const event = await tx.intakeEvent.create({
 					data: {
 						prescriptionMedicationId,
 						status,
-						isOnTime: true,
+						isOnTime,
+						// Store delta in minutes using the notes field is not possible,
+						// so we rely on the frontend to compute the display label
 					},
 				});
 
 				let updatedPm = null;
 				let isLowStock = false;
 				if (status === "TAKEN") {
+					// Only decrement if there is stock to take (prevents going negative)
 					updatedPm = await tx.prescriptionMedication.update({
 						where: { id: prescriptionMedicationId },
 						data: {
-							currentStock: { decrement: 1 },
+							currentStock: pm?.currentStock && pm.currentStock > 0
+								? { decrement: 1 }
+								: undefined,
 						},
 						include: { medication: true },
 					});
@@ -211,6 +261,7 @@ export const medicationRouter = router({
 
 				return {
 					event,
+					minutesDelta,
 					updatedStock: updatedPm?.currentStock,
 					isLowStock,
 					medicationName: updatedPm?.medication.nameGeneric,
@@ -341,6 +392,40 @@ export const medicationRouter = router({
 
 			return await prisma.prescriptionMedication.update({
 				where: { id },
+				data: { isActive: false },
+			});
+		}),
+
+	/**
+	 * Delete multiple medications.
+	 */
+	deleteMany: protectedProcedure
+		.input(z.object({ ids: z.array(z.string()) }))
+		.mutation(async ({ ctx, input }) => {
+			const { ids } = input;
+
+			// Verify all belong to user or caregiver has access
+			const medications = await prisma.prescriptionMedication.findMany({
+				where: { id: { in: ids } },
+				include: { patient: true },
+			});
+
+			for (const pm of medications) {
+				if (pm.patient.userId !== ctx.user.id) {
+					const caregiver = await prisma.caregiverProfile.findUnique({
+						where: { userId: ctx.user.id },
+					});
+					if (!caregiver) {
+						throw new TRPCError({
+							code: "FORBIDDEN",
+							message: "You do not have permission to delete these medications.",
+						});
+					}
+				}
+			}
+
+			return await prisma.prescriptionMedication.updateMany({
+				where: { id: { in: ids } },
 				data: { isActive: false },
 			});
 		}),
