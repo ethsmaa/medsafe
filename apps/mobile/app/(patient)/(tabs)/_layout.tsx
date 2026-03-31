@@ -65,6 +65,15 @@ export default function PatientTabsLayout() {
 				}}
 			/>
 			<Tabs.Screen
+				name="assistant"
+				options={{
+					title: t("tab.assistant"),
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="chatbubble-ellipses" size={size} color={color} />
+					),
+				}}
+			/>
+			<Tabs.Screen
 				name="profile"
 				options={{
 					title: t("tab.profile"),
