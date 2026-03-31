@@ -6,6 +6,7 @@ const tr = {
 	"tab.home": "Ana Sayfa",
 	"tab.cabinet": "İlaç Dolabı",
 	"tab.calendar": "Takvim",
+	"tab.assistant": "Asistan",
 	"tab.profile": "Profil",
 
 	// Profile & Settings
@@ -148,6 +149,14 @@ const tr = {
 	"cg.patientDetails": "Hasta Detayları",
 	"cg.medications": "İlaçlar",
 	"cg.noMedications": "Henüz ilaç eklenmemiş",
+
+	// Asistan
+	"assistant.title": "Sağlık Asistanı",
+	"assistant.welcomeMessage": "Merhaba! İlaçlarınız hakkında sorularınızı yanıtlayabilirim. Neler sormak istersiniz?",
+	"assistant.inputPlaceholder": "Mesajınızı yazın...",
+	"assistant.suggestion1": "\"Bugün ilacımı içtim mi?\"",
+	"assistant.suggestion2": "\"Bir sonraki ilacım ne zaman?\"",
+	"assistant.suggestion3": "\"İlaç stoğum ne durumda?\"",
 } as const;
 
 export type TranslationKey = keyof typeof tr;

@@ -5,6 +5,7 @@ const en: Record<TranslationKey, string> = {
 	"tab.home": "Home",
 	"tab.cabinet": "Cabinet",
 	"tab.calendar": "Calendar",
+	"tab.assistant": "Assistant",
 	"tab.profile": "Profile",
 
 	// Profile & Settings
@@ -147,6 +148,14 @@ const en: Record<TranslationKey, string> = {
 	"cg.patientDetails": "Patient Details",
 	"cg.medications": "Medications",
 	"cg.noMedications": "No medications added yet",
+
+	// Assistant
+	"assistant.title": "Health Assistant",
+	"assistant.welcomeMessage": "Hello! I can answer your questions about your medications. What would you like to know?",
+	"assistant.inputPlaceholder": "Type your message...",
+	"assistant.suggestion1": "\"Did I take my medicine today?\"",
+	"assistant.suggestion2": "\"When is my next dose?\"",
+	"assistant.suggestion3": "\"How is my medication stock?\"",
 };
 
 export default en;
