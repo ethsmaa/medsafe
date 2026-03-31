@@ -52,6 +52,7 @@ model PatientProfile {
 
   careTeam  CareTeamMember[] @relation("PatientToCareTeam")
   prescriptions PrescriptionMedication[]
+  sideEffects   SideEffect[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -181,6 +182,7 @@ model PrescriptionMedication {
   endDate        DateTime?
   
   intakeEvents   IntakeEvent[]
+  sideEffects    SideEffect[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -220,6 +222,25 @@ model IntakeEvent {
   updatedAt               DateTime @updatedAt
 
   @@map("intake_event")
+}
+
+model SideEffect {
+  id                       String   @id @default(cuid())
+
+  prescriptionMedicationId String?
+  prescriptionMedication   PrescriptionMedication? @relation(fields: [prescriptionMedicationId], references: [id], onDelete: SetNull)
+
+  patientId                String
+  patient                  PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  description              String
+  severity                 String?  // "mild" | "moderate" | "severe"
+  reportedAt               DateTime @default(now())
+
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("side_effect")
 }
 
 model Session {
