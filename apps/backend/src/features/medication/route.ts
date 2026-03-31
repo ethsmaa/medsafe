@@ -203,31 +203,31 @@ export const medicationRouter = router({
 			z.object({
 				prescriptionMedicationId: z.string(),
 				status: z.enum(["TAKEN", "SKIPPED"]),
+				takenAt: z.string().optional(),
 			}),
 		)
 		.mutation(async ({ input }) => {
-			const { prescriptionMedicationId, status } = input;
+			const { prescriptionMedicationId, status, takenAt } = input;
+			const takenAtDate = takenAt ? new Date(takenAt) : new Date();
 
 			return await prisma.$transaction(async (tx) => {
-				// Compute isOnTime: within 30 min of the nearest scheduled dose
 				const pm = await tx.prescriptionMedication.findUnique({
 					where: { id: prescriptionMedicationId },
 					include: { doseSchedules: true },
 				});
 
-				const now = new Date();
 				let isOnTime = true;
 				let minutesDelta = 0;
 
 				if (pm?.doseSchedules && pm.doseSchedules.length > 0) {
-					const nowMinutes = now.getHours() * 60 + now.getMinutes();
+					const nowMinutes = takenAtDate.getHours() * 60 + takenAtDate.getMinutes();
 					const deltas = pm.doseSchedules.map((s) => {
 						const parts = s.timeOfDay.split(":").map(Number);
-						const scheduled = (parts[0] ?? 0) * 60 + (parts[1] ?? 0);
+						const scheduled = (parts[0] || 0) * 60 + (parts[1] || 0);
 						return Math.abs(nowMinutes - scheduled);
 					});
 					minutesDelta = Math.min(...deltas);
-					isOnTime = minutesDelta <= 30; // within 30 minutes = on time
+					isOnTime = minutesDelta <= 30;
 				}
 
 				const event = await tx.intakeEvent.create({
@@ -235,26 +235,22 @@ export const medicationRouter = router({
 						prescriptionMedicationId,
 						status,
 						isOnTime,
-						// Store delta in minutes using the notes field is not possible,
-						// so we rely on the frontend to compute the display label
+						takenAt: takenAtDate,
 					},
 				});
 
 				let updatedPm = null;
 				let isLowStock = false;
 				if (status === "TAKEN") {
-					// Only decrement if there is stock to take (prevents going negative)
 					updatedPm = await tx.prescriptionMedication.update({
 						where: { id: prescriptionMedicationId },
 						data: {
-							currentStock: pm?.currentStock && pm.currentStock > 0
-								? { decrement: 1 }
-								: undefined,
+							currentStock: (pm?.currentStock ?? 0) > 0 ? { decrement: 1 } : undefined,
 						},
 						include: { medication: true },
 					});
 
-					if (updatedPm.currentStock <= updatedPm.restockThreshold) {
+					if (updatedPm && updatedPm.currentStock <= updatedPm.restockThreshold) {
 						isLowStock = true;
 					}
 				}
