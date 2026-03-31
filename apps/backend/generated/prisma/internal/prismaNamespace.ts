@@ -393,6 +393,7 @@ export const ModelName = {
   PrescriptionMedication: 'PrescriptionMedication',
   DoseSchedule: 'DoseSchedule',
   IntakeEvent: 'IntakeEvent',
+  SideEffect: 'SideEffect',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification'
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "patientProfile" | "caregiverProfile" | "careTeamMember" | "medication" | "prescription" | "prescriptionMedication" | "doseSchedule" | "intakeEvent" | "session" | "account" | "verification"
+    modelProps: "user" | "patientProfile" | "caregiverProfile" | "careTeamMember" | "medication" | "prescription" | "prescriptionMedication" | "doseSchedule" | "intakeEvent" | "sideEffect" | "session" | "account" | "verification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1081,6 +1082,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SideEffect: {
+      payload: Prisma.$SideEffectPayload<ExtArgs>
+      fields: Prisma.SideEffectFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SideEffectFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SideEffectFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>
+        }
+        findFirst: {
+          args: Prisma.SideEffectFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SideEffectFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>
+        }
+        findMany: {
+          args: Prisma.SideEffectFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>[]
+        }
+        create: {
+          args: Prisma.SideEffectCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>
+        }
+        createMany: {
+          args: Prisma.SideEffectCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SideEffectCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>[]
+        }
+        delete: {
+          args: Prisma.SideEffectDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>
+        }
+        update: {
+          args: Prisma.SideEffectUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>
+        }
+        deleteMany: {
+          args: Prisma.SideEffectDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SideEffectUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SideEffectUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>[]
+        }
+        upsert: {
+          args: Prisma.SideEffectUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SideEffectPayload>
+        }
+        aggregate: {
+          args: Prisma.SideEffectAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSideEffect>
+        }
+        groupBy: {
+          args: Prisma.SideEffectGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SideEffectGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SideEffectCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SideEffectCountAggregateOutputType> | number
+        }
+      }
+    }
     Session: {
       payload: Prisma.$SessionPayload<ExtArgs>
       fields: Prisma.SessionFieldRefs
@@ -1467,6 +1542,20 @@ export const IntakeEventScalarFieldEnum = {
 export type IntakeEventScalarFieldEnum = (typeof IntakeEventScalarFieldEnum)[keyof typeof IntakeEventScalarFieldEnum]
 
 
+export const SideEffectScalarFieldEnum = {
+  id: 'id',
+  prescriptionMedicationId: 'prescriptionMedicationId',
+  patientId: 'patientId',
+  description: 'description',
+  severity: 'severity',
+  reportedAt: 'reportedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SideEffectScalarFieldEnum = (typeof SideEffectScalarFieldEnum)[keyof typeof SideEffectScalarFieldEnum]
+
+
 export const SessionScalarFieldEnum = {
   id: 'id',
   expiresAt: 'expiresAt',
@@ -1778,6 +1867,7 @@ export type GlobalOmitConfig = {
   prescriptionMedication?: Prisma.PrescriptionMedicationOmit
   doseSchedule?: Prisma.DoseScheduleOmit
   intakeEvent?: Prisma.IntakeEventOmit
+  sideEffect?: Prisma.SideEffectOmit
   session?: Prisma.SessionOmit
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit

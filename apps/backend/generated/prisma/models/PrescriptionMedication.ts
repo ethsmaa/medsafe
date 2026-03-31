@@ -325,6 +325,7 @@ export type PrescriptionMedicationWhereInput = {
   prescription?: Prisma.XOR<Prisma.PrescriptionNullableScalarRelationFilter, Prisma.PrescriptionWhereInput> | null
   doseSchedules?: Prisma.DoseScheduleListRelationFilter
   intakeEvents?: Prisma.IntakeEventListRelationFilter
+  sideEffects?: Prisma.SideEffectListRelationFilter
 }
 
 export type PrescriptionMedicationOrderByWithRelationInput = {
@@ -350,6 +351,7 @@ export type PrescriptionMedicationOrderByWithRelationInput = {
   prescription?: Prisma.PrescriptionOrderByWithRelationInput
   doseSchedules?: Prisma.DoseScheduleOrderByRelationAggregateInput
   intakeEvents?: Prisma.IntakeEventOrderByRelationAggregateInput
+  sideEffects?: Prisma.SideEffectOrderByRelationAggregateInput
 }
 
 export type PrescriptionMedicationWhereUniqueInput = Prisma.AtLeast<{
@@ -378,6 +380,7 @@ export type PrescriptionMedicationWhereUniqueInput = Prisma.AtLeast<{
   prescription?: Prisma.XOR<Prisma.PrescriptionNullableScalarRelationFilter, Prisma.PrescriptionWhereInput> | null
   doseSchedules?: Prisma.DoseScheduleListRelationFilter
   intakeEvents?: Prisma.IntakeEventListRelationFilter
+  sideEffects?: Prisma.SideEffectListRelationFilter
 }, "id">
 
 export type PrescriptionMedicationOrderByWithAggregationInput = {
@@ -448,6 +451,7 @@ export type PrescriptionMedicationCreateInput = {
   prescription?: Prisma.PrescriptionCreateNestedOneWithoutMedicationsInput
   doseSchedules?: Prisma.DoseScheduleCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUncheckedCreateInput = {
@@ -470,6 +474,7 @@ export type PrescriptionMedicationUncheckedCreateInput = {
   updatedAt?: Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUpdateInput = {
@@ -492,6 +497,7 @@ export type PrescriptionMedicationUpdateInput = {
   prescription?: Prisma.PrescriptionUpdateOneWithoutMedicationsNestedInput
   doseSchedules?: Prisma.DoseScheduleUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateInput = {
@@ -514,6 +520,7 @@ export type PrescriptionMedicationUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationCreateManyInput = {
@@ -658,6 +665,11 @@ export type PrescriptionMedicationSumOrderByAggregateInput = {
 export type PrescriptionMedicationScalarRelationFilter = {
   is?: Prisma.PrescriptionMedicationWhereInput
   isNot?: Prisma.PrescriptionMedicationWhereInput
+}
+
+export type PrescriptionMedicationNullableScalarRelationFilter = {
+  is?: Prisma.PrescriptionMedicationWhereInput | null
+  isNot?: Prisma.PrescriptionMedicationWhereInput | null
 }
 
 export type PrescriptionMedicationCreateNestedManyWithoutPatientInput = {
@@ -842,6 +854,22 @@ export type PrescriptionMedicationUpdateOneRequiredWithoutIntakeEventsNestedInpu
   update?: Prisma.XOR<Prisma.XOR<Prisma.PrescriptionMedicationUpdateToOneWithWhereWithoutIntakeEventsInput, Prisma.PrescriptionMedicationUpdateWithoutIntakeEventsInput>, Prisma.PrescriptionMedicationUncheckedUpdateWithoutIntakeEventsInput>
 }
 
+export type PrescriptionMedicationCreateNestedOneWithoutSideEffectsInput = {
+  create?: Prisma.XOR<Prisma.PrescriptionMedicationCreateWithoutSideEffectsInput, Prisma.PrescriptionMedicationUncheckedCreateWithoutSideEffectsInput>
+  connectOrCreate?: Prisma.PrescriptionMedicationCreateOrConnectWithoutSideEffectsInput
+  connect?: Prisma.PrescriptionMedicationWhereUniqueInput
+}
+
+export type PrescriptionMedicationUpdateOneWithoutSideEffectsNestedInput = {
+  create?: Prisma.XOR<Prisma.PrescriptionMedicationCreateWithoutSideEffectsInput, Prisma.PrescriptionMedicationUncheckedCreateWithoutSideEffectsInput>
+  connectOrCreate?: Prisma.PrescriptionMedicationCreateOrConnectWithoutSideEffectsInput
+  upsert?: Prisma.PrescriptionMedicationUpsertWithoutSideEffectsInput
+  disconnect?: Prisma.PrescriptionMedicationWhereInput | boolean
+  delete?: Prisma.PrescriptionMedicationWhereInput | boolean
+  connect?: Prisma.PrescriptionMedicationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PrescriptionMedicationUpdateToOneWithWhereWithoutSideEffectsInput, Prisma.PrescriptionMedicationUpdateWithoutSideEffectsInput>, Prisma.PrescriptionMedicationUncheckedUpdateWithoutSideEffectsInput>
+}
+
 export type PrescriptionMedicationCreateWithoutPatientInput = {
   id?: string
   dosageAmount: string
@@ -861,6 +889,7 @@ export type PrescriptionMedicationCreateWithoutPatientInput = {
   prescription?: Prisma.PrescriptionCreateNestedOneWithoutMedicationsInput
   doseSchedules?: Prisma.DoseScheduleCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUncheckedCreateWithoutPatientInput = {
@@ -882,6 +911,7 @@ export type PrescriptionMedicationUncheckedCreateWithoutPatientInput = {
   updatedAt?: Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationCreateOrConnectWithoutPatientInput = {
@@ -952,6 +982,7 @@ export type PrescriptionMedicationCreateWithoutMedicationInput = {
   prescription?: Prisma.PrescriptionCreateNestedOneWithoutMedicationsInput
   doseSchedules?: Prisma.DoseScheduleCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUncheckedCreateWithoutMedicationInput = {
@@ -973,6 +1004,7 @@ export type PrescriptionMedicationUncheckedCreateWithoutMedicationInput = {
   updatedAt?: Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationCreateOrConnectWithoutMedicationInput = {
@@ -1020,6 +1052,7 @@ export type PrescriptionMedicationCreateWithoutPrescriptionInput = {
   medication: Prisma.MedicationCreateNestedOneWithoutPrescriptionsInput
   doseSchedules?: Prisma.DoseScheduleCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUncheckedCreateWithoutPrescriptionInput = {
@@ -1041,6 +1074,7 @@ export type PrescriptionMedicationUncheckedCreateWithoutPrescriptionInput = {
   updatedAt?: Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
   intakeEvents?: Prisma.IntakeEventUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationCreateOrConnectWithoutPrescriptionInput = {
@@ -1088,6 +1122,7 @@ export type PrescriptionMedicationCreateWithoutDoseSchedulesInput = {
   medication: Prisma.MedicationCreateNestedOneWithoutPrescriptionsInput
   prescription?: Prisma.PrescriptionCreateNestedOneWithoutMedicationsInput
   intakeEvents?: Prisma.IntakeEventCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUncheckedCreateWithoutDoseSchedulesInput = {
@@ -1109,6 +1144,7 @@ export type PrescriptionMedicationUncheckedCreateWithoutDoseSchedulesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   intakeEvents?: Prisma.IntakeEventUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationCreateOrConnectWithoutDoseSchedulesInput = {
@@ -1146,6 +1182,7 @@ export type PrescriptionMedicationUpdateWithoutDoseSchedulesInput = {
   medication?: Prisma.MedicationUpdateOneRequiredWithoutPrescriptionsNestedInput
   prescription?: Prisma.PrescriptionUpdateOneWithoutMedicationsNestedInput
   intakeEvents?: Prisma.IntakeEventUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateWithoutDoseSchedulesInput = {
@@ -1167,6 +1204,7 @@ export type PrescriptionMedicationUncheckedUpdateWithoutDoseSchedulesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   intakeEvents?: Prisma.IntakeEventUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationCreateWithoutIntakeEventsInput = {
@@ -1188,6 +1226,7 @@ export type PrescriptionMedicationCreateWithoutIntakeEventsInput = {
   medication: Prisma.MedicationCreateNestedOneWithoutPrescriptionsInput
   prescription?: Prisma.PrescriptionCreateNestedOneWithoutMedicationsInput
   doseSchedules?: Prisma.DoseScheduleCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationUncheckedCreateWithoutIntakeEventsInput = {
@@ -1209,6 +1248,7 @@ export type PrescriptionMedicationUncheckedCreateWithoutIntakeEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  sideEffects?: Prisma.SideEffectUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
 }
 
 export type PrescriptionMedicationCreateOrConnectWithoutIntakeEventsInput = {
@@ -1246,6 +1286,7 @@ export type PrescriptionMedicationUpdateWithoutIntakeEventsInput = {
   medication?: Prisma.MedicationUpdateOneRequiredWithoutPrescriptionsNestedInput
   prescription?: Prisma.PrescriptionUpdateOneWithoutMedicationsNestedInput
   doseSchedules?: Prisma.DoseScheduleUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateWithoutIntakeEventsInput = {
@@ -1267,6 +1308,111 @@ export type PrescriptionMedicationUncheckedUpdateWithoutIntakeEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+}
+
+export type PrescriptionMedicationCreateWithoutSideEffectsInput = {
+  id?: string
+  dosageAmount: string
+  frequency: $Enums.MedicationFrequency
+  instructions?: string | null
+  mealStatus?: $Enums.MealStatus
+  currentStock?: number
+  restockThreshold?: number
+  totalPrescribed?: number | null
+  form?: $Enums.MedicationForm
+  isActive?: boolean
+  startDate?: Date | string
+  endDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  patient: Prisma.PatientProfileCreateNestedOneWithoutPrescriptionsInput
+  medication: Prisma.MedicationCreateNestedOneWithoutPrescriptionsInput
+  prescription?: Prisma.PrescriptionCreateNestedOneWithoutMedicationsInput
+  doseSchedules?: Prisma.DoseScheduleCreateNestedManyWithoutPrescriptionMedicationInput
+  intakeEvents?: Prisma.IntakeEventCreateNestedManyWithoutPrescriptionMedicationInput
+}
+
+export type PrescriptionMedicationUncheckedCreateWithoutSideEffectsInput = {
+  id?: string
+  patientId: string
+  medicationId: string
+  prescriptionId?: string | null
+  dosageAmount: string
+  frequency: $Enums.MedicationFrequency
+  instructions?: string | null
+  mealStatus?: $Enums.MealStatus
+  currentStock?: number
+  restockThreshold?: number
+  totalPrescribed?: number | null
+  form?: $Enums.MedicationForm
+  isActive?: boolean
+  startDate?: Date | string
+  endDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  doseSchedules?: Prisma.DoseScheduleUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+  intakeEvents?: Prisma.IntakeEventUncheckedCreateNestedManyWithoutPrescriptionMedicationInput
+}
+
+export type PrescriptionMedicationCreateOrConnectWithoutSideEffectsInput = {
+  where: Prisma.PrescriptionMedicationWhereUniqueInput
+  create: Prisma.XOR<Prisma.PrescriptionMedicationCreateWithoutSideEffectsInput, Prisma.PrescriptionMedicationUncheckedCreateWithoutSideEffectsInput>
+}
+
+export type PrescriptionMedicationUpsertWithoutSideEffectsInput = {
+  update: Prisma.XOR<Prisma.PrescriptionMedicationUpdateWithoutSideEffectsInput, Prisma.PrescriptionMedicationUncheckedUpdateWithoutSideEffectsInput>
+  create: Prisma.XOR<Prisma.PrescriptionMedicationCreateWithoutSideEffectsInput, Prisma.PrescriptionMedicationUncheckedCreateWithoutSideEffectsInput>
+  where?: Prisma.PrescriptionMedicationWhereInput
+}
+
+export type PrescriptionMedicationUpdateToOneWithWhereWithoutSideEffectsInput = {
+  where?: Prisma.PrescriptionMedicationWhereInput
+  data: Prisma.XOR<Prisma.PrescriptionMedicationUpdateWithoutSideEffectsInput, Prisma.PrescriptionMedicationUncheckedUpdateWithoutSideEffectsInput>
+}
+
+export type PrescriptionMedicationUpdateWithoutSideEffectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dosageAmount?: Prisma.StringFieldUpdateOperationsInput | string
+  frequency?: Prisma.EnumMedicationFrequencyFieldUpdateOperationsInput | $Enums.MedicationFrequency
+  instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mealStatus?: Prisma.EnumMealStatusFieldUpdateOperationsInput | $Enums.MealStatus
+  currentStock?: Prisma.IntFieldUpdateOperationsInput | number
+  restockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPrescribed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  form?: Prisma.EnumMedicationFormFieldUpdateOperationsInput | $Enums.MedicationForm
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  patient?: Prisma.PatientProfileUpdateOneRequiredWithoutPrescriptionsNestedInput
+  medication?: Prisma.MedicationUpdateOneRequiredWithoutPrescriptionsNestedInput
+  prescription?: Prisma.PrescriptionUpdateOneWithoutMedicationsNestedInput
+  doseSchedules?: Prisma.DoseScheduleUpdateManyWithoutPrescriptionMedicationNestedInput
+  intakeEvents?: Prisma.IntakeEventUpdateManyWithoutPrescriptionMedicationNestedInput
+}
+
+export type PrescriptionMedicationUncheckedUpdateWithoutSideEffectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  patientId?: Prisma.StringFieldUpdateOperationsInput | string
+  medicationId?: Prisma.StringFieldUpdateOperationsInput | string
+  prescriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dosageAmount?: Prisma.StringFieldUpdateOperationsInput | string
+  frequency?: Prisma.EnumMedicationFrequencyFieldUpdateOperationsInput | $Enums.MedicationFrequency
+  instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mealStatus?: Prisma.EnumMealStatusFieldUpdateOperationsInput | $Enums.MealStatus
+  currentStock?: Prisma.IntFieldUpdateOperationsInput | number
+  restockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPrescribed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  form?: Prisma.EnumMedicationFormFieldUpdateOperationsInput | $Enums.MedicationForm
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  doseSchedules?: Prisma.DoseScheduleUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  intakeEvents?: Prisma.IntakeEventUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationCreateManyPatientInput = {
@@ -1307,6 +1453,7 @@ export type PrescriptionMedicationUpdateWithoutPatientInput = {
   prescription?: Prisma.PrescriptionUpdateOneWithoutMedicationsNestedInput
   doseSchedules?: Prisma.DoseScheduleUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateWithoutPatientInput = {
@@ -1328,6 +1475,7 @@ export type PrescriptionMedicationUncheckedUpdateWithoutPatientInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateManyWithoutPatientInput = {
@@ -1387,6 +1535,7 @@ export type PrescriptionMedicationUpdateWithoutMedicationInput = {
   prescription?: Prisma.PrescriptionUpdateOneWithoutMedicationsNestedInput
   doseSchedules?: Prisma.DoseScheduleUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateWithoutMedicationInput = {
@@ -1408,6 +1557,7 @@ export type PrescriptionMedicationUncheckedUpdateWithoutMedicationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateManyWithoutMedicationInput = {
@@ -1467,6 +1617,7 @@ export type PrescriptionMedicationUpdateWithoutPrescriptionInput = {
   medication?: Prisma.MedicationUpdateOneRequiredWithoutPrescriptionsNestedInput
   doseSchedules?: Prisma.DoseScheduleUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateWithoutPrescriptionInput = {
@@ -1488,6 +1639,7 @@ export type PrescriptionMedicationUncheckedUpdateWithoutPrescriptionInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   doseSchedules?: Prisma.DoseScheduleUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
   intakeEvents?: Prisma.IntakeEventUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
+  sideEffects?: Prisma.SideEffectUncheckedUpdateManyWithoutPrescriptionMedicationNestedInput
 }
 
 export type PrescriptionMedicationUncheckedUpdateManyWithoutPrescriptionInput = {
@@ -1517,11 +1669,13 @@ export type PrescriptionMedicationUncheckedUpdateManyWithoutPrescriptionInput = 
 export type PrescriptionMedicationCountOutputType = {
   doseSchedules: number
   intakeEvents: number
+  sideEffects: number
 }
 
 export type PrescriptionMedicationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   doseSchedules?: boolean | PrescriptionMedicationCountOutputTypeCountDoseSchedulesArgs
   intakeEvents?: boolean | PrescriptionMedicationCountOutputTypeCountIntakeEventsArgs
+  sideEffects?: boolean | PrescriptionMedicationCountOutputTypeCountSideEffectsArgs
 }
 
 /**
@@ -1548,6 +1702,13 @@ export type PrescriptionMedicationCountOutputTypeCountIntakeEventsArgs<ExtArgs e
   where?: Prisma.IntakeEventWhereInput
 }
 
+/**
+ * PrescriptionMedicationCountOutputType without action
+ */
+export type PrescriptionMedicationCountOutputTypeCountSideEffectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SideEffectWhereInput
+}
+
 
 export type PrescriptionMedicationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1572,6 +1733,7 @@ export type PrescriptionMedicationSelect<ExtArgs extends runtime.Types.Extension
   prescription?: boolean | Prisma.PrescriptionMedication$prescriptionArgs<ExtArgs>
   doseSchedules?: boolean | Prisma.PrescriptionMedication$doseSchedulesArgs<ExtArgs>
   intakeEvents?: boolean | Prisma.PrescriptionMedication$intakeEventsArgs<ExtArgs>
+  sideEffects?: boolean | Prisma.PrescriptionMedication$sideEffectsArgs<ExtArgs>
   _count?: boolean | Prisma.PrescriptionMedicationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["prescriptionMedication"]>
 
@@ -1648,6 +1810,7 @@ export type PrescriptionMedicationInclude<ExtArgs extends runtime.Types.Extensio
   prescription?: boolean | Prisma.PrescriptionMedication$prescriptionArgs<ExtArgs>
   doseSchedules?: boolean | Prisma.PrescriptionMedication$doseSchedulesArgs<ExtArgs>
   intakeEvents?: boolean | Prisma.PrescriptionMedication$intakeEventsArgs<ExtArgs>
+  sideEffects?: boolean | Prisma.PrescriptionMedication$sideEffectsArgs<ExtArgs>
   _count?: boolean | Prisma.PrescriptionMedicationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PrescriptionMedicationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1669,6 +1832,7 @@ export type $PrescriptionMedicationPayload<ExtArgs extends runtime.Types.Extensi
     prescription: Prisma.$PrescriptionPayload<ExtArgs> | null
     doseSchedules: Prisma.$DoseSchedulePayload<ExtArgs>[]
     intakeEvents: Prisma.$IntakeEventPayload<ExtArgs>[]
+    sideEffects: Prisma.$SideEffectPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2087,6 +2251,7 @@ export interface Prisma__PrescriptionMedicationClient<T, Null = never, ExtArgs e
   prescription<T extends Prisma.PrescriptionMedication$prescriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PrescriptionMedication$prescriptionArgs<ExtArgs>>): Prisma.Prisma__PrescriptionClient<runtime.Types.Result.GetResult<Prisma.$PrescriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   doseSchedules<T extends Prisma.PrescriptionMedication$doseSchedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PrescriptionMedication$doseSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DoseSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   intakeEvents<T extends Prisma.PrescriptionMedication$intakeEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PrescriptionMedication$intakeEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IntakeEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sideEffects<T extends Prisma.PrescriptionMedication$sideEffectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PrescriptionMedication$sideEffectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SideEffectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2593,6 +2758,30 @@ export type PrescriptionMedication$intakeEventsArgs<ExtArgs extends runtime.Type
   take?: number
   skip?: number
   distinct?: Prisma.IntakeEventScalarFieldEnum | Prisma.IntakeEventScalarFieldEnum[]
+}
+
+/**
+ * PrescriptionMedication.sideEffects
+ */
+export type PrescriptionMedication$sideEffectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SideEffect
+   */
+  select?: Prisma.SideEffectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SideEffect
+   */
+  omit?: Prisma.SideEffectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SideEffectInclude<ExtArgs> | null
+  where?: Prisma.SideEffectWhereInput
+  orderBy?: Prisma.SideEffectOrderByWithRelationInput | Prisma.SideEffectOrderByWithRelationInput[]
+  cursor?: Prisma.SideEffectWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SideEffectScalarFieldEnum | Prisma.SideEffectScalarFieldEnum[]
 }
 
 /**

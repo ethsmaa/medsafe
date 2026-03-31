@@ -63,6 +63,11 @@ export type DoseSchedule = Prisma.DoseScheduleModel
  */
 export type IntakeEvent = Prisma.IntakeEventModel
 /**
+ * Model SideEffect
+ * 
+ */
+export type SideEffect = Prisma.SideEffectModel
+/**
  * Model Session
  * 
  */

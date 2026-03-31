@@ -60,6 +60,7 @@ export const ModelName = {
   PrescriptionMedication: 'PrescriptionMedication',
   DoseSchedule: 'DoseSchedule',
   IntakeEvent: 'IntakeEvent',
+  SideEffect: 'SideEffect',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification'
@@ -204,6 +205,20 @@ export const IntakeEventScalarFieldEnum = {
 } as const
 
 export type IntakeEventScalarFieldEnum = (typeof IntakeEventScalarFieldEnum)[keyof typeof IntakeEventScalarFieldEnum]
+
+
+export const SideEffectScalarFieldEnum = {
+  id: 'id',
+  prescriptionMedicationId: 'prescriptionMedicationId',
+  patientId: 'patientId',
+  description: 'description',
+  severity: 'severity',
+  reportedAt: 'reportedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SideEffectScalarFieldEnum = (typeof SideEffectScalarFieldEnum)[keyof typeof SideEffectScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {
