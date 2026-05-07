@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8B3A47"/>
+    </marker>
+    <marker id="mS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a3d3d"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="800" fill="#F5EFE7"/>
+
+  <text x="40" y="50" font-size="28" font-weight="700" fill="#1C1C1C">İlaç Takip Akışı</text>
+  <line x1="40" y1="64" x2="160" y2="64" stroke="#8B3A47" stroke-width="2"/>
+  <text x="40" y="90" font-size="14" fill="#7a5a5a">OCR ile kayıt → hatırlatma → alım takibi → bakıcı görünürlüğü</text>
+
+  <text x="40" y="140" font-size="11" font-weight="700" fill="#8B3A47" letter-spacing="1.5">01  İLAÇ EKLEME</text>
+  <line x1="40" y1="148" x2="1160" y2="148" stroke="#C9B891" stroke-width="1"/>
+
+  <g>
+    <rect x="40" y="170" width="180" height="90" rx="10" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <rect x="76" y="195" width="108" height="40" rx="4" fill="#FFFFFF" stroke="#8B3A47"/>
+    <circle cx="130" cy="215" r="8" fill="none" stroke="#8B3A47" stroke-width="1.5"/>
+    <circle cx="130" cy="215" r="3" fill="#8B3A47"/>
+    <text x="130" y="252" text-anchor="middle" font-size="12" font-weight="700" fill="#1C1C1C">Kutu fotoğrafı</text>
+  </g>
+
+  <g>
+    <rect x="260" y="170" width="180" height="90" rx="10" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="350" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">scan-medication</text>
+    <text x="350" y="224" text-anchor="middle" font-size="11" fill="#F0DCDF">Gemini Vision OCR</text>
+    <text x="350" y="244" text-anchor="middle" font-size="10" fill="#F0DCDF">multimodal · &lt; 3 sn</text>
+  </g>
+
+  <g>
+    <rect x="480" y="170" width="200" height="90" rx="10" fill="#FBF6EE" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="580" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Yapısal Çıkarım</text>
+    <text x="580" y="220" text-anchor="middle" font-size="11" fill="#5a3d3d">İsim · Doz · Sıklık</text>
+    <text x="580" y="238" text-anchor="middle" font-size="10" fill="#7a5a5a">JSON · validation (Zod)</text>
+  </g>
+
+  <g>
+    <rect x="720" y="170" width="200" height="90" rx="10" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <text x="820" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Hasta onaylar</text>
+    <text x="820" y="226" text-anchor="middle" font-size="11" fill="#5a3d3d">düzelt + kaydet</text>
+  </g>
+
+  <g>
+    <rect x="960" y="170" width="200" height="90" rx="10" fill="#2A2A2A"/>
+    <text x="1060" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">PostgreSQL</text>
+    <text x="1060" y="226" text-anchor="middle" font-size="11" fill="#D4A0A8">medications</text>
+    <text x="1060" y="244" text-anchor="middle" font-size="10" fill="#C9B891">Prisma row</text>
+  </g>
+
+  <line x1="220" y1="215" x2="260" y2="215" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="440" y1="215" x2="480" y2="215" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="680" y1="215" x2="720" y2="215" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="920" y1="215" x2="960" y2="215" stroke="#8B3A47" stroke-width="1.5" marker-end="url(#m)"/>
+
+  <text x="40" y="320" font-size="11" font-weight="700" fill="#8B3A47" letter-spacing="1.5">02  HATIRLATMA &amp; ALIM</text>
+  <line x1="40" y1="328" x2="1160" y2="328" stroke="#C9B891" stroke-width="1"/>
+
+  <g>
+    <rect x="40" y="350" width="180" height="90" rx="10" fill="#FBF6EE" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="130" y="380" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Zamanlayıcı</text>
+    <text x="130" y="398" text-anchor="middle" font-size="11" fill="#5a3d3d">her ilaca özel</text>
+    <text x="130" y="416" text-anchor="middle" font-size="10" fill="#7a5a5a">cron · interval</text>
+  </g>
+
+  <g>
+    <rect x="260" y="350" width="180" height="90" rx="10" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <circle cx="305" cy="385" r="12" fill="#8B3A47"/>
+    <path d="M298 385 L302 389 L312 379" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+    <text x="350" y="382" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Push bildirimi</text>
+    <text x="350" y="400" text-anchor="middle" font-size="11" fill="#5a3d3d">FCM · APNS</text>
+    <text x="350" y="418" text-anchor="middle" font-size="10" fill="#7a5a5a">expo-notifications</text>
+  </g>
+
+  <g>
+    <rect x="480" y="350" width="200" height="90" rx="10" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <text x="580" y="380" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Hasta hatırlatma</text>
+    <text x="580" y="398" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">alır</text>
+    <text x="580" y="418" text-anchor="middle" font-size="10" fill="#7a5a5a">"Şimdi al" butonu</text>
+  </g>
+
+  <g>
+    <polygon points="820,395 920,350 1020,395 920,440" fill="#FFFFFF" stroke="#8B3A47" stroke-width="2"/>
+    <text x="920" y="392" text-anchor="middle" font-size="14" font-weight="700" fill="#8B3A47">Aldı mı?</text>
+    <text x="920" y="410" text-anchor="middle" font-size="10" fill="#5a3d3d">15 dk pencere</text>
+  </g>
+
+  <line x1="220" y1="395" x2="260" y2="395" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="440" y1="395" x2="480" y2="395" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="680" y1="395" x2="820" y2="395" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+
+  <g>
+    <rect x="1060" y="350" width="100" height="90" rx="10" fill="#FBF6EE" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="1110" y="382" text-anchor="middle" font-size="12" font-weight="700" fill="#1C1C1C">Alım kaydı</text>
+    <text x="1110" y="400" text-anchor="middle" font-size="10" fill="#5a3d3d">timestamp</text>
+    <text x="1110" y="416" text-anchor="middle" font-size="10" fill="#5a3d3d">+ doz</text>
+  </g>
+  <line x1="1020" y1="395" x2="1060" y2="395" stroke="#8B3A47" stroke-width="1.5" marker-end="url(#m)"/>
+  <text x="1030" y="385" font-size="11" font-weight="700" fill="#8B3A47">evet</text>
+
+  <g>
+    <rect x="870" y="475" width="100" height="80" rx="10" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <text x="920" y="500" text-anchor="middle" font-size="12" font-weight="700" fill="#8B3A47">Atlandı!</text>
+    <text x="920" y="518" text-anchor="middle" font-size="10" fill="#5a3d3d">kritik uyarı</text>
+    <text x="920" y="534" text-anchor="middle" font-size="10" fill="#5a3d3d">→ bakıcı</text>
+  </g>
+  <line x1="920" y1="440" x2="920" y2="475" stroke="#8B3A47" stroke-width="1.5" marker-end="url(#m)"/>
+  <text x="930" y="465" font-size="11" font-weight="700" fill="#8B3A47">hayır</text>
+
+  <text x="40" y="615" font-size="11" font-weight="700" fill="#8B3A47" letter-spacing="1.5">03  BAKICI GÖRÜNÜRLÜĞÜ</text>
+  <line x1="40" y1="623" x2="1160" y2="623" stroke="#C9B891" stroke-width="1"/>
+
+  <g>
+    <rect x="40" y="645" width="240" height="100" rx="10" fill="#FBF6EE" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="160" y="678" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Uyum istatistikleri</text>
+    <text x="160" y="696" text-anchor="middle" font-size="11" fill="#5a3d3d">haftalık % rapor</text>
+    <text x="160" y="714" text-anchor="middle" font-size="10" fill="#7a5a5a">trend · grafik · uyarı</text>
+    <rect x="60" y="725" width="200" height="6" fill="#E0D6C5" rx="3"/>
+    <rect x="60" y="725" width="160" height="6" fill="#8B3A47" rx="3"/>
+    <text x="265" y="732" font-size="10" font-weight="700" fill="#8B3A47">86%</text>
+  </g>
+
+  <g>
+    <rect x="320" y="645" width="240" height="100" rx="10" fill="#FBF6EE" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="440" y="678" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Bakıcı paneli</text>
+    <text x="440" y="696" text-anchor="middle" font-size="11" fill="#5a3d3d">mobil dashboard</text>
+    <text x="440" y="716" text-anchor="middle" font-size="10" fill="#7a5a5a">aktif hasta · bekleyen uyarı</text>
+  </g>
+
+  <g>
+    <rect x="600" y="645" width="240" height="100" rx="10" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <text x="720" y="678" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Bakıcı izler</text>
+    <text x="720" y="696" text-anchor="middle" font-size="11" fill="#5a3d3d">+ hastayla iletişim</text>
+    <text x="720" y="716" text-anchor="middle" font-size="10" fill="#7a5a5a">arama · mesaj · gözlem</text>
+  </g>
+
+  <g>
+    <rect x="880" y="645" width="280" height="100" rx="10" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="1020" y="678" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">Erken Müdahale</text>
+    <text x="1020" y="696" text-anchor="middle" font-size="11" fill="#F0DCDF">3 atlanan doz → otomatik</text>
+    <text x="1020" y="714" text-anchor="middle" font-size="10" fill="#F0DCDF">aile + birinci basamak hekim</text>
+  </g>
+
+  <line x1="280" y1="695" x2="320" y2="695" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="560" y1="695" x2="600" y2="695" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#mS)"/>
+  <line x1="840" y1="695" x2="880" y2="695" stroke="#8B3A47" stroke-width="1.5" marker-end="url(#m)"/>
+
+  <path d="M 1060 260 Q 1170 350 1110 350" fill="none" stroke="#5a3d3d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#mS)"/>
+  <text x="1115" y="305" font-size="10" fill="#5a3d3d">kaynak</text>
+
+  <path d="M 1110 440 Q 1180 555 280 645" fill="none" stroke="#5a3d3d" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#mS)"/>
+  <text x="700" y="588" font-size="10" fill="#5a3d3d">uyum verisi besler</text>
+</svg>

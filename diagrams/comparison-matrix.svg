@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <symbol id="check" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7" fill="#8B3A47"/>
+      <path d="M4.5 8.2 L7 10.5 L11.5 5.8" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="checkLite" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7" fill="none" stroke="#8B3A47" stroke-width="1.5"/>
+      <path d="M4.5 8.2 L7 10.5 L11.5 5.8" stroke="#8B3A47" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="partial" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7" fill="none" stroke="#C9A961" stroke-width="1.5"/>
+      <path d="M8 1 A 7 7 0 0 1 8 15 Z" fill="#C9A961"/>
+    </symbol>
+    <symbol id="cross" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7" fill="none" stroke="#C0B8AC" stroke-width="1.5"/>
+      <path d="M5 5 L11 11 M11 5 L5 11" stroke="#9A8E7E" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+
+  <rect width="1200" height="820" fill="#F5EFE7"/>
+
+  <text x="40" y="50" font-size="28" font-weight="700" fill="#1C1C1C">Mevcut Çözümlerle Karşılaştırma</text>
+  <line x1="40" y1="64" x2="240" y2="64" stroke="#8B3A47" stroke-width="2"/>
+  <text x="40" y="92" font-size="14" fill="#7a5a5a">10 ayırt edici özellik · 6 ürün · MedSafe sütunu bordo ile vurgulanmıştır</text>
+
+  <g>
+    <rect x="40"  y="130" width="420" height="64" fill="#FBF6EE" stroke="#C9B891"/>
+    <rect x="460" y="130" width="120" height="64" fill="#8B3A47" stroke="#6E2A36"/>
+    <rect x="580" y="130" width="120" height="64" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="700" y="130" width="120" height="64" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="820" y="130" width="120" height="64" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="940" y="130" width="120" height="64" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="1060" y="130" width="120" height="64" fill="#FFFFFF" stroke="#C9B891"/>
+
+    <text x="60" y="167" font-size="13" font-weight="700" fill="#7a5a5a" letter-spacing="1">ÖZELLİK</text>
+
+    <text x="520" y="160" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">MedSafe</text>
+    <text x="520" y="180" text-anchor="middle" font-size="10" fill="#F0DCDF">bu proje</text>
+
+    <text x="640" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Medisafe</text>
+    <text x="640" y="180" text-anchor="middle" font-size="10" fill="#7a5a5a">mobil · ABD</text>
+
+    <text x="760" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">MyTherapy</text>
+    <text x="760" y="180" text-anchor="middle" font-size="10" fill="#7a5a5a">mobil · DE</text>
+
+    <text x="880" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Round Health</text>
+    <text x="880" y="180" text-anchor="middle" font-size="10" fill="#7a5a5a">iOS · ABD</text>
+
+    <text x="1000" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">Hero</text>
+    <text x="1000" y="180" text-anchor="middle" font-size="10" fill="#7a5a5a">akıllı kutu</text>
+
+    <text x="1120" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#1C1C1C">MedMinder</text>
+    <text x="1120" y="180" text-anchor="middle" font-size="10" fill="#7a5a5a">akıllı kutu</text>
+  </g>
+
+  <g font-size="13" fill="#1C1C1C">
+    <rect x="40" y="194" width="1140" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="460" y="194" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="217" font-weight="700">Doğal dil sesli asistan</text>
+    <text x="60" y="234" font-size="11" fill="#7a5a5a">LLM tabanlı sohbet + tool calling</text>
+    <use href="#check"     x="512" y="208" width="16" height="16"/>
+    <use href="#cross"     x="632" y="208" width="16" height="16"/>
+    <use href="#cross"     x="752" y="208" width="16" height="16"/>
+    <use href="#cross"     x="872" y="208" width="16" height="16"/>
+    <use href="#cross"     x="992" y="208" width="16" height="16"/>
+    <use href="#cross"     x="1112" y="208" width="16" height="16"/>
+
+    <rect x="40" y="244" width="1140" height="50" fill="#FBF6EE" stroke="#C9B891"/>
+    <rect x="460" y="244" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="267" font-weight="700">OCR ile ilaç kutusu tarama</text>
+    <text x="60" y="284" font-size="11" fill="#7a5a5a">Multimodal vision · isim · doz · sıklık çıkarımı</text>
+    <use href="#check"     x="512" y="258" width="16" height="16"/>
+    <use href="#partial"   x="632" y="258" width="16" height="16"/>
+    <use href="#cross"     x="752" y="258" width="16" height="16"/>
+    <use href="#cross"     x="872" y="258" width="16" height="16"/>
+    <use href="#cross"     x="992" y="258" width="16" height="16"/>
+    <use href="#cross"     x="1112" y="258" width="16" height="16"/>
+
+    <rect x="40" y="294" width="1140" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="460" y="294" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="317" font-weight="700">Türkçe ana dil tasarımı</text>
+    <text x="60" y="334" font-size="11" fill="#7a5a5a">Yerel kelime hazinesi · ses · yerelleştirilmiş UX</text>
+    <use href="#check"     x="512" y="308" width="16" height="16"/>
+    <use href="#partial"   x="632" y="308" width="16" height="16"/>
+    <use href="#partial"   x="752" y="308" width="16" height="16"/>
+    <use href="#cross"     x="872" y="308" width="16" height="16"/>
+    <use href="#cross"     x="992" y="308" width="16" height="16"/>
+    <use href="#cross"     x="1112" y="308" width="16" height="16"/>
+
+    <rect x="40" y="344" width="1140" height="50" fill="#FBF6EE" stroke="#C9B891"/>
+    <rect x="460" y="344" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="367" font-weight="700">Bakıcı paneli (uzaktan izleme)</text>
+    <text x="60" y="384" font-size="11" fill="#7a5a5a">Adherence dashboard · kritik uyarı eskalasyonu</text>
+    <use href="#check"     x="512" y="358" width="16" height="16"/>
+    <use href="#checkLite" x="632" y="358" width="16" height="16"/>
+    <use href="#checkLite" x="752" y="358" width="16" height="16"/>
+    <use href="#cross"     x="872" y="358" width="16" height="16"/>
+    <use href="#checkLite" x="992" y="358" width="16" height="16"/>
+    <use href="#checkLite" x="1112" y="358" width="16" height="16"/>
+
+    <rect x="40" y="394" width="1140" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="460" y="394" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="417" font-weight="700">AI destekli yan etki kaydı</text>
+    <text x="60" y="434" font-size="11" fill="#7a5a5a">log_side_effect · şiddet sınıflama · bakıcıya iletim</text>
+    <use href="#check"     x="512" y="408" width="16" height="16"/>
+    <use href="#partial"   x="632" y="408" width="16" height="16"/>
+    <use href="#partial"   x="752" y="408" width="16" height="16"/>
+    <use href="#cross"     x="872" y="408" width="16" height="16"/>
+    <use href="#cross"     x="992" y="408" width="16" height="16"/>
+    <use href="#cross"     x="1112" y="408" width="16" height="16"/>
+
+    <rect x="40" y="444" width="1140" height="50" fill="#FBF6EE" stroke="#C9B891"/>
+    <rect x="460" y="444" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="467" font-weight="700">Yaşlı dostu erişilebilirlik</text>
+    <text x="60" y="484" font-size="11" fill="#7a5a5a">24pt+ tipo · WCAG AA · 48dp dokunma · sesli komut</text>
+    <use href="#check"     x="512" y="458" width="16" height="16"/>
+    <use href="#partial"   x="632" y="458" width="16" height="16"/>
+    <use href="#partial"   x="752" y="458" width="16" height="16"/>
+    <use href="#partial"   x="872" y="458" width="16" height="16"/>
+    <use href="#partial"   x="992" y="458" width="16" height="16"/>
+    <use href="#partial"   x="1112" y="458" width="16" height="16"/>
+
+    <rect x="40" y="494" width="1140" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="460" y="494" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="517" font-weight="700">Ek donanım GEREKMİYOR</text>
+    <text x="60" y="534" font-size="11" fill="#7a5a5a">Sadece akıllı telefon · düşük benimseme bariyeri</text>
+    <use href="#check"     x="512" y="508" width="16" height="16"/>
+    <use href="#check"     x="632" y="508" width="16" height="16"/>
+    <use href="#check"     x="752" y="508" width="16" height="16"/>
+    <use href="#check"     x="872" y="508" width="16" height="16"/>
+    <use href="#cross"     x="992" y="508" width="16" height="16"/>
+    <use href="#cross"     x="1112" y="508" width="16" height="16"/>
+
+    <rect x="40" y="544" width="1140" height="50" fill="#FBF6EE" stroke="#C9B891"/>
+    <rect x="460" y="544" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="567" font-weight="700">Atlanan doz eskalasyonu</text>
+    <text x="60" y="584" font-size="11" fill="#7a5a5a">N atlanan doz → otomatik bakıcı + birinci basamak hekim</text>
+    <use href="#check"     x="512" y="558" width="16" height="16"/>
+    <use href="#partial"   x="632" y="558" width="16" height="16"/>
+    <use href="#partial"   x="752" y="558" width="16" height="16"/>
+    <use href="#cross"     x="872" y="558" width="16" height="16"/>
+    <use href="#checkLite" x="992" y="558" width="16" height="16"/>
+    <use href="#checkLite" x="1112" y="558" width="16" height="16"/>
+
+    <rect x="40" y="594" width="1140" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="460" y="594" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="617" font-weight="700">Çoklu doz · karmaşık plan</text>
+    <text x="60" y="634" font-size="11" fill="#7a5a5a">Yemek-öncesi · değişken sıklık · titrasyon planları</text>
+    <use href="#check"     x="512" y="608" width="16" height="16"/>
+    <use href="#check"     x="632" y="608" width="16" height="16"/>
+    <use href="#check"     x="752" y="608" width="16" height="16"/>
+    <use href="#partial"   x="872" y="608" width="16" height="16"/>
+    <use href="#check"     x="992" y="608" width="16" height="16"/>
+    <use href="#check"     x="1112" y="608" width="16" height="16"/>
+
+    <rect x="40" y="644" width="1140" height="50" fill="#FBF6EE" stroke="#C9B891"/>
+    <rect x="460" y="644" width="120" height="50" fill="#FAEEEF" stroke="#8B3A47"/>
+    <text x="60" y="667" font-weight="700">Açık kaynak / akademik</text>
+    <text x="60" y="684" font-size="11" fill="#7a5a5a">Şeffaf veri akışı · denetlenebilir · özelleştirilebilir</text>
+    <use href="#check"     x="512" y="658" width="16" height="16"/>
+    <use href="#cross"     x="632" y="658" width="16" height="16"/>
+    <use href="#cross"     x="752" y="658" width="16" height="16"/>
+    <use href="#cross"     x="872" y="658" width="16" height="16"/>
+    <use href="#cross"     x="992" y="658" width="16" height="16"/>
+    <use href="#cross"     x="1112" y="658" width="16" height="16"/>
+  </g>
+
+  <g>
+    <rect x="40"   y="694" width="420" height="50" fill="#F0DCDF" stroke="#8B3A47"/>
+    <rect x="460"  y="694" width="120" height="50" fill="#8B3A47" stroke="#6E2A36"/>
+    <rect x="580"  y="694" width="120" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="700"  y="694" width="120" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="820"  y="694" width="120" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="940"  y="694" width="120" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+    <rect x="1060" y="694" width="120" height="50" fill="#FFFFFF" stroke="#C9B891"/>
+
+    <text x="60"  y="725" font-size="13" font-weight="700" fill="#8B3A47" letter-spacing="1">TOPLAM ✓ SKORU</text>
+    <text x="520" y="725" text-anchor="middle" font-size="22" font-weight="700" fill="#FFFFFF">10</text>
+    <text x="640" y="725" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1C1C">3.5</text>
+    <text x="760" y="725" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1C1C">3.5</text>
+    <text x="880" y="725" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1C1C">2.5</text>
+    <text x="1000" y="725" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1C1C">4</text>
+    <text x="1120" y="725" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1C1C">4</text>
+  </g>
+
+  <g transform="translate(40 770)" font-size="11" fill="#1C1C1C">
+    <text x="0" y="0" font-size="11" font-weight="700" fill="#7a5a5a" letter-spacing="1.2">SEMBOL ANAHTARI</text>
+    <g transform="translate(0 14)">
+      <use href="#check"     x="0"  y="0" width="16" height="16"/><text x="22" y="12">tam destek</text>
+      <use href="#checkLite" x="115" y="0" width="16" height="16"/><text x="137" y="12">var (sınırlı)</text>
+      <use href="#partial"   x="240" y="0" width="16" height="16"/><text x="262" y="12">kısmi / iyileştirme gerekli</text>
+      <use href="#cross"     x="430" y="0" width="16" height="16"/><text x="452" y="12">yok / desteklemiyor</text>
+      <text x="700" y="12" font-style="italic" fill="#7a5a5a">Kaynak: ürün dokümantasyonu &amp; uygulama mağazası açıklamaları, May 2026.</text>
+    </g>
+  </g>
+</svg>

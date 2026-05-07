@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8B3A47"/>
+    </marker>
+    <marker id="arrDark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a3d3d"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="720" fill="#F5EFE7"/>
+
+  <text x="40" y="50" font-size="28" font-weight="700" fill="#1C1C1C">Sistem Mimarisi</text>
+  <line x1="40" y1="64" x2="160" y2="64" stroke="#8B3A47" stroke-width="2"/>
+  <text x="40" y="90" font-size="14" fill="#7a5a5a">Yapay zekâ destekli, sesli ilaç takip sistemi · uçtan uca akış</text>
+
+  <text x="60"  y="130" font-size="11" font-weight="700" fill="#8B3A47" letter-spacing="1.5">İSTEMCİ</text>
+  <text x="460" y="130" font-size="11" font-weight="700" fill="#8B3A47" letter-spacing="1.5">SUNUCU</text>
+  <text x="860" y="130" font-size="11" font-weight="700" fill="#8B3A47" letter-spacing="1.5">YAPAY ZEKÂ</text>
+
+  <g>
+    <rect x="60" y="150" width="170" height="56" rx="8" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <circle cx="86" cy="178" r="9" fill="#8B3A47"/>
+    <path d="M70 198 Q86 184 102 198" stroke="#8B3A47" stroke-width="1.5" fill="none"/>
+    <text x="115" y="175" font-size="13" font-weight="700" fill="#1C1C1C">Yaşlı Hasta</text>
+    <text x="115" y="192" font-size="11" fill="#5a3d3d">mobil kullanıcı</text>
+  </g>
+  <g>
+    <rect x="240" y="150" width="170" height="56" rx="8" fill="#F0DCDF" stroke="#8B3A47" stroke-width="1.5"/>
+    <circle cx="266" cy="178" r="9" fill="#8B3A47"/>
+    <path d="M250 198 Q266 184 282 198" stroke="#8B3A47" stroke-width="1.5" fill="none"/>
+    <text x="295" y="175" font-size="13" font-weight="700" fill="#1C1C1C">Bakıcı / Aile</text>
+    <text x="295" y="192" font-size="11" fill="#5a3d3d">uzaktan izleme</text>
+  </g>
+
+  <g>
+    <rect x="40" y="230" width="380" height="270" rx="10" fill="#FFFFFF" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="60" y="258" font-size="14" font-weight="700" fill="#1C1C1C">Mobil Uygulama</text>
+    <text x="60" y="275" font-size="11" fill="#7a5a5a">Expo · React Native · NativeWind · TypeScript</text>
+
+    <rect x="60" y="290" width="160" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="140" y="316" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">Hasta Arayüzü</text>
+    <text x="140" y="332" text-anchor="middle" font-size="10" fill="#5a3d3d">tabs · scan · doz</text>
+
+    <rect x="240" y="290" width="160" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="320" y="316" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">Bakıcı Paneli</text>
+    <text x="320" y="332" text-anchor="middle" font-size="10" fill="#5a3d3d">izleme · uyarı</text>
+
+    <rect x="60" y="358" width="340" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="230" y="384" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">Sesli Asistan</text>
+    <text x="230" y="400" text-anchor="middle" font-size="10" fill="#5a3d3d">chat · mikrofon · TTS</text>
+
+    <rect x="60" y="426" width="340" height="58" rx="6" fill="#F5EFE7" stroke="#C9B891"/>
+    <text x="230" y="450" text-anchor="middle" font-size="11" fill="#1C1C1C">expo-secure-store · expo-notifications · i18n (TR / EN)</text>
+    <text x="230" y="468" text-anchor="middle" font-size="10" fill="#7a5a5a">SQLite önbellek · offline-first</text>
+  </g>
+
+  <g>
+    <rect x="440" y="150" width="380" height="430" rx="10" fill="#FFFFFF" stroke="#C9B891" stroke-width="1.5"/>
+    <text x="460" y="178" font-size="14" font-weight="700" fill="#1C1C1C">API Sunucusu</text>
+    <text x="460" y="195" font-size="11" fill="#7a5a5a">Hono · tRPC · Prisma · Node.js</text>
+
+    <rect x="460" y="210" width="160" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="540" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">Auth Router</text>
+    <text x="540" y="250" text-anchor="middle" font-size="10" fill="#5a3d3d">better-auth</text>
+
+    <rect x="640" y="210" width="160" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="720" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">İlaç Router</text>
+    <text x="720" y="250" text-anchor="middle" font-size="10" fill="#5a3d3d">CRUD · alım kayıt</text>
+
+    <rect x="460" y="278" width="160" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="540" y="302" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">Bakım Ekibi</text>
+    <text x="540" y="318" text-anchor="middle" font-size="10" fill="#5a3d3d">davet · uyum</text>
+
+    <rect x="640" y="278" width="160" height="58" rx="6" fill="#FBF6EE" stroke="#C9B891"/>
+    <text x="720" y="302" text-anchor="middle" font-size="12" font-weight="600" fill="#1C1C1C">Medication</text>
+    <text x="720" y="318" text-anchor="middle" font-size="10" fill="#5a3d3d">tarama · not</text>
+
+    <rect x="460" y="350" width="340" height="68" rx="6" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="630" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#FFFFFF">Agent Router</text>
+    <text x="630" y="396" text-anchor="middle" font-size="11" fill="#F5EFE7">chat · voice · ReAct döngüsü</text>
+
+    <rect x="460" y="430" width="340" height="60" rx="6" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="630" y="456" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">Tool Handlers</text>
+    <text x="630" y="472" text-anchor="middle" font-size="10" fill="#F5EFE7">scan · note · reminder · intake</text>
+
+    <rect x="460" y="502" width="340" height="58" rx="6" fill="#F5EFE7" stroke="#C9B891" stroke-dasharray="3 3"/>
+    <text x="630" y="528" text-anchor="middle" font-size="11" fill="#5a3d3d">Docker · Coolify · Hetzner VPS</text>
+    <text x="630" y="544" text-anchor="middle" font-size="10" fill="#7a5a5a">CI/CD · health-check · log</text>
+  </g>
+
+  <g>
+    <rect x="840" y="150" width="320" height="100" rx="10" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="1000" y="184" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">Gemini 2.5 Flash</text>
+    <text x="1000" y="206" text-anchor="middle" font-size="11" fill="#F0DCDF">LLM · Tool-use · multimodal</text>
+    <text x="1000" y="226" text-anchor="middle" font-size="10" fill="#F0DCDF">sistem-prompt · ReAct ajanı</text>
+
+    <rect x="840" y="270" width="320" height="86" rx="10" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="1000" y="302" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">Speech-to-Text</text>
+    <text x="1000" y="322" text-anchor="middle" font-size="11" fill="#F0DCDF">Gemini ses transkripsiyon</text>
+    <text x="1000" y="340" text-anchor="middle" font-size="10" fill="#F0DCDF">TR · EN · &lt; 1 sn</text>
+
+    <rect x="840" y="376" width="320" height="86" rx="10" fill="#8B3A47" stroke="#6E2A36"/>
+    <text x="1000" y="408" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">Vision OCR</text>
+    <text x="1000" y="428" text-anchor="middle" font-size="11" fill="#F0DCDF">ilaç kutusu tarama</text>
+    <text x="1000" y="446" text-anchor="middle" font-size="10" fill="#F0DCDF">isim · doz · sıklık çıkarımı</text>
+
+    <rect x="840" y="482" width="320" height="78" rx="10" fill="#2A2A2A"/>
+    <text x="1000" y="512" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">PostgreSQL</text>
+    <text x="1000" y="530" text-anchor="middle" font-size="11" fill="#D4A0A8">Prisma ORM · users, meds, intakes</text>
+    <text x="1000" y="548" text-anchor="middle" font-size="10" fill="#C9B891">migrations · backups</text>
+  </g>
+
+  <g>
+    <rect x="40" y="600" width="1120" height="62" rx="10" fill="#F0DCDF" stroke="#8B3A47"/>
+    <text x="60" y="625" font-size="12" font-weight="700" fill="#8B3A47" letter-spacing="1.2">PUSH BİLDİRİMİ</text>
+    <text x="60" y="648" font-size="11" fill="#5a3d3d">FCM (Android) · APNS (iOS) · zamanlanmış doz hatırlatıcısı · kritik uyum uyarıları</text>
+    <circle cx="970" cy="630" r="6" fill="#8B3A47"/>
+    <text x="985" y="635" font-size="11" fill="#1C1C1C">scheduler</text>
+    <circle cx="1060" cy="630" r="6" fill="#8B3A47"/>
+    <text x="1075" y="635" font-size="11" fill="#1C1C1C">delivery</text>
+  </g>
+
+  <line x1="145" y1="206" x2="145" y2="230" stroke="#8B3A47" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="325" y1="206" x2="325" y2="230" stroke="#8B3A47" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <path d="M 420 365 Q 430 365 440 365" fill="none" stroke="#8B3A47" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="425" y="358" font-size="10" font-weight="700" fill="#8B3A47">tRPC / HTTPS</text>
+
+  <path d="M 820 200 Q 830 200 840 200" fill="none" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#arrDark)"/>
+  <text x="822" y="194" font-size="9" fill="#5a3d3d">chat</text>
+
+  <path d="M 820 313 Q 830 313 840 313" fill="none" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#arrDark)"/>
+  <text x="822" y="307" font-size="9" fill="#5a3d3d">audio</text>
+
+  <path d="M 820 419 Q 830 419 840 419" fill="none" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#arrDark)"/>
+  <text x="822" y="413" font-size="9" fill="#5a3d3d">vision</text>
+
+  <path d="M 820 521 Q 830 521 840 521" fill="none" stroke="#5a3d3d" stroke-width="1.5" marker-end="url(#arrDark)"/>
+  <text x="822" y="515" font-size="9" fill="#5a3d3d">Prisma</text>
+
+  <line x1="630" y1="580" x2="630" y2="600" stroke="#8B3A47" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+  <line x1="230" y1="600" x2="230" y2="500" stroke="#8B3A47" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+</svg>
