@@ -1,135 +1,97 @@
-# Turborepo starter
+# MedSafe
 
-This Turborepo starter is maintained by the Turborepo core team.
+A medication management app for patients and their caregivers. Patients track their daily medications, log side effects, and get reminders; caregivers monitor their patients' adherence and intervene when something looks off. An on-device voice + chat assistant lets users ask questions like "did I take my blood-pressure pill today?" and have answers grounded in their own records, never in invented medical advice.
 
-## Using this example
+This repository is the senior graduation project of [@ethsmaa](https://github.com/ethsmaa).
 
-Run the following command:
+## Tech stack
 
+**Backend (`apps/backend`)**
+- [Hono](https://hono.dev/) HTTP server
+- [tRPC](https://trpc.io/) end-to-end typed API
+- [Prisma](https://www.prisma.io/) ORM on PostgreSQL
+- [Better Auth](https://www.better-auth.com/) for authentication
+- [Google Generative AI](https://ai.google.dev/) (Gemini) for the assistant agent and tool-calling
+- [Zod](https://zod.dev/) for schema validation
+
+**Mobile (`apps/mobile`)**
+- [Expo](https://expo.dev/) (React Native) with `expo-router`
+- [NativeWind](https://www.nativewind.dev/) (Tailwind for React Native)
+- [TanStack Query](https://tanstack.com/query) + tRPC client
+- `expo-speech` (TTS) and `expo-speech-recognition` (STT) for the voice assistant
+- `expo-notifications` for medication reminders
+- `react-native-reanimated` for animations
+
+**Tooling**
+- [Turborepo](https://turborepo.dev/) + [pnpm](https://pnpm.io/) workspaces
+- [Biome](https://biomejs.dev/) for lint and format
+- TypeScript everywhere
+
+## Repository layout
+
+```
+apps/
+  backend/       Hono + tRPC + Prisma server
+  mobile/        Expo (React Native) app
+packages/
+  typescript-config/  Shared tsconfig presets
+diagrams/        Architecture and flow diagrams (Excalidraw + PNG/SVG)
+reports/         Project reports
+```
+
+## Getting started
+
+### Prerequisites
+- Node.js 18+
+- pnpm 9
+- PostgreSQL (locally or via the included `compose.dev.yaml`)
+- For mobile: Expo Go on a device, or Xcode / Android Studio
+
+### Install
 ```sh
-npx create-turbo@latest
+pnpm install
 ```
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+### Database
+Spin up Postgres with Docker Compose:
+```sh
+docker compose -f compose.dev.yaml up -d
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+Configure `apps/backend/.env.development` (DATABASE_URL, auth secrets, Gemini API key), then:
+```sh
+pnpm --filter @medsafe/backend db:migrate
 ```
 
-### Develop
+### Run
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+Backend and mobile in parallel:
+```sh
+pnpm dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+Or individually:
+```sh
+pnpm --filter @medsafe/backend dev
+pnpm --filter @medsafe/mobile  dev
 ```
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+### Other scripts
+```sh
+pnpm build         # turbo build across the monorepo
+pnpm lint          # turbo lint + biome
+pnpm check-types   # tsc --noEmit across packages
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Architecture
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+System-level diagrams live under [`diagrams/`](./diagrams):
+- `architecture.png` — overall system architecture
+- `medication-flow.png` — medication intake / logging flow
+- `chat-tool-calling.png` — assistant tool-calling pipeline
+- `voice-flow.png` — voice (STT → agent → TTS) pipeline
+- `comparison-matrix.png` — comparison with similar apps
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+## License
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+This project is currently unlicensed and intended for academic submission. Contact the author before reuse.
