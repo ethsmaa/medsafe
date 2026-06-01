@@ -6,7 +6,6 @@ import { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
-	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
@@ -68,7 +67,7 @@ export default function ScanMedicationScreen() {
 	// Permission not yet determined
 	if (!permission) {
 		return (
-			<SafeAreaView style={styles.container}>
+			<SafeAreaView className="flex-1 bg-black">
 				<ActivityIndicator size="large" color="#d99696" />
 			</SafeAreaView>
 		);
@@ -77,24 +76,23 @@ export default function ScanMedicationScreen() {
 	// Permission denied
 	if (!permission.granted) {
 		return (
-			<SafeAreaView style={styles.container}>
-				<View style={styles.permissionContainer}>
-					<Ionicons name="camera-outline" size={64} color="#9ca3af" />
-					<Text style={styles.permissionTitle}>Kamera İzni Gerekli</Text>
-					<Text style={styles.permissionText}>
+			<SafeAreaView className="flex-1 bg-black">
+				<View className="flex-1 items-center justify-center gap-4 p-8">
+					<Ionicons name="camera-outline" size={64} className="text-gray-400" />
+					<Text className="font-bold text-2xl text-white">
+						Kamera İzni Gerekli
+					</Text>
+					<Text className="text-center text-base text-gray-400">
 						İlaç kutusunu taramak için kamera erişimine ihtiyacımız var.
 					</Text>
 					<TouchableOpacity
-						style={styles.permissionButton}
+						className="mt-2 rounded-xl bg-primary px-8 py-3.5"
 						onPress={requestPermission}
 					>
-						<Text style={styles.permissionButtonText}>İzin Ver</Text>
+						<Text className="font-bold text-base text-white">İzin Ver</Text>
 					</TouchableOpacity>
-					<TouchableOpacity
-						style={styles.backLink}
-						onPress={() => router.back()}
-					>
-						<Text style={styles.backLinkText}>Geri Dön</Text>
+					<TouchableOpacity className="mt-2" onPress={() => router.back()}>
+						<Text className="text-gray-400 text-sm">Geri Dön</Text>
 					</TouchableOpacity>
 				</View>
 			</SafeAreaView>
@@ -102,50 +100,54 @@ export default function ScanMedicationScreen() {
 	}
 
 	return (
-		<View style={styles.container}>
-			<CameraView ref={cameraRef} style={styles.camera} facing="back">
+		<View className="flex-1 bg-black">
+			<CameraView ref={cameraRef} style={{ flex: 1 }} facing="back">
 				{/* Top Bar */}
-				<SafeAreaView edges={["top"]} style={styles.topBar}>
+				<SafeAreaView
+					edges={["top"]}
+					className="flex-row items-center justify-between px-4 pt-2"
+				>
 					<TouchableOpacity
 						onPress={() => router.back()}
-						style={styles.closeButton}
+						className="h-10 w-10 items-center justify-center rounded-full bg-black/40"
 					>
-						<Ionicons name="close" size={28} color="white" />
+						<Ionicons name="close" size={28} className="text-white" />
 					</TouchableOpacity>
-					<Text style={styles.topTitle}>İlaç Kutusunu Tara</Text>
-					<View style={{ width: 40 }} />
+					<Text className="font-bold text-lg text-white">
+						İlaç Kutusunu Tara
+					</Text>
+					<View className="w-10" />
 				</SafeAreaView>
 
 				{/* Center Frame */}
-				<View style={styles.frameContainer}>
-					<View style={styles.frame}>
+				<View className="flex-1 items-center justify-center">
+					<View className="h-[200px] w-[300px] items-center justify-center rounded-2xl border-[3px] border-white/70 border-dashed">
 						{scanMutation.isPending && (
-							<View style={styles.scanningOverlay}>
+							<View className="items-center gap-3">
 								<ActivityIndicator size="large" color="white" />
-								<Text style={styles.scanningText}>Analiz ediliyor...</Text>
+								<Text className="font-semibold text-base text-white">
+									Analiz ediliyor...
+								</Text>
 							</View>
 						)}
 					</View>
-					<Text style={styles.hint}>
+					<Text className="mt-4 text-center text-sm text-white/80">
 						İlaç kutusunun ön yüzünü çerçeveye hizalayın
 					</Text>
 				</View>
 
 				{/* Bottom Controls */}
-				<SafeAreaView edges={["bottom"]} style={styles.bottomBar}>
+				<SafeAreaView edges={["bottom"]} className="items-center pb-5">
 					<TouchableOpacity
-						style={[
-							styles.captureButton,
-							(isCaptured || scanMutation.isPending) && styles.captureDisabled,
-						]}
+						className={`h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg ${isCaptured || scanMutation.isPending ? "opacity-60" : ""}`}
 						onPress={handleCapture}
 						disabled={isCaptured || scanMutation.isPending}
 					>
-						<View style={styles.captureInner}>
+						<View className="h-16 w-16 items-center justify-center rounded-full bg-[#f0f0f0]">
 							{scanMutation.isPending ? (
 								<ActivityIndicator size="small" color="#d99696" />
 							) : (
-								<Ionicons name="scan" size={32} color="#d99696" />
+								<Ionicons name="scan" size={32} className="text-primary" />
 							)}
 						</View>
 					</TouchableOpacity>
@@ -154,127 +156,3 @@ export default function ScanMedicationScreen() {
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#000",
-	},
-	camera: {
-		flex: 1,
-	},
-	topBar: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		paddingHorizontal: 16,
-		paddingTop: 8,
-	},
-	closeButton: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		backgroundColor: "rgba(0,0,0,0.4)",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	topTitle: {
-		color: "white",
-		fontSize: 18,
-		fontWeight: "700",
-	},
-	frameContainer: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	frame: {
-		width: 300,
-		height: 200,
-		borderRadius: 16,
-		borderWidth: 3,
-		borderColor: "rgba(255,255,255,0.7)",
-		borderStyle: "dashed",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	scanningOverlay: {
-		alignItems: "center",
-		gap: 12,
-	},
-	scanningText: {
-		color: "white",
-		fontSize: 16,
-		fontWeight: "600",
-	},
-	hint: {
-		color: "rgba(255,255,255,0.8)",
-		fontSize: 14,
-		marginTop: 16,
-		textAlign: "center",
-	},
-	bottomBar: {
-		alignItems: "center",
-		paddingBottom: 20,
-	},
-	captureButton: {
-		width: 80,
-		height: 80,
-		borderRadius: 40,
-		backgroundColor: "white",
-		alignItems: "center",
-		justifyContent: "center",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		elevation: 8,
-	},
-	captureDisabled: {
-		opacity: 0.6,
-	},
-	captureInner: {
-		width: 64,
-		height: 64,
-		borderRadius: 32,
-		backgroundColor: "#f0f0f0",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	permissionContainer: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-		padding: 32,
-		gap: 16,
-	},
-	permissionTitle: {
-		fontSize: 22,
-		fontWeight: "700",
-		color: "white",
-	},
-	permissionText: {
-		fontSize: 16,
-		color: "#9ca3af",
-		textAlign: "center",
-	},
-	permissionButton: {
-		backgroundColor: "#d99696",
-		paddingHorizontal: 32,
-		paddingVertical: 14,
-		borderRadius: 12,
-		marginTop: 8,
-	},
-	permissionButtonText: {
-		color: "white",
-		fontSize: 16,
-		fontWeight: "700",
-	},
-	backLink: {
-		marginTop: 8,
-	},
-	backLinkText: {
-		color: "#9ca3af",
-		fontSize: 14,
-	},
-});
