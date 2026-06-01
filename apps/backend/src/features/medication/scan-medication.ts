@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
+import { getGeminiClient } from "../agent/gemini-client.js";
 import {
 	MEAL_STATUSES,
 	MEDICATION_FORMS,
@@ -25,15 +25,7 @@ export type ScanResult = z.infer<typeof ScanResultSchema>;
 export async function scanMedicationImage(
 	imageBase64: string,
 ): Promise<ScanResult> {
-	const apiKey = process.env.GEMINI_API_KEY;
-	if (!apiKey) {
-		throw new Error(
-			"GEMINI_API_KEY is not set. Add it to your .env.development file.",
-		);
-	}
-
-	const genAI = new GoogleGenerativeAI(apiKey);
-	const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+	const model = getGeminiClient().getGenerativeModel({ model: GEMINI_MODEL });
 
 	// Strip data URI prefix if present
 	const base64Data = imageBase64.includes(",")
