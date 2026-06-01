@@ -1,7 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
-import { Colors } from "@/constants/theme";
-import { useAccessibility } from "@/context/AccessibilityContext";
+import { Text, View } from "react-native";
 
 interface ScheduleItem {
 	id: string;
@@ -16,78 +14,62 @@ interface ScheduleListProps {
 	nextDoseId?: string;
 }
 
-export const ScheduleList = ({ schedule, nextDoseId }: ScheduleListProps) => {
-	const { isHighContrast, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, textSize);
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
+const ICON_CONTAINER =
+	"z-10 mr-4 h-6 w-6 items-center justify-center rounded-full border-2 border-surface-light dark:border-surface-dark";
+const CONTENT =
+	"flex-1 flex-row items-center justify-between rounded-2xl border border-border-light bg-surface-light p-4 dark:border-border-dark dark:bg-surface-dark";
 
+export const ScheduleList = ({ schedule, nextDoseId }: ScheduleListProps) => {
 	if (schedule.length === 0) {
 		return (
-			<Text
-				style={{
-					color: theme.textSecondary,
-					fontStyle: "italic",
-					marginLeft: 24,
-				}}
-			>
+			<Text className="ml-6 text-text-sub-light italic dark:text-text-sub-dark">
 				No medications scheduled.
 			</Text>
 		);
 	}
 
 	return (
-		<View style={styles.timeline}>
+		<View className="pl-6">
 			{schedule.map((item, index) => {
 				const isNext = item.id === nextDoseId;
 				const isLast = index === schedule.length - 1;
 
 				return (
-					<View key={index} style={styles.timelineItem}>
+					<View key={index} className="relative mb-6 flex-row">
 						{/* Status Icon */}
 						<View
-							style={[
-								styles.timelineIconContainer,
-								item.taken ? styles.iconTaken : styles.iconPending,
-							]}
+							className={`${ICON_CONTAINER} ${item.taken ? "bg-success-light dark:bg-success-dark" : "bg-gray-200 dark:bg-border-dark"}`}
 						>
 							<Ionicons
 								name={item.taken ? "checkmark" : isNext ? "time" : "hourglass"}
 								size={18}
-								color={
-									item.taken ? "white" : isNext ? "white" : "#9ca3af" // Gray for pending
+								className={
+									item.taken || isNext ? "text-white" : "text-gray-400"
 								}
 							/>
 						</View>
 
 						{/* Line Connector */}
-						{!isLast && <View style={styles.timelineLine} />}
+						{!isLast && (
+							<View className="absolute top-6 -bottom-6 left-[9px] -z-10 w-0.5 bg-border-light dark:bg-border-dark" />
+						)}
 
 						{/* Content */}
 						<View
-							style={[
-								styles.timelineContent,
-								isNext && styles.activeTimelineContent,
-							]}
+							className={`${CONTENT} ${isNext ? "border-primary border-l-4" : ""}`}
 						>
-							<View style={{ flex: 1 }}>
+							<View className="flex-1">
 								<Text
-									style={[
-										styles.tlMedName,
-										item.taken && styles.textStrikethrough,
-									]}
+									className={`font-bold text-base ${item.taken ? "text-text-sub-light line-through dark:text-text-sub-dark" : "text-text-main-light dark:text-text-main-dark"}`}
 								>
 									{item.genericName}
 								</Text>
-								<Text style={styles.tlDosage}>{item.dosage}</Text>
+								<Text className="text-text-sub-light text-xs dark:text-text-sub-dark">
+									{item.dosage}
+								</Text>
 							</View>
 							<Text
-								style={[
-									styles.tlTime,
-									isNext && {
-										color: theme.primary,
-										fontWeight: "bold",
-									},
-								]}
+								className={`text-sm ${isNext ? "font-bold text-primary" : "font-medium text-text-sub-light dark:text-text-sub-dark"}`}
 							>
 								{item.timeOfDay}
 							</Text>
@@ -97,78 +79,4 @@ export const ScheduleList = ({ schedule, nextDoseId }: ScheduleListProps) => {
 			})}
 		</View>
 	);
-};
-
-const makeStyles = (isHighContrast: boolean, textSize: number) => {
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
-	return StyleSheet.create({
-		timeline: {
-			paddingLeft: 24, // Space for line
-		},
-		timelineItem: {
-			flexDirection: "row",
-			marginBottom: 24,
-			position: "relative",
-		},
-		timelineLine: {
-			position: "absolute",
-			left: 9, // Center of icon (18/2) is 9
-			top: 24, // Start below icon
-			bottom: -24, // Extend to next
-			width: 2,
-			backgroundColor: "#e5e7eb",
-			zIndex: -1,
-		},
-		timelineIconContainer: {
-			width: 24, // Larger than icon
-			height: 24,
-			borderRadius: 12,
-			alignItems: "center",
-			justifyContent: "center",
-			marginRight: 16,
-			borderWidth: 2,
-			borderColor: theme.cardBg,
-			zIndex: 1,
-			backgroundColor: theme.cardBg, // default
-		},
-		iconTaken: {
-			backgroundColor: theme.success, // Green
-		},
-		iconPending: {
-			backgroundColor: "#e5e7eb", // Gray
-		},
-		timelineContent: {
-			flex: 1,
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-			backgroundColor: theme.cardBg,
-			padding: 16,
-			borderRadius: 16,
-			borderWidth: 1,
-			borderColor: theme.border,
-		},
-		activeTimelineContent: {
-			borderColor: theme.primary,
-			borderLeftWidth: 4,
-		},
-		tlMedName: {
-			fontSize: 16 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-		},
-		textStrikethrough: {
-			textDecorationLine: "line-through",
-			color: theme.textSecondary,
-		},
-		tlDosage: {
-			fontSize: 13 * textSize,
-			color: theme.textSecondary,
-		},
-		tlTime: {
-			fontSize: 14 * textSize,
-			color: theme.textSecondary,
-			fontWeight: "500",
-		},
-	});
 };

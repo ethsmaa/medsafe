@@ -1,13 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-	ActivityIndicator,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-} from "react-native";
-import { Colors } from "@/constants/theme";
-import { useAccessibility } from "@/context/AccessibilityContext";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface NextDose {
 	id: string;
@@ -20,9 +12,16 @@ interface NextDose {
 }
 
 interface NextDoseCardProps {
-	nextDose: NextDose | null; // Use specific type ideally
+	nextDose: NextDose | null;
 	onTakeNow: (med: NextDose) => void;
 	isTaking: boolean;
+}
+
+function mealLabel(mealStatus: string): string {
+	if (mealStatus === "BEFORE_MEAL") return "Take before meal";
+	if (mealStatus === "AFTER_MEAL") return "Take after meal";
+	if (mealStatus === "WITH_FOOD") return "Take with food";
+	return "Any time";
 }
 
 export const NextDoseCard = ({
@@ -30,55 +29,55 @@ export const NextDoseCard = ({
 	onTakeNow,
 	isTaking,
 }: NextDoseCardProps) => {
-	const { isHighContrast, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, textSize);
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
-
 	if (!nextDose) {
 		return (
-			<View style={styles.emptyState}>
+			<View className="items-center gap-3 rounded-2xl border border-border-light bg-surface-light p-6 dark:border-border-dark dark:bg-surface-dark">
 				<Ionicons
 					name="checkmark-done-circle"
 					size={48}
-					color={theme.success}
+					className="text-success-light dark:text-success-dark"
 				/>
-				<Text style={styles.emptyStateText}>All caught up for today!</Text>
+				<Text className="font-medium text-base text-text-sub-light dark:text-text-sub-dark">
+					All caught up for today!
+				</Text>
 			</View>
 		);
 	}
 
 	return (
-		<View style={styles.nextDoseCard}>
-			<View style={styles.nextDoseHeader}>
-				<View style={styles.medIconBg}>
-					<Ionicons name="medkit" size={28} color={theme.primary} />
+		<View className="mb-3 rounded-3xl border border-border-light bg-surface-light p-5 shadow-sm dark:border-border-dark dark:bg-surface-dark">
+			<View className="mb-4 flex-row gap-4">
+				<View className="h-14 w-14 items-center justify-center rounded-[18px] bg-cyan-50 dark:bg-cyan-950/30">
+					<Ionicons name="medkit" size={28} className="text-primary" />
 				</View>
-				<View style={{ flex: 1 }}>
-					<Text style={styles.ndMedName}>{nextDose.genericName}</Text>
-					<Text style={styles.ndDosage}>
+				<View className="flex-1">
+					<Text className="mb-1 font-bold text-2xl text-text-main-light dark:text-text-main-dark">
+						{nextDose.genericName}
+					</Text>
+					<Text className="text-base text-text-sub-light dark:text-text-sub-dark">
 						{nextDose.dosage} • {nextDose.form}
 					</Text>
 				</View>
-				<View style={styles.timeBadge}>
-					<Text style={styles.timeBadgeText}>{nextDose.timeOfDay}</Text>
+				<View className="h-8 justify-center rounded-xl bg-orange-50 px-3 py-1.5 dark:bg-orange-950/30">
+					<Text className="font-bold text-orange-600 text-sm dark:text-orange-400">
+						{nextDose.timeOfDay}
+					</Text>
 				</View>
 			</View>
 
-			<View style={styles.instructionRow}>
-				<Ionicons name="restaurant" size={18} color={theme.textSecondary} />
-				<Text style={styles.instructionText}>
-					{nextDose.mealStatus === "BEFORE_MEAL"
-						? "Take before meal"
-						: nextDose.mealStatus === "AFTER_MEAL"
-							? "Take after meal"
-							: nextDose.mealStatus === "WITH_FOOD"
-								? "Take with food"
-								: "Any time"}
+			<View className="mb-5 flex-row items-center gap-2 rounded-xl bg-background-light p-3 dark:bg-background-dark">
+				<Ionicons
+					name="restaurant"
+					size={18}
+					className="text-text-sub-light dark:text-text-sub-dark"
+				/>
+				<Text className="text-sm text-text-main-light dark:text-text-main-dark">
+					{mealLabel(nextDose.mealStatus)}
 				</Text>
 			</View>
 
 			<TouchableOpacity
-				style={styles.takeNowButton}
+				className="flex-row items-center justify-center gap-2 rounded-2xl bg-primary py-4 shadow-lg"
 				onPress={() => onTakeNow(nextDose)}
 				disabled={isTaking}
 			>
@@ -86,111 +85,15 @@ export const NextDoseCard = ({
 					<ActivityIndicator color="white" />
 				) : (
 					<>
-						<Ionicons name="checkmark-circle" size={20} color="white" />
-						<Text style={styles.takeNowText}>Take Now</Text>
+						<Ionicons
+							name="checkmark-circle"
+							size={20}
+							className="text-white"
+						/>
+						<Text className="font-bold text-lg text-white">Take Now</Text>
 					</>
 				)}
 			</TouchableOpacity>
 		</View>
 	);
-};
-
-const makeStyles = (isHighContrast: boolean, textSize: number) => {
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
-	return StyleSheet.create({
-		nextDoseCard: {
-			backgroundColor: theme.cardBg,
-			borderRadius: 24,
-			padding: 20,
-			shadowColor: theme.primary,
-			shadowOffset: { width: 0, height: 4 },
-			shadowOpacity: 0.1,
-			shadowRadius: 12,
-			elevation: 4,
-			marginBottom: 12,
-			borderWidth: 1,
-			borderColor: isHighContrast ? "black" : "#ecfeff",
-		},
-		nextDoseHeader: {
-			flexDirection: "row",
-			gap: 16,
-			marginBottom: 16,
-		},
-		medIconBg: {
-			width: 56,
-			height: 56,
-			borderRadius: 18,
-			backgroundColor: isHighContrast ? "#eee" : "#ecfeff",
-			alignItems: "center",
-			justifyContent: "center",
-		},
-		ndMedName: {
-			fontSize: 22 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-			marginBottom: 4,
-		},
-		ndDosage: {
-			fontSize: 16 * textSize,
-			color: theme.textSecondary,
-		},
-		timeBadge: {
-			backgroundColor: isHighContrast ? "#eee" : "#fff7ed",
-			paddingHorizontal: 12,
-			paddingVertical: 6,
-			borderRadius: 12,
-			height: 32,
-			justifyContent: "center",
-		},
-		timeBadgeText: {
-			color: isHighContrast ? "black" : "#ea580c",
-			fontWeight: "bold",
-			fontSize: 14 * textSize,
-		},
-		instructionRow: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 8,
-			marginBottom: 20,
-			backgroundColor: isHighContrast ? "#eee" : "#f9fafb",
-			padding: 12,
-			borderRadius: 12,
-		},
-		instructionText: {
-			color: theme.text,
-			fontSize: 15 * textSize,
-		},
-		takeNowButton: {
-			backgroundColor: isHighContrast ? "black" : "#d99696",
-			borderRadius: 16,
-			paddingVertical: 16,
-			flexDirection: "row",
-			justifyContent: "center",
-			alignItems: "center",
-			gap: 8,
-			shadowColor: theme.primary,
-			shadowOffset: { width: 0, height: 4 },
-			shadowOpacity: 0.3,
-			shadowRadius: 8,
-		},
-		takeNowText: {
-			color: "white",
-			fontSize: 18 * textSize,
-			fontWeight: "bold",
-		},
-		emptyState: {
-			padding: 24,
-			alignItems: "center",
-			backgroundColor: theme.cardBg,
-			borderRadius: 16,
-			gap: 12,
-			borderWidth: isHighContrast ? 2 : 1,
-			borderColor: theme.border,
-		},
-		emptyStateText: {
-			fontSize: 16 * textSize,
-			color: theme.textSecondary,
-			fontWeight: "500",
-		},
-	});
 };
