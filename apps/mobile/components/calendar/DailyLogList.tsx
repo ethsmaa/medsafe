@@ -1,7 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { Colors } from "@/constants/theme";
-import { useAccessibility } from "@/context/AccessibilityContext";
+import { ActivityIndicator, Text, View } from "react-native";
 
 export interface LogItem {
 	id: string;
@@ -18,188 +16,102 @@ interface DailyLogListProps {
 	logs: LogItem[];
 }
 
-export const DailyLogList = ({ isLoading, logs }: DailyLogListProps) => {
-	const { isHighContrast, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, textSize);
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
+type StatusStyle = {
+	indicator: string;
+	badge: string;
+	badgeText: string;
+	icon: keyof typeof Ionicons.glyphMap;
+	iconClass: string;
+};
 
+const STATUS_STYLES: Record<"TAKEN" | "MISSED" | "UPCOMING", StatusStyle> = {
+	TAKEN: {
+		indicator: "bg-success-light dark:bg-success-dark",
+		badge: "bg-emerald-100 dark:bg-emerald-900/30",
+		badgeText: "text-emerald-700 dark:text-emerald-300",
+		icon: "checkmark-circle",
+		iconClass: "text-success-light dark:text-success-dark",
+	},
+	MISSED: {
+		indicator: "bg-error-light dark:bg-error-dark",
+		badge: "bg-red-100 dark:bg-red-900/30",
+		badgeText: "text-red-700 dark:text-red-300",
+		icon: "alert-circle",
+		iconClass: "text-error-light dark:text-error-dark",
+	},
+	UPCOMING: {
+		indicator: "bg-slate-300 dark:bg-slate-600",
+		badge: "bg-slate-100 dark:bg-slate-800",
+		badgeText: "text-slate-500 dark:text-slate-400",
+		icon: "time",
+		iconClass: "text-slate-300 dark:text-slate-500",
+	},
+};
+
+function statusStyle(status: string): StatusStyle {
+	if (status === "TAKEN") return STATUS_STYLES.TAKEN;
+	if (status === "MISSED") return STATUS_STYLES.MISSED;
+	return STATUS_STYLES.UPCOMING;
+}
+
+export const DailyLogList = ({ isLoading, logs }: DailyLogListProps) => {
 	if (isLoading) {
-		return (
-			<ActivityIndicator
-				size="large"
-				color={theme.primary}
-				style={{ marginTop: 40 }}
-			/>
-		);
+		return <ActivityIndicator size="large" color="#d99696" className="mt-10" />;
 	}
 
 	if (logs.length === 0) {
 		return (
-			<View style={styles.emptyState}>
+			<View className="mt-10 items-center justify-center opacity-50">
 				<Ionicons
 					name="calendar-outline"
 					size={48}
-					color={theme.textSecondary}
+					className="text-text-sub-light dark:text-text-sub-dark"
 				/>
-				<Text style={styles.emptyText}>No records for this day.</Text>
+				<Text className="mt-3 text-base text-text-sub-light dark:text-text-sub-dark">
+					No records for this day.
+				</Text>
 			</View>
 		);
 	}
 
 	return (
-		<View style={styles.timeline}>
-			{logs.map((item) => (
-				<View key={item.id} style={styles.card}>
+		<View className="gap-4">
+			{logs.map((item) => {
+				const cfg = statusStyle(item.status);
+				return (
 					<View
-						style={[
-							styles.statusIndicator,
-							item.status === "TAKEN"
-								? styles.statusTaken
-								: item.status === "MISSED"
-									? styles.statusMissed
-									: styles.statusUpcoming,
-						]}
-					/>
+						key={item.id}
+						className="flex-row overflow-hidden rounded-2xl border border-border-light bg-surface-light shadow-sm dark:border-border-dark dark:bg-surface-dark"
+					>
+						<View className={`h-full w-1.5 ${cfg.indicator}`} />
 
-					<View style={styles.cardContent}>
-						<View style={styles.cardRow}>
-							<Text style={styles.timeText}>{item.time}</Text>
-							<View
-								style={[
-									styles.badge,
-									item.status === "TAKEN"
-										? styles.badgeTaken
-										: item.status === "MISSED"
-											? styles.badgeMissed
-											: styles.badgeUpcoming,
-								]}
-							>
-								<Text
-									style={[
-										styles.badgeText,
-										item.status === "TAKEN"
-											? styles.badgeTextTaken
-											: item.status === "MISSED"
-												? styles.badgeTextMissed
-												: styles.badgeTextUpcoming,
-									]}
-								>
-									{item.status}
+						<View className="flex-1 gap-2 p-4">
+							<View className="flex-row items-center justify-between">
+								<Text className="font-bold text-base text-text-main-light dark:text-text-main-dark">
+									{item.time}
+								</Text>
+								<View className={`rounded-lg px-2 py-0.5 ${cfg.badge}`}>
+									<Text className={`font-bold text-[10px] ${cfg.badgeText}`}>
+										{item.status}
+									</Text>
+								</View>
+							</View>
+							<View>
+								<Text className="font-semibold text-base text-text-sub-light dark:text-text-sub-dark">
+									{item.medName}
+								</Text>
+								<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
+									{item.dosage}
 								</Text>
 							</View>
 						</View>
-						<View>
-							<Text style={styles.medName}>{item.medName}</Text>
-							<Text style={styles.dosage}>{item.dosage}</Text>
+
+						<View className="items-center justify-center p-4">
+							<Ionicons name={cfg.icon} size={28} className={cfg.iconClass} />
 						</View>
 					</View>
-
-					<View style={styles.iconContainer}>
-						<Ionicons
-							name={
-								item.status === "TAKEN"
-									? "checkmark-circle"
-									: item.status === "MISSED"
-										? "alert-circle"
-										: "time"
-							}
-							size={28}
-							color={
-								item.status === "TAKEN"
-									? theme.success
-									: item.status === "MISSED"
-										? theme.error
-										: "#cbd5e1"
-							}
-						/>
-					</View>
-				</View>
-			))}
+				);
+			})}
 		</View>
 	);
-};
-
-const makeStyles = (isHighContrast: boolean, textSize: number) => {
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
-	return StyleSheet.create({
-		timeline: {
-			gap: 16,
-		},
-		card: {
-			backgroundColor: theme.cardBg,
-			borderRadius: 16,
-			flexDirection: "row",
-			overflow: "hidden",
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: 0.05,
-			shadowRadius: 4,
-			elevation: 2,
-			borderWidth: 1,
-			borderColor: theme.border,
-		},
-		statusIndicator: {
-			width: 6,
-			height: "100%",
-		},
-		statusTaken: { backgroundColor: theme.success },
-		statusMissed: { backgroundColor: theme.error },
-		statusUpcoming: { backgroundColor: "#cbd5e1" },
-
-		cardContent: {
-			flex: 1,
-			padding: 16,
-			gap: 8,
-		},
-		cardRow: {
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-		},
-		timeText: {
-			fontSize: 16 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-		},
-		medName: {
-			fontSize: 16 * textSize,
-			fontWeight: "600",
-			color: theme.textSecondary, // Slightly lighter
-		},
-		dosage: {
-			fontSize: 14 * textSize,
-			color: theme.textSecondary,
-		},
-		iconContainer: {
-			padding: 16,
-			justifyContent: "center",
-			alignItems: "center",
-		},
-		// Badges
-		badge: {
-			paddingHorizontal: 8,
-			paddingVertical: 2,
-			borderRadius: 8,
-		},
-		badgeTaken: { backgroundColor: "#d1fae5" },
-		badgeMissed: { backgroundColor: "#fee2e2" },
-		badgeUpcoming: { backgroundColor: "#f1f5f9" },
-
-		badgeText: { fontSize: 10 * textSize, fontWeight: "bold" },
-		badgeTextTaken: { color: "#047857" },
-		badgeTextMissed: { color: "#b91c1c" },
-		badgeTextUpcoming: { color: "#64748b" },
-
-		emptyState: {
-			alignItems: "center",
-			justifyContent: "center",
-			marginTop: 40,
-			opacity: 0.5,
-		},
-		emptyText: {
-			marginTop: 12,
-			fontSize: 16 * textSize,
-			color: theme.textSecondary,
-		},
-	});
 };
