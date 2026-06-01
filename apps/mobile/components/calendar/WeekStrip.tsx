@@ -1,12 +1,4 @@
-import {
-	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-} from "react-native";
-import { Colors } from "@/constants/theme";
-import { useAccessibility } from "@/context/AccessibilityContext";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 interface WeekStripProps {
 	dates: Date[];
@@ -22,14 +14,11 @@ export const WeekStrip = ({
 	selectedDate,
 	onSelectDate,
 }: WeekStripProps) => {
-	const { isHighContrast, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, textSize);
-
 	return (
 		<ScrollView
 			horizontal
 			showsHorizontalScrollIndicator={false}
-			contentContainerStyle={styles.stripContainer}
+			contentContainerClassName="gap-3 px-4 pb-4"
 		>
 			{dates.map((date, index) => {
 				const isSelected = isSameDay(date, selectedDate);
@@ -38,25 +27,31 @@ export const WeekStrip = ({
 				return (
 					<TouchableOpacity
 						key={index}
-						style={[styles.dateItem, isSelected && styles.dateItemSelected]}
+						className={`min-w-[50px] items-center justify-center rounded-xl p-2 ${isSelected ? "bg-primary shadow-sm" : ""}`}
 						onPress={() => onSelectDate(date)}
 					>
-						<Text style={[styles.dayName, isSelected && styles.textSelected]}>
+						<Text
+							className={`mb-1 font-semibold text-xs ${isSelected ? "text-white" : "text-text-sub-light dark:text-text-sub-dark"}`}
+						>
 							{date.toLocaleDateString("en-US", { weekday: "short" })}
 						</Text>
 						<View
-							style={[
-								styles.dayNumContainer,
-								isSelected && styles.dayNumSelected,
-								isToday && !isSelected && styles.dayNumToday,
-							]}
+							className={`h-9 w-9 items-center justify-center rounded-full ${
+								isSelected
+									? "bg-transparent"
+									: isToday
+										? "border border-primary bg-surface-light dark:bg-surface-dark"
+										: "bg-border-light dark:bg-border-dark"
+							}`}
 						>
 							<Text
-								style={[
-									styles.dayNum,
-									isSelected && styles.textSelected,
-									isToday && !isSelected && styles.textToday,
-								]}
+								className={`font-bold text-base ${
+									isSelected
+										? "text-white"
+										: isToday
+											? "text-primary"
+											: "text-text-main-light dark:text-text-main-dark"
+								}`}
 							>
 								{date.getDate()}
 							</Text>
@@ -66,58 +61,4 @@ export const WeekStrip = ({
 			})}
 		</ScrollView>
 	);
-};
-
-const makeStyles = (isHighContrast: boolean, textSize: number) => {
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
-	return StyleSheet.create({
-		stripContainer: {
-			paddingHorizontal: 16,
-			paddingBottom: 16,
-			gap: 12,
-		},
-		dateItem: {
-			alignItems: "center",
-			justifyContent: "center",
-			padding: 8,
-			borderRadius: 12,
-			minWidth: 50,
-		},
-		dateItemSelected: {
-			backgroundColor: theme.primary,
-			shadowColor: theme.primary,
-			shadowOffset: { width: 0, height: 4 },
-			shadowOpacity: 0.3,
-			shadowRadius: 8,
-		},
-		dayName: {
-			fontSize: 12 * textSize,
-			color: theme.textSecondary,
-			marginBottom: 4,
-			fontWeight: "600",
-		},
-		dayNumContainer: {
-			width: 36,
-			height: 36,
-			borderRadius: 18,
-			alignItems: "center",
-			justifyContent: "center",
-			backgroundColor: theme.border,
-		},
-		dayNum: {
-			fontSize: 16 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-		},
-		dayNumSelected: {
-			backgroundColor: "transparent",
-		},
-		dayNumToday: {
-			borderWidth: 1,
-			borderColor: theme.primary,
-			backgroundColor: theme.cardBg,
-		},
-		textSelected: { color: "white" },
-		textToday: { color: theme.primary },
-	});
 };
