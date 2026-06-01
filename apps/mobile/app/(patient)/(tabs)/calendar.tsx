@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import {
 	RefreshControl,
 	ScrollView,
-	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
@@ -11,8 +10,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DailyLogList, type LogItem } from "@/components/calendar/DailyLogList";
 import { WeekStrip } from "@/components/calendar/WeekStrip";
-import { Colors } from "@/constants/theme";
-import { useAccessibility } from "@/context/AccessibilityContext";
 import { useTRPC } from "@/lib/trpc";
 
 // Simple date helpers
@@ -21,8 +18,6 @@ const isSameDay = (d1: Date, d2: Date) => formatDate(d1) === formatDate(d2);
 
 export default function CalendarScreen() {
 	const trpc = useTRPC();
-	const { isHighContrast, isDarkMode, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, isDarkMode, textSize);
 
 	const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -108,13 +103,20 @@ export default function CalendarScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container} edges={["top"]}>
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
 			{/* Header */}
-			<View style={styles.header}>
-				<Text style={styles.title}>History & Schedule</Text>
+			<View className="flex-row items-center justify-between px-5 py-4">
+				<Text className="font-bold text-2xl text-text-main-light dark:text-text-main-dark">
+					History & Schedule
+				</Text>
 				{!isSameDay(selectedDate, new Date()) && (
 					<TouchableOpacity onPress={scrollToToday}>
-						<Text style={styles.todayBtn}>Jump to Today</Text>
+						<Text className="font-semibold text-primary text-sm">
+							Jump to Today
+						</Text>
 					</TouchableOpacity>
 				)}
 			</View>
@@ -130,7 +132,7 @@ export default function CalendarScreen() {
 
 			{/* Content List */}
 			<ScrollView
-				style={styles.content}
+				className="flex-1 px-5"
 				refreshControl={
 					<RefreshControl
 						refreshing={dayLogQuery.isLoading}
@@ -138,8 +140,8 @@ export default function CalendarScreen() {
 					/>
 				}
 			>
-				<View style={styles.dateHeader}>
-					<Text style={styles.dateHeaderText}>
+				<View className="mb-5 border-border-light border-b py-2 dark:border-border-dark">
+					<Text className="text-center font-semibold text-base text-text-sub-light dark:text-text-sub-dark">
 						{selectedDate.toLocaleDateString("en-US", {
 							weekday: "long",
 							month: "long",
@@ -150,59 +152,8 @@ export default function CalendarScreen() {
 
 				<DailyLogList isLoading={dayLogQuery.isLoading} logs={timeline} />
 
-				<View style={{ height: 40 }} />
+				<View className="h-10" />
 			</ScrollView>
 		</SafeAreaView>
 	);
 }
-
-const makeStyles = (
-	isHighContrast: boolean,
-	isDark: boolean,
-	textSize: number,
-) => {
-	const theme = isHighContrast
-		? Colors.highContrast
-		: isDark
-			? Colors.dark
-			: Colors.light;
-	return StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: theme.background,
-		},
-		header: {
-			paddingHorizontal: 20,
-			paddingVertical: 16,
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-		},
-		title: {
-			fontSize: 24 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-		},
-		todayBtn: {
-			color: theme.primary,
-			fontWeight: "600",
-			fontSize: 14 * textSize,
-		},
-		content: {
-			flex: 1,
-			paddingHorizontal: 20,
-		},
-		dateHeader: {
-			marginBottom: 20,
-			paddingVertical: 8,
-			borderBottomWidth: 1,
-			borderBottomColor: theme.border,
-		},
-		dateHeaderText: {
-			fontSize: 16 * textSize,
-			fontWeight: "600",
-			color: theme.textSecondary,
-			textAlign: "center",
-		},
-	});
-};
