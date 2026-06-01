@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/suspicious/noConsole: <explanation> */
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../database/prisma.js";
@@ -254,70 +253,58 @@ export const careTeamRouter = router({
 	getPatientData: protectedProcedure
 		.input(z.object({ patientId: z.string() }))
 		.query(async ({ ctx, input }) => {
-			try {
-				console.log("[getPatientData] Input:", input);
-				const user = ctx.user;
-				console.log("[getPatientData] User:", user.id);
+			const user = ctx.user;
 
-				// Verify caregiver has access
-				const caregiverProfile = await prisma.caregiverProfile.findUnique({
-					where: { userId: user.id },
+			// Verify caregiver has access
+			const caregiverProfile = await prisma.caregiverProfile.findUnique({
+				where: { userId: user.id },
+			});
+
+			if (!caregiverProfile) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "User is not a caregiver.",
 				});
+			}
 
-				if (!caregiverProfile) {
-					console.error("[getPatientData] User is not a caregiver");
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: "User is not a caregiver.",
-					});
-				}
-
-				// Verify connection exists and is active
-				const connection = await prisma.careTeamMember.findUnique({
-					where: {
-						patientId_caregiverId: {
-							patientId: input.patientId,
-							caregiverId: caregiverProfile.id,
-						},
+			// Verify connection exists and is active
+			const connection = await prisma.careTeamMember.findUnique({
+				where: {
+					patientId_caregiverId: {
+						patientId: input.patientId,
+						caregiverId: caregiverProfile.id,
 					},
+				},
+			});
+
+			if (!connection || connection.status !== "ACTIVE") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "You do not have access to this patient.",
 				});
+			}
 
-				console.log("[getPatientData] Connection:", connection);
-
-				if (!connection || connection.status !== "ACTIVE") {
-					console.error("[getPatientData] No active connection");
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: "You do not have access to this patient.",
-					});
-				}
-
-				// Fetch patient data with medications
-				const result = await prisma.patientProfile.findUnique({
-					where: { id: input.patientId },
-					include: {
-						user: {
-							select: { name: true, email: true, image: true },
-						},
-						prescriptions: {
-							where: { isActive: true },
-							include: {
-								medication: true,
-								intakeEvents: {
-									orderBy: { takenAt: "desc" },
-									take: 5,
-								},
+			// Fetch patient data with medications
+			const result = await prisma.patientProfile.findUnique({
+				where: { id: input.patientId },
+				include: {
+					user: {
+						select: { name: true, email: true, image: true },
+					},
+					prescriptions: {
+						where: { isActive: true },
+						include: {
+							medication: true,
+							intakeEvents: {
+								orderBy: { takenAt: "desc" },
+								take: 5,
 							},
 						},
 					},
-				});
+				},
+			});
 
-				console.log("[getPatientData] Result found:", !!result);
-				return result;
-			} catch (e) {
-				console.error("[getPatientData] Error:", e);
-				throw e;
-			}
+			return result;
 		}),
 
 	/**
@@ -417,16 +404,18 @@ export const careTeamRouter = router({
 				},
 			});
 		}),
-	
+
 	/**
 	 * Get activity log: intake events across all active patients for this caregiver.
 	 * Ordered by most recent first, limited to last 100 events.
 	 */
 	getActivityLog: protectedProcedure
 		.input(
-			z.object({
-				limit: z.number().min(1).max(200).default(100),
-			}).optional(),
+			z
+				.object({
+					limit: z.number().min(1).max(200).default(100),
+				})
+				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
 			const caregiverProfile = await prisma.caregiverProfile.findUnique({

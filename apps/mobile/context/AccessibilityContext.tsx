@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 import {
 	createContext,
 	type ReactNode,
@@ -6,7 +7,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import { useColorScheme as useNativeWindColorScheme } from "nativewind";
+import { logger } from "@/lib/logger";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -66,7 +67,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 					setThemeModeState(savedTheme);
 				}
 			} catch (e) {
-				console.error("Failed to load accessibility settings", e);
+				logger.error("Failed to load accessibility settings", e);
 			}
 		};
 

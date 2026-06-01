@@ -22,6 +22,9 @@ This repository is the senior graduation project of [@ethsmaa](https://github.co
 - `expo-notifications` for medication reminders
 - `react-native-reanimated` for animations
 
+**Firmware (`firmware/`)**
+- ESP32 (Arduino) medication-alarm node: WiFi HTTP server (`/alarm`, `/status`, `/stop`), OLED (SSD1306) display, buzzer + red/green LEDs + button. Complements the in-app reminders via `apps/backend` → `/api/device/*`.
+
 **Tooling**
 - [Turborepo](https://turborepo.dev/) + [pnpm](https://pnpm.io/) workspaces
 - [Biome](https://biomejs.dev/) for lint and format
@@ -35,6 +38,7 @@ apps/
   mobile/        Expo (React Native) app
 packages/
   typescript-config/  Shared tsconfig presets
+firmware/        ESP32 medication-alarm device (Arduino sketches)
 diagrams/        Architecture and flow diagrams (Excalidraw + PNG/SVG)
 reports/         Project reports
 ```

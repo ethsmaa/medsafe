@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLanguage } from "@/context/LanguageContext";
 import { authClient } from "@/lib/auth-client";
+import { logger } from "@/lib/logger";
 import { queryClient } from "@/lib/react-query";
 import { useTRPC } from "@/lib/trpc";
 import { useActivityLogStore } from "@/stores/activityLogStore";
@@ -58,7 +59,7 @@ export default function CaregiverDashboard() {
 			queryClient.clear(); // Force clear all cache
 			router.replace("/(auth)/login");
 		} catch (err) {
-			console.error("Logout error:", err);
+			logger.error("Logout error:", err);
 			router.replace("/(auth)/login");
 		}
 	};
@@ -90,7 +91,7 @@ export default function CaregiverDashboard() {
 				{/* Stats Cards */}
 				<View className="mb-8 flex-row gap-4">
 					<TouchableOpacity
-						className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark active:opacity-80"
+						className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm active:opacity-80 dark:bg-surface-dark"
 						onPress={() => router.push("/(caregiver)/(tabs)/patients")}
 					>
 						<View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -105,7 +106,7 @@ export default function CaregiverDashboard() {
 					</TouchableOpacity>
 
 					<TouchableOpacity
-						className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark active:opacity-80"
+						className="flex-1 rounded-2xl bg-surface-light p-5 shadow-sm active:opacity-80 dark:bg-surface-dark"
 						onPress={() => router.push("/(caregiver)/(tabs)/alerts")}
 					>
 						<View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">

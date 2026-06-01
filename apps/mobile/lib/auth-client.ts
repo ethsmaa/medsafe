@@ -1,6 +1,6 @@
 import { expoClient } from "@better-auth/expo/client";
-import Constants from "expo-constants";
 import { createAuthClient } from "better-auth/react";
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 
 /**
@@ -10,14 +10,14 @@ import * as SecureStore from "expo-secure-store";
  */
 const getBaseURL = () => {
 	if (__DEV__) {
-		const debuggerHost = Constants.expoConfig?.hostUri ?? Constants.manifest2?.extra?.expoGo?.debuggerHost;
+		const debuggerHost =
+			Constants.expoConfig?.hostUri ??
+			Constants.manifest2?.extra?.expoGo?.debuggerHost;
 		const hostname = debuggerHost?.split(":")[0] ?? "localhost";
 		return `http://${hostname}:3001/api/auth`;
 	}
 	return "https://api.medsafe.app/api/auth";
 };
-
-console.log(getBaseURL());
 
 export const authClient = createAuthClient({
 	baseURL: getBaseURL(),

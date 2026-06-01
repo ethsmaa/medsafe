@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { authClient } from "@/lib/auth-client";
+import { logger } from "@/lib/logger";
 import { queryClient } from "@/lib/react-query";
 
 type ThemeMode = "light" | "dark" | "system";
@@ -43,7 +44,7 @@ export default function ProfileScreen() {
 			await authClient.signOut();
 			router.replace("/login");
 		} catch (error) {
-			console.error("Logout error:", error);
+			logger.error("Logout error:", error);
 			router.replace("/login");
 		} finally {
 			setIsLoggingOut(false);

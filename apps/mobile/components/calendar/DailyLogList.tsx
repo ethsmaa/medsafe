@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Colors } from "@/constants/theme";
 import { useAccessibility } from "@/context/AccessibilityContext";
 
-interface LogItem {
+export interface LogItem {
 	id: string;
 	type: string;
 	time: string;

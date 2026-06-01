@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "@/hooks/use-user";
+import { logger } from "@/lib/logger";
 import { useTRPC } from "@/lib/trpc";
 
 export default function RoleSelectionScreen() {
@@ -16,17 +17,14 @@ export default function RoleSelectionScreen() {
 
 	const setupRoleMutation = useMutation({
 		...trpc.user.setupRole.mutationOptions(),
-		onSuccess: async (data) => {
-			console.log("Setup Role Success:", data);
+		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: trpc.user.getProfile.queryOptions({ userId: user?.id })
 					.queryKey,
 			});
-			// Force check
-			console.log("Invalidated queries");
 		},
 		onError: (err) => {
-			console.error("Setup Role Error:", err);
+			logger.error("Setup Role Error:", err);
 			Alert.alert("Error", err.message);
 		},
 	});

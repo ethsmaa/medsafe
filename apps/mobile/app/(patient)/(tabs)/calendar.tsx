@@ -9,7 +9,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { DailyLogList } from "@/components/calendar/DailyLogList";
+import { DailyLogList, type LogItem } from "@/components/calendar/DailyLogList";
 import { WeekStrip } from "@/components/calendar/WeekStrip";
 import { Colors } from "@/constants/theme";
 import { useAccessibility } from "@/context/AccessibilityContext";
@@ -49,7 +49,7 @@ export default function CalendarScreen() {
 	const timeline = useMemo(() => {
 		if (!dayLogQuery.data) return [];
 
-		const events: any[] = [];
+		const events: LogItem[] = [];
 		const now = new Date();
 		const isToday = isSameDay(selectedDate, now);
 		const isPast = selectedDate < now && !isToday;
@@ -61,7 +61,7 @@ export default function CalendarScreen() {
 			// 1. Map Schedules
 			let takenCount = intakes.length;
 
-			schedules.forEach((sched: any) => {
+			schedules.forEach((sched) => {
 				const [h, m] = sched.timeOfDay.split(":").map(Number);
 
 				// Determine Status

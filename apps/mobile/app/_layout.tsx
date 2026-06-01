@@ -62,13 +62,6 @@ function RootLayoutNav() {
 
 	const isLoading = isUserLoading || isRoleLoading;
 
-	console.log("RootLayoutNav State:", {
-		user: !!user,
-		role,
-		segment: segments[0],
-		isLoading,
-	});
-
 	// Re-fetch role on focus or mount to ensure fresh state after signup/login
 	useEffect(() => {
 		if (user && !role) {
