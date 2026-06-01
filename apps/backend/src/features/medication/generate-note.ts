@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiClient } from "../agent/gemini-client.js";
 import {
 	AI_NOTE_SYSTEM_PROMPT,
 	buildAiNoteUserPrompt,
@@ -66,20 +66,12 @@ export async function generateMedicationNote(
 	drugName: string,
 	language = "en",
 ): Promise<GeneratedNote> {
-	const apiKey = process.env.GEMINI_API_KEY;
-	if (!apiKey) {
-		throw new Error(
-			"GEMINI_API_KEY is not set. Add it to your .env.development file.",
-		);
-	}
-
 	// 1. Try to get enriched FDA text
 	const fdaText = await fetchDrugInfo(drugName);
 	const source: NoteSource = fdaText ? "fda" : "ai_only";
 
 	// 2. Call Gemini with system + user prompt
-	const genAI = new GoogleGenerativeAI(apiKey);
-	const model = genAI.getGenerativeModel({
+	const model = getGeminiClient().getGenerativeModel({
 		model: GEMINI_MODEL,
 		systemInstruction: AI_NOTE_SYSTEM_PROMPT,
 	});

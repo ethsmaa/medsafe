@@ -3,7 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "../database/prisma.js";
 
 export const auth = betterAuth({
-	baseURL: "http://localhost:3001",
+	baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3001",
 	database: prismaAdapter(prisma, {
 		provider: "postgresql",
 	}),
@@ -32,6 +32,6 @@ export const auth = betterAuth({
 		"exp://localhost:*/*", // Trust localhost
 	],
 	advanced: {
-		disableOriginCheck: true,
+		disableOriginCheck: process.env.NODE_ENV !== "production",
 	},
 });
