@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: install
+        run: pnpm install --frozen-lockfile
+
+      - name: generate prisma client
+        run: pnpm --filter @medsafe/backend db:generate
+
+      - name: type-check
+        run: pnpm check-types
+
+      - name: build
+        run: pnpm build
+
+      # lint gate comes online in faz 1 (after console.log + format cleanup),
+      # test gate in faz 1.5. keeping ci green per phase.
