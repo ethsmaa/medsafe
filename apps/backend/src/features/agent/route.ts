@@ -1,19 +1,21 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { protectedProcedure, router } from "../trpc/index.js";
 import { resolveTargetPatient } from "../medication/resolve-patient.js";
+import { protectedProcedure, router } from "../trpc/index.js";
 import { agentChat } from "./agent-service.js";
 import { transcribeAudio } from "./transcribe-service.js";
 import { ChatInputSchema } from "./types.js";
 
 const MESSAGES = {
 	tr: {
-		profileMissing: "Hasta profili bulunamadı. Lütfen önce profilinizi oluşturun.",
+		profileMissing:
+			"Hasta profili bulunamadı. Lütfen önce profilinizi oluşturun.",
 		chatFailed: "Asistan şu anda yanıt veremiyor. Lütfen tekrar deneyin.",
 		transcribeFailed: "Ses tanıma başarısız oldu.",
 	},
 	en: {
-		profileMissing: "Patient profile not found. Please create your profile first.",
+		profileMissing:
+			"Patient profile not found. Please create your profile first.",
 		chatFailed: "The assistant cannot respond right now. Please try again.",
 		transcribeFailed: "Voice transcription failed.",
 	},
@@ -47,7 +49,12 @@ export const agentRouter = router({
 			}
 
 			try {
-				return await agentChat(message, patientId, language, conversationHistory);
+				return await agentChat(
+					message,
+					patientId,
+					language,
+					conversationHistory,
+				);
 			} catch (error) {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
@@ -75,9 +82,9 @@ export const agentRouter = router({
 			} catch (error) {
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: error instanceof Error ? error.message : msgs.transcribeFailed,
+					message:
+						error instanceof Error ? error.message : msgs.transcribeFailed,
 				});
 			}
 		}),
 });
-

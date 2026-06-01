@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
-import { MEDICATION_FORMS, MEDICATION_FREQUENCIES, MEAL_STATUSES } from "./constants.js";
+import {
+	MEAL_STATUSES,
+	MEDICATION_FORMS,
+	MEDICATION_FREQUENCIES,
+} from "./constants.js";
 import { GEMINI_MODEL, SCAN_MEDICATION_PROMPT } from "./prompts.js";
 
 // Zod schema for the structured scan result

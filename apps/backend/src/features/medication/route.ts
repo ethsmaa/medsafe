@@ -2,10 +2,14 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../database/prisma.js";
 import { protectedProcedure, router } from "../trpc/index.js";
-import { MEDICATION_FORMS, MEDICATION_FREQUENCIES, MEAL_STATUSES } from "./constants.js";
+import {
+	MEAL_STATUSES,
+	MEDICATION_FORMS,
+	MEDICATION_FREQUENCIES,
+} from "./constants.js";
+import { generateMedicationNote } from "./generate-note.js";
 import { resolveTargetPatient } from "./resolve-patient.js";
 import { scanMedicationImage } from "./scan-medication.js";
-import { generateMedicationNote } from "./generate-note.js";
 
 export const medicationRouter = router({
 	/**
@@ -44,7 +48,10 @@ export const medicationRouter = router({
 		)
 		.mutation(async ({ input }) => {
 			try {
-				const result = await generateMedicationNote(input.drugName, input.language);
+				const result = await generateMedicationNote(
+					input.drugName,
+					input.language,
+				);
 				return result; // { note: string; source: "fda" | "ai_only" }
 			} catch (error) {
 				throw new TRPCError({
@@ -105,7 +112,9 @@ export const medicationRouter = router({
 
 			let medication = nameGeneric
 				? await prisma.medication.findFirst({
-						where: { nameGeneric: { equals: nameGeneric, mode: "insensitive" } },
+						where: {
+							nameGeneric: { equals: nameGeneric, mode: "insensitive" },
+						},
 					})
 				: await prisma.medication.findFirst({
 						where: { nameBrand: { equals: nameBrand, mode: "insensitive" } },
@@ -164,7 +173,10 @@ export const medicationRouter = router({
 		.query(async ({ ctx, input }) => {
 			let targetPatientId: string;
 			try {
-				targetPatientId = await resolveTargetPatient(ctx.user.id, input.patientId);
+				targetPatientId = await resolveTargetPatient(
+					ctx.user.id,
+					input.patientId,
+				);
 			} catch {
 				return []; // No patient profile found — return empty cabinet
 			}
@@ -220,7 +232,8 @@ export const medicationRouter = router({
 				let minutesDelta = 0;
 
 				if (pm?.doseSchedules && pm.doseSchedules.length > 0) {
-					const nowMinutes = takenAtDate.getHours() * 60 + takenAtDate.getMinutes();
+					const nowMinutes =
+						takenAtDate.getHours() * 60 + takenAtDate.getMinutes();
 					const deltas = pm.doseSchedules.map((s) => {
 						const parts = s.timeOfDay.split(":").map(Number);
 						const scheduled = (parts[0] || 0) * 60 + (parts[1] || 0);
@@ -245,12 +258,16 @@ export const medicationRouter = router({
 					updatedPm = await tx.prescriptionMedication.update({
 						where: { id: prescriptionMedicationId },
 						data: {
-							currentStock: (pm?.currentStock ?? 0) > 0 ? { decrement: 1 } : undefined,
+							currentStock:
+								(pm?.currentStock ?? 0) > 0 ? { decrement: 1 } : undefined,
 						},
 						include: { medication: true },
 					});
 
-					if (updatedPm && updatedPm.currentStock <= updatedPm.restockThreshold) {
+					if (
+						updatedPm &&
+						updatedPm.currentStock <= updatedPm.restockThreshold
+					) {
 						isLowStock = true;
 					}
 				}
@@ -299,7 +316,8 @@ export const medicationRouter = router({
 			}
 		}
 
-		if (totalScheduled === 0) return { percentage: 100, takenCount: events.length, totalScheduled: 0 };
+		if (totalScheduled === 0)
+			return { percentage: 100, takenCount: events.length, totalScheduled: 0 };
 
 		const percentage = Math.min(
 			100,
@@ -322,7 +340,10 @@ export const medicationRouter = router({
 		.query(async ({ ctx, input }) => {
 			let targetPatientId: string;
 			try {
-				targetPatientId = await resolveTargetPatient(ctx.user.id, input.patientId);
+				targetPatientId = await resolveTargetPatient(
+					ctx.user.id,
+					input.patientId,
+				);
 			} catch {
 				return [];
 			}
@@ -414,7 +435,8 @@ export const medicationRouter = router({
 					if (!caregiver) {
 						throw new TRPCError({
 							code: "FORBIDDEN",
-							message: "You do not have permission to delete these medications.",
+							message:
+								"You do not have permission to delete these medications.",
 						});
 					}
 				}

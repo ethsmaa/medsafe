@@ -18,7 +18,9 @@ export const { TRPCProvider, useTRPC, useTRPCClient } =
 
 const getBaseURL = () => {
 	if (__DEV__) {
-		const debuggerHost = Constants.expoConfig?.hostUri ?? Constants.manifest2?.extra?.expoGo?.debuggerHost;
+		const debuggerHost =
+			Constants.expoConfig?.hostUri ??
+			Constants.manifest2?.extra?.expoGo?.debuggerHost;
 		const hostname = debuggerHost?.split(":")[0] ?? "localhost";
 		return `http://${hostname}:3001/trpc`;
 	}

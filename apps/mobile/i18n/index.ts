@@ -1,6 +1,6 @@
-import tr from "./tr";
 import en from "./en";
 import type { TranslationKey } from "./tr";
+import tr from "./tr";
 
 export type Locale = "tr" | "en";
 

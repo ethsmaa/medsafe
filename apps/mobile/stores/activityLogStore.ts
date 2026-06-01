@@ -55,12 +55,15 @@ export function useActivityLogStore() {
 	 * Returns number of entries the caregiver hasn't seen yet.
 	 * @param entries - all fetched log entries (ordered newest first)
 	 */
-	const getUnreadCount = useCallback((entries: Array<{ id: string }>): number => {
-		if (!entries || entries.length === 0) return 0;
-		if (!lastSeenId) return entries.length; // Never visited — all are new
-		const idx = entries.findIndex((e) => e.id === lastSeenId);
-		return idx === -1 ? entries.length : idx; // entries before lastSeenId are newer
-	}, []);
+	const getUnreadCount = useCallback(
+		(entries: Array<{ id: string }>): number => {
+			if (!entries || entries.length === 0) return 0;
+			if (!lastSeenId) return entries.length; // Never visited — all are new
+			const idx = entries.findIndex((e) => e.id === lastSeenId);
+			return idx === -1 ? entries.length : idx; // entries before lastSeenId are newer
+		},
+		[],
+	);
 
 	return { markAsSeen, getUnreadCount };
 }

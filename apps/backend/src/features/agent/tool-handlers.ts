@@ -11,7 +11,10 @@ function getTodayRange(): { start: Date; end: Date } {
 	return { start, end };
 }
 
-function getMedicationDisplayName(med: { nameGeneric: string; nameBrand: string | null }): string {
+function getMedicationDisplayName(med: {
+	nameGeneric: string;
+	nameBrand: string | null;
+}): string {
 	return med.nameBrand
 		? `${med.nameBrand} (${med.nameGeneric})`
 		: med.nameGeneric;
@@ -33,8 +36,18 @@ export async function handleGetTodayIntakeStatus(
 				? {
 						medication: {
 							OR: [
-								{ nameGeneric: { contains: args.medicationName, mode: "insensitive" } },
-								{ nameBrand: { contains: args.medicationName, mode: "insensitive" } },
+								{
+									nameGeneric: {
+										contains: args.medicationName,
+										mode: "insensitive",
+									},
+								},
+								{
+									nameBrand: {
+										contains: args.medicationName,
+										mode: "insensitive",
+									},
+								},
 							],
 						},
 					}
@@ -51,8 +64,12 @@ export async function handleGetTodayIntakeStatus(
 
 	const statusList = prescriptions.map((pm) => {
 		const totalDoses = pm.doseSchedules.length;
-		const takenDoses = pm.intakeEvents.filter((e) => e.status === "TAKEN").length;
-		const skippedDoses = pm.intakeEvents.filter((e) => e.status === "SKIPPED").length;
+		const takenDoses = pm.intakeEvents.filter(
+			(e) => e.status === "TAKEN",
+		).length;
+		const skippedDoses = pm.intakeEvents.filter(
+			(e) => e.status === "SKIPPED",
+		).length;
 
 		return {
 			medicationName: getMedicationDisplayName(pm.medication),
@@ -145,10 +162,16 @@ export async function handleGetNextDose(
 	upcomingDoses.sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime));
 
 	if (upcomingDoses.length === 0) {
-		return { success: true, data: { message: "Bugün için kalan ilaç dozunuz yok." } };
+		return {
+			success: true,
+			data: { message: "Bugün için kalan ilaç dozunuz yok." },
+		};
 	}
 
-	return { success: true, data: { nextDose: upcomingDoses[0], allUpcoming: upcomingDoses } };
+	return {
+		success: true,
+		data: { nextDose: upcomingDoses[0], allUpcoming: upcomingDoses },
+	};
 }
 
 export async function handleGetMedicationUsageInfo(
@@ -161,7 +184,9 @@ export async function handleGetMedicationUsageInfo(
 			isActive: true,
 			medication: {
 				OR: [
-					{ nameGeneric: { contains: args.medicationName, mode: "insensitive" } },
+					{
+						nameGeneric: { contains: args.medicationName, mode: "insensitive" },
+					},
 					{ nameBrand: { contains: args.medicationName, mode: "insensitive" } },
 				],
 			},
@@ -201,7 +226,9 @@ export async function handleGetMedicationDuration(
 			isActive: true,
 			medication: {
 				OR: [
-					{ nameGeneric: { contains: args.medicationName, mode: "insensitive" } },
+					{
+						nameGeneric: { contains: args.medicationName, mode: "insensitive" },
+					},
 					{ nameBrand: { contains: args.medicationName, mode: "insensitive" } },
 				],
 			},
@@ -230,7 +257,8 @@ export async function handleGetMedicationDuration(
 		daysRemaining = Math.max(
 			0,
 			Math.ceil(
-				(new Date(prescription.endDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+				(new Date(prescription.endDate).getTime() - now.getTime()) /
+					(1000 * 60 * 60 * 24),
 			),
 		);
 	}
@@ -262,8 +290,15 @@ export async function handleLogSideEffect(
 				isActive: true,
 				medication: {
 					OR: [
-						{ nameGeneric: { contains: args.medicationName, mode: "insensitive" } },
-						{ nameBrand: { contains: args.medicationName, mode: "insensitive" } },
+						{
+							nameGeneric: {
+								contains: args.medicationName,
+								mode: "insensitive",
+							},
+						},
+						{
+							nameBrand: { contains: args.medicationName, mode: "insensitive" },
+						},
 					],
 				},
 			},
@@ -326,9 +361,7 @@ export async function handleGetAdherenceSummary(
 	}
 
 	const adherencePercentage =
-		totalExpected > 0
-			? Math.round((totalTaken / totalExpected) * 100)
-			: 100;
+		totalExpected > 0 ? Math.round((totalTaken / totalExpected) * 100) : 100;
 
 	return {
 		success: true,
@@ -355,8 +388,18 @@ export async function handleGetStockStatus(
 				? {
 						medication: {
 							OR: [
-								{ nameGeneric: { contains: args.medicationName, mode: "insensitive" } },
-								{ nameBrand: { contains: args.medicationName, mode: "insensitive" } },
+								{
+									nameGeneric: {
+										contains: args.medicationName,
+										mode: "insensitive",
+									},
+								},
+								{
+									nameBrand: {
+										contains: args.medicationName,
+										mode: "insensitive",
+									},
+								},
 							],
 						},
 					}
@@ -367,7 +410,8 @@ export async function handleGetStockStatus(
 
 	const stockList = prescriptions.map((pm) => {
 		const dailyDoses = pm.doseSchedules.length || 1;
-		const daysRemaining = pm.currentStock > 0 ? Math.floor(pm.currentStock / dailyDoses) : 0;
+		const daysRemaining =
+			pm.currentStock > 0 ? Math.floor(pm.currentStock / dailyDoses) : 0;
 		const isLowStock = pm.currentStock <= pm.restockThreshold;
 
 		return {
@@ -385,7 +429,11 @@ export async function handleGetStockStatus(
 
 export async function handleRecordMedicationIntake(
 	patientId: string,
-	args: { medicationName: string; status: "TAKEN" | "SKIPPED"; takenAt?: string },
+	args: {
+		medicationName: string;
+		status: "TAKEN" | "SKIPPED";
+		takenAt?: string;
+	},
 ): Promise<ToolHandlerResult> {
 	const prescription = await prisma.prescriptionMedication.findFirst({
 		where: {
@@ -393,7 +441,9 @@ export async function handleRecordMedicationIntake(
 			isActive: true,
 			medication: {
 				OR: [
-					{ nameGeneric: { contains: args.medicationName, mode: "insensitive" } },
+					{
+						nameGeneric: { contains: args.medicationName, mode: "insensitive" },
+					},
 					{ nameBrand: { contains: args.medicationName, mode: "insensitive" } },
 				],
 			},
@@ -450,7 +500,8 @@ export async function handleRecordMedicationIntake(
 			status: args.status,
 			takenAt: takenAtDate.toISOString(),
 			isOnTime,
-			currentStock: prescription.currentStock - (args.status === "TAKEN" ? 1 : 0),
+			currentStock:
+				prescription.currentStock - (args.status === "TAKEN" ? 1 : 0),
 		},
 	};
 }
@@ -464,30 +515,54 @@ export async function dispatchToolCall(
 ): Promise<ToolHandlerResult> {
 	switch (toolName) {
 		case "get_today_intake_status":
-			return handleGetTodayIntakeStatus(patientId, args as { medicationName?: string });
+			return handleGetTodayIntakeStatus(
+				patientId,
+				args as { medicationName?: string },
+			);
 		case "get_medication_list":
 			return handleGetMedicationList(patientId);
 		case "get_next_dose":
 			return handleGetNextDose(patientId);
 		case "get_medication_usage_info":
-			return handleGetMedicationUsageInfo(patientId, args as { medicationName: string });
+			return handleGetMedicationUsageInfo(
+				patientId,
+				args as { medicationName: string },
+			);
 		case "get_medication_duration":
-			return handleGetMedicationDuration(patientId, args as { medicationName: string });
+			return handleGetMedicationDuration(
+				patientId,
+				args as { medicationName: string },
+			);
 		case "log_side_effect":
 			return handleLogSideEffect(
 				patientId,
-				args as { description: string; medicationName?: string; severity?: string },
+				args as {
+					description: string;
+					medicationName?: string;
+					severity?: string;
+				},
 			);
 		case "get_adherence_summary":
 			return handleGetAdherenceSummary(patientId);
 		case "get_stock_status":
-			return handleGetStockStatus(patientId, args as { medicationName?: string });
+			return handleGetStockStatus(
+				patientId,
+				args as { medicationName?: string },
+			);
 		case "record_medication_intake":
 			return handleRecordMedicationIntake(
 				patientId,
-				args as { medicationName: string; status: "TAKEN" | "SKIPPED"; takenAt?: string },
+				args as {
+					medicationName: string;
+					status: "TAKEN" | "SKIPPED";
+					takenAt?: string;
+				},
 			);
 		default:
-			return { success: false, data: null, error: `Bilinmeyen araç: ${toolName}` };
+			return {
+				success: false,
+				data: null,
+				error: `Bilinmeyen araç: ${toolName}`,
+			};
 	}
 }

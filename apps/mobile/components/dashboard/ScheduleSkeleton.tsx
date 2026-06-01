@@ -1,5 +1,5 @@
-import { View, Animated } from "react-native";
 import { useEffect, useRef } from "react";
+import { Animated, View } from "react-native";
 
 export function ScheduleSkeleton() {
 	const opacity = useRef(new Animated.Value(0.3)).current;
@@ -36,7 +36,7 @@ export function ScheduleSkeleton() {
 					<View className="flex-1">
 						<Animated.View
 							style={{ opacity }}
-							className="h-24 rounded-2xl bg-gray-100 dark:bg-gray-800 p-5"
+							className="h-24 rounded-2xl bg-gray-100 p-5 dark:bg-gray-800"
 						>
 							<View className="mb-2 h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700" />
 							<View className="h-3 w-1/3 rounded bg-gray-200 dark:bg-gray-700" />

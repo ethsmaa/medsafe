@@ -39,7 +39,6 @@ const t = initTRPC.context<TRPCHonoContext>().create({
 	},
 });
 
-
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
