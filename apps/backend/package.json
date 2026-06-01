@@ -12,6 +12,7 @@
         "dev": "node ./build.mjs --watch & dotenvx run -f .env.development -- node --watch --watch-path=./dist/runtime dist/runtime/server.js",
         "start": "node dist/runtime/server.js",
         "lint": "tsc --noEmit",
+        "check-types": "tsc --noEmit",
         "db:migrate": "dotenvx run -f .env.development -- prisma migrate dev && dotenvx run -f .env.development -- prisma generate",
         "db:generate": "prisma generate",
         "db:deploy": "prisma migrate deploy"
