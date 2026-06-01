@@ -7,19 +7,21 @@ import {
 	Alert,
 	FlatList,
 	RefreshControl,
-	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useMedicationAction } from "@/hooks/useMedicationAction";
 import { useTRPC } from "@/lib/trpc";
 
+const MED_CARD =
+	"mb-3 flex-row items-center rounded-2xl border border-border-light bg-surface-light p-4 shadow-sm dark:border-border-dark dark:bg-surface-dark";
+const MED_CARD_SELECTED =
+	"border-2 border-primary bg-primary-soft-light dark:bg-primary-soft-dark";
+
 export default function CabinetScreen() {
-	const { isHighContrast, isDarkMode, textSize } = useAccessibility();
 	const { t } = useLanguage();
 	const router = useRouter();
 	const trpc = useTRPC();
@@ -29,7 +31,6 @@ export default function CabinetScreen() {
 			setSelectedIds(new Set());
 		},
 	});
-	const styles = makeStyles(isHighContrast, isDarkMode, textSize);
 
 	const [isSelectionMode, setIsSelectionMode] = useState(false);
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -84,33 +85,36 @@ export default function CabinetScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container} edges={["top"]}>
-			<View style={styles.header}>
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
+			<View className="flex-row items-center justify-between bg-background-light p-4 dark:bg-background-dark">
 				{isSelectionMode ? (
-					<View style={styles.selectionHeader}>
-						<TouchableOpacity
-							onPress={cancelSelection}
-							style={styles.cancelButton}
-						>
-							<Text style={styles.cancelText}>
+					<View className="flex-1 flex-row items-center justify-between">
+						<TouchableOpacity onPress={cancelSelection} className="p-2">
+							<Text className="font-semibold text-base text-error-light dark:text-error-dark">
 								{t("cabinet.cancelSelection")}
 							</Text>
 						</TouchableOpacity>
-						<Text style={styles.title}>
+						<Text className="font-bold text-2xl text-text-main-light dark:text-text-main-dark">
 							{selectedIds.size} {t("cabinet.selected")}
 						</Text>
-						<TouchableOpacity
-							onPress={handleDeleteSelected}
-							style={styles.deleteButtonHeader}
-						>
-							<Ionicons name="trash" size={24} color="#ef4444" />
+						<TouchableOpacity onPress={handleDeleteSelected} className="p-2">
+							<Ionicons
+								name="trash"
+								size={24}
+								className="text-error-light dark:text-error-dark"
+							/>
 						</TouchableOpacity>
 					</View>
 				) : (
 					<>
-						<Text style={styles.title}>{t("cabinet.title")}</Text>
+						<Text className="font-bold text-2xl text-text-main-light dark:text-text-main-dark">
+							{t("cabinet.title")}
+						</Text>
 						<TouchableOpacity
-							style={styles.addButton}
+							className="rounded-full bg-primary p-2"
 							onPress={() =>
 								Alert.alert(t("med.new"), t("cabinet.addFirst"), [
 									{
@@ -125,30 +129,25 @@ export default function CabinetScreen() {
 								])
 							}
 						>
-							<Ionicons
-								name="add"
-								size={24}
-								color={isHighContrast ? "black" : "white"}
-							/>
+							<Ionicons name="add" size={24} className="text-white" />
 						</TouchableOpacity>
 					</>
 				)}
 			</View>
 
 			{cabinetQuery.isLoading ? (
-				<ActivityIndicator
-					size="large"
-					color={isHighContrast ? "black" : "#d99696"}
-				/>
+				<ActivityIndicator size="large" color="#d99696" />
 			) : cabinetQuery.data?.length === 0 ? (
-				<View style={styles.emptyContent}>
-					<Text style={styles.emptyText}>{t("cabinet.empty")}</Text>
+				<View className="flex-1 items-center justify-center">
+					<Text className="text-base text-text-sub-light dark:text-text-sub-dark">
+						{t("cabinet.empty")}
+					</Text>
 				</View>
 			) : (
 				<FlatList
 					data={cabinetQuery.data}
 					keyExtractor={(item) => item.id}
-					contentContainerStyle={styles.listContent}
+					contentContainerClassName="gap-3 p-4"
 					refreshControl={
 						<RefreshControl
 							refreshing={cabinetQuery.isLoading}
@@ -162,36 +161,36 @@ export default function CabinetScreen() {
 								activeOpacity={0.7}
 								onPress={() => handlePress(item.id)}
 								onLongPress={() => handleLongPress(item.id)}
-								style={[styles.medCard, isSelected && styles.medCardSelected]}
+								className={`${MED_CARD} ${isSelected ? MED_CARD_SELECTED : ""}`}
 							>
 								{isSelectionMode && (
-									<View style={styles.selectionIndicator}>
+									<View className="mr-3">
 										<Ionicons
 											name={isSelected ? "checkbox" : "square-outline"}
 											size={24}
-											color={isSelected ? "#d99696" : "#9ca3af"}
+											className={
+												isSelected
+													? "text-primary"
+													: "text-text-sub-light dark:text-text-sub-dark"
+											}
 										/>
 									</View>
 								)}
-								<View style={styles.medIconPlaceholder}>
-									<Ionicons
-										name="medkit"
-										size={24}
-										color={isHighContrast ? "black" : "#d99696"}
-									/>
+								<View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-primary-soft-light dark:bg-primary-soft-dark">
+									<Ionicons name="medkit" size={24} className="text-primary" />
 								</View>
-								<View style={styles.medInfo}>
-									<Text style={styles.medName}>
+								<View className="flex-1">
+									<Text className="mb-1 font-bold text-base text-text-main-light dark:text-text-main-dark">
 										{item.medication.nameBrand || item.medication.nameGeneric}
 									</Text>
-									<Text style={styles.medDetails}>
+									<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
 										{item.dosageAmount} • {item.frequency}
 									</Text>
 								</View>
 								{!isSelectionMode && (
-									<View style={{ alignItems: "flex-end", gap: 8 }}>
-										<View style={styles.stockBadge}>
-											<Text style={styles.stockText}>
+									<View className="items-end gap-2">
+										<View className="rounded-xl bg-background-light px-3 py-1.5 dark:bg-primary-soft-dark">
+											<Text className="font-semibold text-text-sub-light text-xs dark:text-text-sub-dark">
 												{item.currentStock} left
 											</Text>
 										</View>
@@ -199,7 +198,7 @@ export default function CabinetScreen() {
 											<Ionicons
 												name="document-text"
 												size={16}
-												color="#d99696"
+												className="text-primary"
 											/>
 										) : null}
 										<TouchableOpacity
@@ -233,13 +232,7 @@ export default function CabinetScreen() {
 											<Ionicons
 												name="ellipsis-horizontal"
 												size={24}
-												color={
-													isHighContrast
-														? "black"
-														: isDarkMode
-															? "#a09090"
-															: "#9ca3af"
-												}
+												className="text-text-sub-light dark:text-text-sub-dark"
 											/>
 										</TouchableOpacity>
 									</View>
@@ -252,148 +245,3 @@ export default function CabinetScreen() {
 		</SafeAreaView>
 	);
 }
-
-const makeStyles = (
-	isHighContrast: boolean,
-	isDark: boolean,
-	textSize: number,
-) =>
-	StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: isHighContrast
-				? "#ffffff"
-				: isDark
-					? "#1e1414"
-					: "#f3f4f6",
-		},
-		header: {
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-			padding: 16,
-			backgroundColor: isHighContrast
-				? "#ffffff"
-				: isDark
-					? "#1e1414"
-					: "#f3f4f6",
-		},
-		title: {
-			fontSize: 24 * textSize,
-			fontWeight: "bold",
-			color: isHighContrast ? "#000000" : isDark ? "#f0ecec" : "#111827",
-		},
-		addButton: {
-			backgroundColor: isHighContrast
-				? "#ffcc00"
-				: isDark
-					? "#d99696"
-					: "#d99696",
-			padding: 8,
-			borderRadius: 20,
-			borderWidth: isHighContrast ? 2 : 0,
-			borderColor: "black",
-		},
-		listContent: {
-			padding: 16,
-			gap: 12,
-		},
-		emptyContent: {
-			flex: 1,
-			justifyContent: "center",
-			alignItems: "center",
-		},
-		emptyText: {
-			fontSize: 16 * textSize,
-			color: isHighContrast ? "#000000" : isDark ? "#a09090" : "#6b7280",
-		},
-		medCard: {
-			flexDirection: "row",
-			alignItems: "center",
-			padding: 16,
-			backgroundColor: isHighContrast
-				? "#ffffff"
-				: isDark
-					? "#2d2424"
-					: "white",
-			borderRadius: 16,
-			borderWidth: isHighContrast ? 2 : 1,
-			borderColor: isHighContrast ? "#000000" : isDark ? "#4a3e3e" : "#f3f4f6",
-			marginBottom: 12,
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: isDark ? 0.2 : 0.05,
-			shadowRadius: 2,
-			elevation: 1,
-		},
-		medIconPlaceholder: {
-			width: 48,
-			height: 48,
-			backgroundColor: isHighContrast
-				? "#e5e7eb"
-				: isDark
-					? "#3d2a2a"
-					: "#f5e0e0",
-			borderRadius: 12,
-			alignItems: "center",
-			justifyContent: "center",
-			marginRight: 16,
-			borderWidth: isHighContrast ? 1 : 0,
-			borderColor: "black",
-		},
-		medInfo: {
-			flex: 1,
-		},
-		medName: {
-			fontSize: 16 * textSize,
-			fontWeight: "bold",
-			color: isHighContrast ? "#000000" : isDark ? "#f0ecec" : "#1f2937",
-			marginBottom: 4,
-		},
-		medDetails: {
-			fontSize: 14 * textSize,
-			color: isHighContrast ? "#000000" : isDark ? "#a09090" : "#6b7280",
-		},
-		stockBadge: {
-			backgroundColor: isHighContrast
-				? "#ffffff"
-				: isDark
-					? "#3d2a2a"
-					: "#f3f4f6",
-			paddingHorizontal: 12,
-			paddingVertical: 6,
-			borderRadius: 12,
-			borderWidth: isHighContrast ? 1 : 0,
-			borderColor: "black",
-		},
-		stockText: {
-			fontSize: 12 * textSize,
-			fontWeight: "600",
-			color: isHighContrast ? "#000000" : isDark ? "#a09090" : "#4b5563",
-		},
-		selectionHeader: {
-			flex: 1,
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-		},
-		cancelButton: {
-			padding: 8,
-		},
-		cancelText: {
-			fontSize: 16 * textSize,
-			color: "#ef4444",
-			fontWeight: "600",
-		},
-		deleteButtonHeader: {
-			padding: 8,
-		},
-		medCardSelected: {
-			borderColor: "#d99696",
-			backgroundColor: isDark ? "#3d2a2a" : "#fdf2f2",
-			borderWidth: 2,
-		},
-		selectionIndicator: {
-			marginRight: 12,
-		},
-	});
