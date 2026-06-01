@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
 import {
 	RefreshControl,
 	ScrollView,
@@ -14,6 +15,11 @@ import { DashboardInvite } from "@/components/dashboard/DashboardInvite";
 import { TimelineItem } from "@/components/dashboard/TimelineItem";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import type { ScheduleItem } from "@/hooks/useMedicationSchedule";
+import {
+	fireDeviceAlarm,
+	stopDeviceAlarm,
+	updateDeviceInfo,
+} from "@/lib/deviceApi";
 
 export default function PatientDashboard() {
 	const router = useRouter();
@@ -31,6 +37,39 @@ export default function PatientDashboard() {
 		isTaking,
 		isAccepting,
 	} = useDashboardData();
+
+	// Hangi doz icin alarm vermistik (tekrar otmesin diye)
+	const firedForRef = useRef<string | null>(null);
+
+	// nextDose degistikce ESP32 OLED'i guncelle + vakit gelince alarm tetikle
+	useEffect(() => {
+		if (!nextDose) return;
+		const medName =
+			nextDose.medication?.name || nextDose.genericName || "Medication";
+		const doseKey = `${nextDose.prescriptionMedicationId}-${nextDose.scheduledTime}`;
+
+		const tick = () => {
+			const diffMs = new Date(nextDose.scheduledTime).getTime() - Date.now();
+			const mins = Math.max(0, Math.round(diffMs / 60000));
+
+			if (diffMs <= 0 && firedForRef.current !== doseKey) {
+				// vakit geldi, alarmi tetikle (sadece bir kere)
+				firedForRef.current = doseKey;
+				fireDeviceAlarm({ medication: medName, nextDoseMinutes: 0 }).catch(
+					() => {},
+				);
+			} else {
+				updateDeviceInfo({
+					medication: medName,
+					nextDoseMinutes: mins,
+				}).catch(() => {});
+			}
+		};
+
+		tick();
+		const id = setInterval(tick, 10_000); // 10 sn'de bir kontrol
+		return () => clearInterval(id);
+	}, [nextDose]);
 
 	return (
 		<SafeAreaView
@@ -102,15 +141,39 @@ export default function PatientDashboard() {
 											"No dosage info"}
 									</Text>
 								</View>
-								<View className="rounded-full bg-white/20 p-3">
-									<Ionicons name="medkit" size={24} color="white" />
-								</View>
+								<TouchableOpacity
+									onPress={async () => {
+										const medName =
+											nextDose.medication?.name ||
+											nextDose.genericName ||
+											"Medication";
+										const diffMs =
+											new Date(nextDose.scheduledTime).getTime() - Date.now();
+										const mins = Math.max(1, Math.round(diffMs / 60000));
+										try {
+											await fireDeviceAlarm({
+												medication: medName,
+												nextDoseMinutes: mins,
+											});
+										} catch (_err) {
+											// sessizce gec — cihaz ulasilamayabilir
+										}
+									}}
+									className="rounded-full bg-white/20 p-3 active:opacity-70"
+								>
+									<Ionicons name="notifications" size={24} color="white" />
+								</TouchableOpacity>
 							</View>
 
 							<TouchableOpacity
-								onPress={() =>
-									takeMedication(nextDose.prescriptionMedicationId)
-								}
+								onPress={async () => {
+									takeMedication(nextDose.prescriptionMedicationId);
+									try {
+										await stopDeviceAlarm();
+									} catch (_err) {
+										// cihaz kapali olabilir — yine de devam
+									}
+								}}
 								disabled={isTaking}
 								className="mt-6 flex-row items-center justify-center rounded-xl bg-white p-4 active:opacity-90"
 							>

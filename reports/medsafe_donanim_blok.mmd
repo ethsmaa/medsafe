@@ -1,0 +1,18 @@
+flowchart TB
+  ESP["ESP32<br/>WiFi + Web Sunucusu"]
+  OLED["OLED SSD1306 · 128x64"]
+  BZ["Aktif Buzzer"]
+  RED["Kırmızı LED"]
+  GRN["Yeşil LED"]
+  BTN["Buton"]
+  ESP <-->|"I2C · SDA 21 / SCL 22"| OLED
+  ESP -->|"GPIO 25"| BZ
+  ESP -->|"GPIO 26"| RED
+  ESP -->|"GPIO 27"| GRN
+  BTN -->|"GPIO 14 · INPUT_PULLUP"| ESP
+  classDef mcu fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+  classDef out fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef inp fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  class ESP mcu
+  class OLED,BZ,RED,GRN out
+  class BTN inp

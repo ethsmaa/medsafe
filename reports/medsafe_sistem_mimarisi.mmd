@@ -1,0 +1,28 @@
+flowchart LR
+  subgraph PHONE["Mobil Katman"]
+    A["Mobil Uygulama<br/>Expo / React Native"]
+  end
+  subgraph SERVER["Sunucu Katmanı"]
+    B["Backend<br/>Hono + tRPC"]
+  end
+  subgraph DEVICE["Donanım Katmanı — ESP32"]
+    C["Web Sunucusu :80<br/>/alarm · /status · /stop"]
+    D["OLED Ekran"]
+    E["Buzzer"]
+    F["Kırmızı LED"]
+    G["Yeşil LED"]
+    H["Buton"]
+  end
+  A -->|"POST /alarm"| B
+  B -->|"HTTP — ESP32_HOST"| C
+  C -->|"I2C"| D
+  C -->|"GPIO 25"| E
+  C -->|"GPIO 26"| F
+  C -->|"GPIO 27"| G
+  H -->|"GPIO 14 · sustur"| C
+  classDef phone fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef server fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+  classDef dev fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+  class A phone
+  class B server
+  class C,D,E,F,G,H dev

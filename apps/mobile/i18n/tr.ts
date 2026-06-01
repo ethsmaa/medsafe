@@ -157,6 +157,18 @@ const tr = {
 	"assistant.suggestion1": "\"Bugün ilacımı içtim mi?\"",
 	"assistant.suggestion2": "\"Bir sonraki ilacım ne zaman?\"",
 	"assistant.suggestion3": "\"İlaç stoğum ne durumda?\"",
+	"assistant.listening": "Dinleniyor...",
+	"assistant.micPermissionDenied": "Mikrofon izni verilmedi. Ayarlardan etkinleştirin.",
+	"assistant.speakHint": "Mesajı sesli oku",
+	"assistant.stopSpeaking": "Okumayı durdur",
+	"assistant.voiceInputHint": "Sesli mesaj göndermek için basılı tutun",
+	"assistant.errorMessage": "Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.",
+	"assistant.transcribing": "Metin çözümleniyor...",
+	"assistant.processing": "İşleniyor...",
+	"assistant.permissionRequired": "İzin Gerekli",
+	"assistant.voiceRecognitionFailed": "Ses tanıma başarısız oldu. Lütfen tekrar deneyin.",
+	"assistant.recordingTooShort": "Kayıt çok kısa, biraz daha uzun tutun.",
+	"assistant.emptyTranscription": "Sesinizi duyamadım, tekrar deneyin.",
 } as const;
 
 export type TranslationKey = keyof typeof tr;

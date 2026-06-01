@@ -156,6 +156,18 @@ const en: Record<TranslationKey, string> = {
 	"assistant.suggestion1": "\"Did I take my medicine today?\"",
 	"assistant.suggestion2": "\"When is my next dose?\"",
 	"assistant.suggestion3": "\"How is my medication stock?\"",
+	"assistant.listening": "Listening...",
+	"assistant.micPermissionDenied": "Microphone permission denied. Enable it in Settings.",
+	"assistant.speakHint": "Read message aloud",
+	"assistant.stopSpeaking": "Stop reading",
+	"assistant.voiceInputHint": "Hold to send a voice message",
+	"assistant.errorMessage": "Sorry, an error occurred. Please try again.",
+	"assistant.transcribing": "Transcribing...",
+	"assistant.processing": "Processing...",
+	"assistant.permissionRequired": "Permission Required",
+	"assistant.voiceRecognitionFailed": "Voice recognition failed. Please try again.",
+	"assistant.recordingTooShort": "Recording too short. Hold a bit longer.",
+	"assistant.emptyTranscription": "I couldn't hear that. Please try again.",
 };
 
 export default en;

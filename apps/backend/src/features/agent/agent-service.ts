@@ -1,10 +1,10 @@
 import {
-	GoogleGenerativeAI,
 	type Content,
 	type Part,
 	type FunctionCall,
 } from "@google/generative-ai";
 import { GEMINI_MODEL } from "../medication/prompts.js";
+import { getGeminiClient } from "./gemini-client.js";
 import { buildSystemPrompt } from "./system-prompt.js";
 import { agentTools } from "./tools.js";
 import { dispatchToolCall } from "./tool-handlers.js";
@@ -37,13 +37,7 @@ export async function agentChat(
 	language: string,
 	conversationHistory: ChatMessage[],
 ): Promise<ChatOutput> {
-	const apiKey = process.env.GEMINI_API_KEY;
-	if (!apiKey) {
-		throw new Error("GEMINI_API_KEY is not set. Add it to your .env.development file.");
-	}
-
-	const genAI = new GoogleGenerativeAI(apiKey);
-	const model = genAI.getGenerativeModel({
+	const model = getGeminiClient().getGenerativeModel({
 		model: GEMINI_MODEL,
 		systemInstruction: buildSystemPrompt(language),
 		tools: agentTools,

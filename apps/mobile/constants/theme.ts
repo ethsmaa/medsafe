@@ -51,6 +51,43 @@ export const Colors = {
 	},
 };
 
+/**
+ * Assistant-feature-specific palette (chat bubbles, mic, listening UI).
+ * Kept separate from semantic Colors because these are stylistic accents
+ * not shared with other screens.
+ */
+export const AssistantColors = {
+	accent: "#f87171",
+	accentWarm: "#fb923c",
+	accentSoft: {
+		light: "#e8a0a0",
+		dark: "#d99696",
+	},
+	iconMuted: {
+		light: "#9ca3af",
+		dark: "#a38383",
+	},
+	micIdleIcon: {
+		light: "#6b7280",
+		dark: "#d99696",
+	},
+	inputPlaceholder: {
+		light: "#9ca3af",
+		dark: "#6b5e5e",
+	},
+	screenBg: {
+		light: "#ffffff",
+		dark: "#1a1212",
+	},
+	ringHigh: "rgba(248,113,113,0.25)",
+	ringLow: "rgba(248,113,113,0.18)",
+	centerBg: {
+		light: "rgba(244,114,114,0.12)",
+		dark: "rgba(244,114,114,0.18)",
+	},
+	waveColors: ["#f87171", "#fb923c", "#f87171", "#fb923c", "#f87171"],
+};
+
 export const Layout = {
 	padding: 20,
 	borderRadius: 16,

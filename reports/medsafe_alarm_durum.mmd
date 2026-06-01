@@ -1,0 +1,7 @@
+stateDiagram-v2
+  direction LR
+  [*] --> Bosta
+  Bosta: BOŞTA — Yeşil LED yanar, buzzer kapalı
+  Alarm: ALARM — Kırmızı LED + buzzer (400 ms)
+  Bosta --> Alarm: POST /alarm (veya seri "ALARM")
+  Alarm --> Bosta: butona bas (veya POST /stop)

@@ -3,6 +3,7 @@ import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "./features/auth/index.js";
+import { deviceRouter } from "./features/device/route.js";
 import { createTRPCConextForHono } from "./features/trpc/index.js";
 import { appRouter } from "./features/trpc/router.js";
 
@@ -36,6 +37,8 @@ app.get("/", (c) => {
 app.all("/api/auth/*", (c) => {
     return auth.handler(c.req.raw);
 });
+
+app.route("/api/device", deviceRouter);
 
 app.use(
     "/trpc/*",

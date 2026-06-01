@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
 	ActivityIndicator,
 	Alert,
@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useMedicationAction } from "@/hooks/useMedicationAction";
+import { fireDeviceAlarm, stopDeviceAlarm } from "@/lib/deviceApi";
 import { useTRPC } from "@/lib/trpc";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -61,6 +62,26 @@ function formatMealStatus(m: string): string {
 		default:
 			return m;
 	}
+}
+
+// Schedule'daki "HH:MM" zamanlardan, simdiden sonraki en yakininin kac dakika
+// sonra oldugunu doner. Bugunun tum zamanlari gectiyse yarinin ilk zamanini kullanir.
+function minutesUntilNextDose(
+	schedules: { timeOfDay: string }[] | undefined,
+): number {
+	if (!schedules || schedules.length === 0) return 1;
+	const now = new Date();
+	const nowMin = now.getHours() * 60 + now.getMinutes();
+	const todayMinutes = schedules
+		.map((s) => {
+			const [h, m] = s.timeOfDay.split(":").map(Number);
+			return (h || 0) * 60 + (m || 0);
+		})
+		.sort((a, b) => a - b);
+	const upcoming = todayMinutes.find((m) => m > nowMin);
+	if (upcoming !== undefined) return upcoming - nowMin;
+	// Bugun bitti, yarinin ilki
+	return 24 * 60 - nowMin + todayMinutes[0];
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -275,6 +296,51 @@ export default function MedicationDetailScreen() {
 							</Text>
 						</View>
 					)}
+				</View>
+
+				{/* ESP32 cihaz kontrolleri */}
+				<View style={styles.deviceRow}>
+					<TouchableOpacity
+						style={[styles.deviceButton, styles.deviceButtonTest]}
+						onPress={async () => {
+							try {
+								const nextDoseMinutes = minutesUntilNextDose(med.doseSchedules);
+								await fireDeviceAlarm({
+									medication: name,
+									nextDoseMinutes,
+								});
+								const h = Math.floor(nextDoseMinutes / 60);
+								const m = nextDoseMinutes % 60;
+								const eta = h > 0 ? `${h}s ${m}d` : `${m}d`;
+								Alert.alert("Cihaz", `Alarm gönderildi — sonraki doz: ${eta}`);
+							} catch (err) {
+								Alert.alert(
+									"Cihaz hatası",
+									(err as Error).message || "Bilinmeyen hata",
+								);
+							}
+						}}
+					>
+						<Ionicons name="notifications" size={18} color="#0e7490" />
+						<Text style={styles.deviceButtonTextTest}>Test Et</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[styles.deviceButton, styles.deviceButtonStop]}
+						onPress={async () => {
+							try {
+								await stopDeviceAlarm();
+								Alert.alert("Cihaz", "Alarm durduruldu");
+							} catch (err) {
+								Alert.alert(
+									"Cihaz hatası",
+									(err as Error).message || "Bilinmeyen hata",
+								);
+							}
+						}}
+					>
+						<Ionicons name="stop-circle" size={18} color="#b45309" />
+						<Text style={styles.deviceButtonTextStop}>Durdur</Text>
+					</TouchableOpacity>
 				</View>
 
 				{/* Delete */}
@@ -507,5 +573,38 @@ const makeStyles = (
 			fontSize: 15 * textSize,
 			fontWeight: "600",
 			color: "#dc2626",
+		},
+		deviceRow: {
+			flexDirection: "row",
+			gap: 10,
+			marginTop: 8,
+		},
+		deviceButton: {
+			flex: 1,
+			flexDirection: "row",
+			alignItems: "center",
+			justifyContent: "center",
+			gap: 8,
+			padding: 14,
+			borderRadius: 16,
+			borderWidth: 1,
+		},
+		deviceButtonTest: {
+			backgroundColor: isHighContrast ? "#fff" : isDark ? "#1c2e33" : "#ecfeff",
+			borderColor: "#a5f3fc",
+		},
+		deviceButtonStop: {
+			backgroundColor: isHighContrast ? "#fff" : isDark ? "#3d2e1a" : "#fef3c7",
+			borderColor: "#fcd34d",
+		},
+		deviceButtonTextTest: {
+			fontSize: 15 * textSize,
+			fontWeight: "600",
+			color: "#0e7490",
+		},
+		deviceButtonTextStop: {
+			fontSize: 15 * textSize,
+			fontWeight: "600",
+			color: "#b45309",
 		},
 	});

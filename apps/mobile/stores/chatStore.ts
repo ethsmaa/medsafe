@@ -1,12 +1,15 @@
 /**
  * Chat store for the MedSafe AI Health Assistant.
- * Uses useState + AsyncStorage for simplicity and reliable re-renders.
+ * Uses useState + AsyncStorage with a debounced persist to avoid writes
+ * on every message addition.
  */
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const STORAGE_KEY = "chat_messages";
 const MAX_MESSAGES = 50;
+const HISTORY_LIMIT = 10;
+const PERSIST_DEBOUNCE_MS = 300;
 
 export type ChatMessage = {
 	id: string;
@@ -22,8 +25,8 @@ function generateId(): string {
 export function useChatStore() {
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const loaded = useRef(false);
+	const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	// Load from AsyncStorage once on mount
 	useEffect(() => {
 		if (loaded.current) return;
 		loaded.current = true;
@@ -38,10 +41,16 @@ export function useChatStore() {
 			.catch(() => {});
 	}, []);
 
-	// Persist whenever messages change (skip initial empty state)
 	useEffect(() => {
 		if (!loaded.current) return;
-		AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch(() => {});
+		if (persistTimer.current) clearTimeout(persistTimer.current);
+		persistTimer.current = setTimeout(() => {
+			AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch(() => {});
+		}, PERSIST_DEBOUNCE_MS);
+
+		return () => {
+			if (persistTimer.current) clearTimeout(persistTimer.current);
+		};
 	}, [messages]);
 
 	const addUserMessage = useCallback((content: string): ChatMessage => {
@@ -69,16 +78,24 @@ export function useChatStore() {
 		[],
 	);
 
-	const getConversationHistory = useCallback(() => {
-		return messages.map((msg) => ({
-			role: msg.role,
-			content: msg.content,
-			timestamp: msg.timestamp,
-		}));
-	}, [messages]);
+	const conversationHistory = useMemo(
+		() =>
+			messages.slice(-HISTORY_LIMIT).map((msg) => ({
+				role: msg.role,
+				content: msg.content,
+				timestamp: msg.timestamp,
+			})),
+		[messages],
+	);
+
+	const getConversationHistory = useCallback(
+		() => conversationHistory,
+		[conversationHistory],
+	);
 
 	const clearMessages = useCallback(() => {
 		setMessages([]);
+		if (persistTimer.current) clearTimeout(persistTimer.current);
 		AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
 	}, []);
 
