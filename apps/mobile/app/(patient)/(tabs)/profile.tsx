@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
 	ActivityIndicator,
 	ScrollView,
-	StyleSheet,
 	Switch,
 	Text,
 	TouchableOpacity,
@@ -20,6 +19,16 @@ import { queryClient } from "@/lib/react-query";
 
 type ThemeMode = "light" | "dark" | "system";
 
+const SECTION =
+	"mb-4 rounded-[14px] bg-surface-light p-[18px] shadow-sm dark:bg-surface-dark";
+const SECTION_TITLE =
+	"font-semibold text-sm uppercase tracking-wider text-text-sub-light dark:text-text-sub-dark";
+const SEGMENT = "flex-1 flex-row items-center justify-center rounded-lg py-2.5";
+const SEGMENT_TEXT =
+	"font-semibold text-sm text-text-sub-light dark:text-text-sub-dark";
+const ROW = "flex-row items-center justify-between py-2.5";
+const ROW_ICON = "text-text-sub-light dark:text-text-sub-dark";
+
 export default function ProfileScreen() {
 	const router = useRouter();
 	const {
@@ -33,7 +42,6 @@ export default function ProfileScreen() {
 	} = useAccessibility();
 	const { locale, setLocale, t } = useLanguage();
 
-	const styles = makeStyles(isHighContrast, isDarkMode, textSize);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 	const handleLogout = async () => {
@@ -66,40 +74,43 @@ export default function ProfileScreen() {
 	];
 
 	return (
-		<SafeAreaView style={styles.container} edges={["top"]}>
-			<ScrollView contentContainerStyle={styles.scrollContent}>
-				<Text style={styles.title}>{t("profile.title")}</Text>
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
+			<ScrollView contentContainerClassName="p-6">
+				<Text className="mb-7 font-bold text-3xl text-text-main-light tracking-tight dark:text-text-main-dark">
+					{t("profile.title")}
+				</Text>
 
 				{/* ── Language ── */}
-				<View style={styles.section}>
-					<View style={styles.sectionHeader}>
-						<Ionicons name="language-outline" size={20} color={"#d99696"} />
-						<Text style={styles.sectionTitle}>{t("profile.language")}</Text>
+				<View className={SECTION}>
+					<View className="mb-3.5 flex-row items-center gap-2">
+						<Ionicons
+							name="language-outline"
+							size={20}
+							className="text-primary"
+						/>
+						<Text className={SECTION_TITLE}>{t("profile.language")}</Text>
 					</View>
 
-					<View style={styles.segmentedControl}>
+					<View className="flex-row rounded-[10px] bg-background-light p-[3px] dark:bg-background-dark">
 						<TouchableOpacity
-							style={[styles.segment, locale === "tr" && styles.segmentActive]}
+							className={`${SEGMENT} ${locale === "tr" ? "bg-primary shadow-sm" : ""}`}
 							onPress={() => setLocale("tr")}
 						>
 							<Text
-								style={[
-									styles.segmentText,
-									locale === "tr" && styles.segmentTextActive,
-								]}
+								className={`${SEGMENT_TEXT} ${locale === "tr" ? "text-white" : ""}`}
 							>
 								TR
 							</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
-							style={[styles.segment, locale === "en" && styles.segmentActive]}
+							className={`${SEGMENT} ${locale === "en" ? "bg-primary shadow-sm" : ""}`}
 							onPress={() => setLocale("en")}
 						>
 							<Text
-								style={[
-									styles.segmentText,
-									locale === "en" && styles.segmentTextActive,
-								]}
+								className={`${SEGMENT_TEXT} ${locale === "en" ? "text-white" : ""}`}
 							>
 								EN
 							</Text>
@@ -108,43 +119,30 @@ export default function ProfileScreen() {
 				</View>
 
 				{/* ── Theme ── */}
-				<View style={styles.section}>
-					<View style={styles.sectionHeader}>
+				<View className={SECTION}>
+					<View className="mb-3.5 flex-row items-center gap-2">
 						<Ionicons
 							name="color-palette-outline"
 							size={20}
-							color={"#d99696"}
+							className="text-primary"
 						/>
-						<Text style={styles.sectionTitle}>{t("profile.theme")}</Text>
+						<Text className={SECTION_TITLE}>{t("profile.theme")}</Text>
 					</View>
 
-					<View style={styles.segmentedControl}>
+					<View className="flex-row rounded-[10px] bg-background-light p-[3px] dark:bg-background-dark">
 						{themeOptions.map((opt) => (
 							<TouchableOpacity
 								key={opt.key}
-								style={[
-									styles.segment,
-									themeMode === opt.key && styles.segmentActive,
-								]}
+								className={`${SEGMENT} ${themeMode === opt.key ? "bg-primary shadow-sm" : ""}`}
 								onPress={() => setThemeMode(opt.key)}
 							>
 								<Ionicons
 									name={opt.icon}
 									size={16}
-									color={
-										themeMode === opt.key
-											? "#ffffff"
-											: isDarkMode
-												? "#a09090"
-												: "#6b7280"
-									}
-									style={{ marginRight: 6 }}
+									className={`mr-1.5 ${themeMode === opt.key ? "text-white" : ROW_ICON}`}
 								/>
 								<Text
-									style={[
-										styles.segmentText,
-										themeMode === opt.key && styles.segmentTextActive,
-									]}
+									className={`${SEGMENT_TEXT} ${themeMode === opt.key ? "text-white" : ""}`}
 								>
 									{opt.label}
 								</Text>
@@ -154,29 +152,29 @@ export default function ProfileScreen() {
 				</View>
 
 				{/* ── Accessibility ── */}
-				<View style={styles.section}>
-					<View style={styles.sectionHeader}>
+				<View className={SECTION}>
+					<View className="mb-3.5 flex-row items-center gap-2">
 						<Ionicons
 							name="accessibility-outline"
 							size={20}
-							color={"#d99696"}
+							className="text-primary"
 						/>
-						<Text style={styles.sectionTitle}>
-							{t("profile.accessibility")}
-						</Text>
+						<Text className={SECTION_TITLE}>{t("profile.accessibility")}</Text>
 					</View>
 
 					{/* High Contrast */}
-					<View style={styles.row}>
-						<View style={styles.rowContent}>
+					<View className={ROW}>
+						<View className="flex-1 flex-row items-center gap-3">
 							<Ionicons
 								name="contrast-outline"
 								size={20}
-								color={styles.rowIcon.color}
+								className={ROW_ICON}
 							/>
-							<View style={styles.rowText}>
-								<Text style={styles.label}>{t("profile.highContrast")}</Text>
-								<Text style={styles.description}>
+							<View className="flex-1">
+								<Text className="font-medium text-sm text-text-main-light dark:text-text-main-dark">
+									{t("profile.highContrast")}
+								</Text>
+								<Text className="mt-0.5 text-text-sub-light text-xs dark:text-text-sub-dark">
 									{t("profile.highContrastDesc")}
 								</Text>
 							</View>
@@ -193,16 +191,16 @@ export default function ProfileScreen() {
 					</View>
 
 					{/* Text Size */}
-					<View style={styles.row}>
-						<View style={styles.rowContent}>
-							<Ionicons
-								name="text-outline"
-								size={20}
-								color={styles.rowIcon.color}
-							/>
-							<View style={styles.rowText}>
-								<Text style={styles.label}>{t("profile.textSize")}</Text>
-								<Text style={styles.description}>{textSize.toFixed(1)}x</Text>
+					<View className={ROW}>
+						<View className="flex-1 flex-row items-center gap-3">
+							<Ionicons name="text-outline" size={20} className={ROW_ICON} />
+							<View className="flex-1">
+								<Text className="font-medium text-sm text-text-main-light dark:text-text-main-dark">
+									{t("profile.textSize")}
+								</Text>
+								<Text className="mt-0.5 text-text-sub-light text-xs dark:text-text-sub-dark">
+									{textSize.toFixed(1)}x
+								</Text>
 							</View>
 						</View>
 					</View>
@@ -220,51 +218,65 @@ export default function ProfileScreen() {
 				</View>
 
 				{/* ── Care Team ── */}
-				<View style={styles.section}>
-					<View style={styles.sectionHeader}>
-						<Ionicons name="people-outline" size={20} color={"#d99696"} />
-						<Text style={styles.sectionTitle}>{t("profile.careTeam")}</Text>
+				<View className={SECTION}>
+					<View className="mb-3.5 flex-row items-center gap-2">
+						<Ionicons
+							name="people-outline"
+							size={20}
+							className="text-primary"
+						/>
+						<Text className={SECTION_TITLE}>{t("profile.careTeam")}</Text>
 					</View>
 					<TouchableOpacity
-						style={styles.row}
+						className={ROW}
 						onPress={() => router.push("/(patient)/care-team")}
 						activeOpacity={0.6}
 					>
-						<View style={styles.rowContent}>
+						<View className="flex-1 flex-row items-center gap-3">
 							<Ionicons
 								name="people-circle-outline"
 								size={20}
-								color={styles.rowIcon.color}
+								className={ROW_ICON}
 							/>
-							<Text style={styles.label}>{t("profile.manageCaregivers")}</Text>
+							<Text className="font-medium text-sm text-text-main-light dark:text-text-main-dark">
+								{t("profile.manageCaregivers")}
+							</Text>
 						</View>
 						<Ionicons
 							name="chevron-forward"
 							size={18}
-							color={isDarkMode ? "#6b5e5e" : "#9ca3af"}
+							className="text-text-sub-light dark:text-text-sub-dark"
 						/>
 					</TouchableOpacity>
 				</View>
 
 				{/* ── Account ── */}
-				<View style={[styles.section, { marginBottom: 40 }]}>
-					<View style={styles.sectionHeader}>
-						<Ionicons name="settings-outline" size={20} color={"#d99696"} />
-						<Text style={styles.sectionTitle}>{t("profile.account")}</Text>
+				<View className={`${SECTION} mb-10`}>
+					<View className="mb-3.5 flex-row items-center gap-2">
+						<Ionicons
+							name="settings-outline"
+							size={20}
+							className="text-primary"
+						/>
+						<Text className={SECTION_TITLE}>{t("profile.account")}</Text>
 					</View>
 					<TouchableOpacity
-						style={styles.row}
+						className={ROW}
 						onPress={handleLogout}
 						disabled={isLoggingOut}
 						activeOpacity={0.6}
 					>
-						<View style={styles.rowContent}>
+						<View className="flex-1 flex-row items-center gap-3">
 							{isLoggingOut ? (
 								<ActivityIndicator size="small" color="#ef4444" />
 							) : (
-								<Ionicons name="log-out-outline" size={20} color="#ef4444" />
+								<Ionicons
+									name="log-out-outline"
+									size={20}
+									className="text-error-light dark:text-error-dark"
+								/>
 							)}
-							<Text style={styles.logoutText}>
+							<Text className="font-semibold text-error-light text-sm dark:text-error-dark">
 								{isLoggingOut ? t("profile.loggingOut") : t("profile.logout")}
 							</Text>
 						</View>
@@ -274,133 +286,3 @@ export default function ProfileScreen() {
 		</SafeAreaView>
 	);
 }
-
-const makeStyles = (
-	isHighContrast: boolean,
-	isDark: boolean,
-	textSize: number,
-) => {
-	const accent = "#d99696";
-
-	return StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: isHighContrast
-				? "#ffffff"
-				: isDark
-					? "#1e1414"
-					: "#f3f4f6",
-		},
-		scrollContent: {
-			padding: 24,
-		},
-		title: {
-			fontSize: 28 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000000" : isDark ? "#f0ecec" : "#111827",
-			marginBottom: 28,
-			letterSpacing: -0.5,
-		},
-
-		// ── Section ──
-		section: {
-			backgroundColor: isHighContrast
-				? "#ffffff"
-				: isDark
-					? "#2d2424"
-					: "#ffffff",
-			borderRadius: 14,
-			padding: 18,
-			marginBottom: 16,
-			borderWidth: isHighContrast ? 2 : 0,
-			borderColor: isHighContrast ? "#000000" : "transparent",
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: isDark ? 0.15 : 0.04,
-			shadowRadius: 3,
-			elevation: 1,
-		},
-		sectionHeader: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 8,
-			marginBottom: 14,
-		},
-		sectionTitle: {
-			fontSize: 15 * textSize,
-			fontWeight: "600",
-			color: isHighContrast ? "#000000" : isDark ? "#a09090" : "#6b7280",
-			textTransform: "uppercase",
-			letterSpacing: 0.8,
-		},
-
-		// ── Segmented Control ──
-		segmentedControl: {
-			flexDirection: "row",
-			backgroundColor: isDark ? "#1e1414" : "#f3f4f6",
-			borderRadius: 10,
-			padding: 3,
-		},
-		segment: {
-			flex: 1,
-			flexDirection: "row",
-			alignItems: "center",
-			justifyContent: "center",
-			paddingVertical: 10,
-			borderRadius: 8,
-		},
-		segmentActive: {
-			backgroundColor: accent,
-			shadowColor: accent,
-			shadowOffset: { width: 0, height: 2 },
-			shadowOpacity: 0.3,
-			shadowRadius: 4,
-			elevation: 2,
-		},
-		segmentText: {
-			fontSize: 14 * textSize,
-			fontWeight: "600",
-			color: isDark ? "#a09090" : "#6b7280",
-		},
-		segmentTextActive: {
-			color: "#ffffff",
-		},
-
-		// ── Rows ──
-		row: {
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-			paddingVertical: 10,
-		},
-		rowContent: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 12,
-			flex: 1,
-		},
-		rowText: {
-			flex: 1,
-		},
-		rowIcon: {
-			color: isDark ? "#a09090" : "#6b7280",
-		},
-		label: {
-			fontSize: 15 * textSize,
-			fontWeight: "500",
-			color: isHighContrast ? "#000000" : isDark ? "#f0ecec" : "#374151",
-		},
-		description: {
-			fontSize: 13 * textSize,
-			color: isHighContrast ? "#000000" : isDark ? "#6b5e5e" : "#9ca3af",
-			marginTop: 2,
-		},
-
-		// ── Logout ──
-		logoutText: {
-			fontSize: 15 * textSize,
-			fontWeight: "600",
-			color: "#ef4444",
-		},
-	});
-};
