@@ -1,5 +1,6 @@
 // import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 // import { Platform } from "react-native";
 
 // Configure handler safely
@@ -10,15 +11,22 @@ const configureNotifications = () => {
 configureNotifications();
 */
 
+export type ReceivedNotification = {
+	request?: {
+		content?: {
+			data?: { medicationId?: string } | null;
+			title?: string | null;
+			body?: string | null;
+		} | null;
+	} | null;
+};
+
 export function useNotifications() {
-	// const [lastNotification, setLastNotification] = useState<Notifications.Notification | null>(null);
-	const [lastNotification, setLastNotification] = useState<unknown | null>(
-		null,
-	);
+	const [lastNotification, setLastNotification] =
+		useState<ReceivedNotification | null>(null);
 
 	useEffect(() => {
-		// Mock listener
-		console.log("Notifications disabled in Expo Go SDK 53");
+		// mock listener (notifications disabled in expo go sdk 53)
 		// registerForLocalNotificationsAsync();
 
 		return () => {
@@ -34,7 +42,7 @@ export function useNotifications() {
 		minute: number,
 		data: Record<string, unknown> = {},
 	) {
-		console.log("Mock schedule:", title, body, hour, minute, data);
+		logger.info("mock schedule", { title, body, hour, minute, data });
 	}
 
 	async function clearNotificationState() {

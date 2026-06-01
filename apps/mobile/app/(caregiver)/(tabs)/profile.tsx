@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { authClient } from "@/lib/auth-client";
+import { logger } from "@/lib/logger";
 import { queryClient } from "@/lib/react-query";
 
 export default function ProfileScreen() {
@@ -40,7 +41,7 @@ export default function ProfileScreen() {
 
 			router.replace("/login");
 		} catch (error) {
-			console.error("Logout error:", error);
+			logger.error("Logout error:", error);
 			router.replace("/login");
 		} finally {
 			setIsLoggingOut(false);

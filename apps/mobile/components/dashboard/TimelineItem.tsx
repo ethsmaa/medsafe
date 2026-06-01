@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { format, getHours } from "date-fns";
+import { useRouter } from "expo-router";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useMedicationAction } from "@/hooks/useMedicationAction";
-import { useRouter } from "expo-router";
 
 import type { ScheduleItem } from "@/hooks/useMedicationSchedule";
 

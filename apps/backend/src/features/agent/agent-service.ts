@@ -1,13 +1,9 @@
-import {
-	type Content,
-	type Part,
-	type FunctionCall,
-} from "@google/generative-ai";
+import type { Content, FunctionCall, Part } from "@google/generative-ai";
 import { GEMINI_MODEL } from "../medication/prompts.js";
 import { getGeminiClient } from "./gemini-client.js";
 import { buildSystemPrompt } from "./system-prompt.js";
-import { agentTools } from "./tools.js";
 import { dispatchToolCall } from "./tool-handlers.js";
+import { agentTools } from "./tools.js";
 import type { ChatMessage, ChatOutput } from "./types.js";
 
 const MAX_TOOL_ITERATIONS = 5;

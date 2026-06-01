@@ -173,7 +173,11 @@ export default function PatientDetailScreen() {
 									]}
 								>
 									{t(
-										`log.status${log.status.charAt(0).toUpperCase() + log.status.slice(1).toLowerCase()}` as any,
+										log.status === "TAKEN"
+											? "log.statusTaken"
+											: log.status === "SKIPPED"
+												? "log.statusSkipped"
+												: "log.statusMissed",
 									)}
 								</Text>
 							</View>

@@ -13,47 +13,47 @@ const app = new Hono();
 
 // Global CORS Middleware
 app.use(
-    "*",
-    cors({
-        origin: (origin) => {
-            // In development, allow all origins (mobile IP changes frequently)
-            if (process.env.NODE_ENV !== "production") return origin;
-            // In production, whitelist specific origins
-            const allowed = ["https://medsafe.app", "https://api.medsafe.app"];
-            return allowed.includes(origin) ? origin : null;
-        },
-        allowHeaders: ["Content-Type", "Authorization"],
-        allowMethods: ["POST", "GET", "OPTIONS"],
-        exposeHeaders: ["Content-Length"],
-        maxAge: 600,
-        credentials: true,
-    }),
+	"*",
+	cors({
+		origin: (origin) => {
+			// In development, allow all origins (mobile IP changes frequently)
+			if (process.env.NODE_ENV !== "production") return origin;
+			// In production, whitelist specific origins
+			const allowed = ["https://medsafe.app", "https://api.medsafe.app"];
+			return allowed.includes(origin) ? origin : null;
+		},
+		allowHeaders: ["Content-Type", "Authorization"],
+		allowMethods: ["POST", "GET", "OPTIONS"],
+		exposeHeaders: ["Content-Length"],
+		maxAge: 600,
+		credentials: true,
+	}),
 );
 
 app.get("/", (c) => {
-    return c.text("Hello World from MedSafe Backend!");
+	return c.text("Hello World from MedSafe Backend!");
 });
 
 app.all("/api/auth/*", (c) => {
-    return auth.handler(c.req.raw);
+	return auth.handler(c.req.raw);
 });
 
 app.route("/api/device", deviceRouter);
 
 app.use(
-    "/trpc/*",
-    trpcServer({
-        router: appRouter,
-        createContext: createTRPCConextForHono,
-    }),
+	"/trpc/*",
+	trpcServer({
+		router: appRouter,
+		createContext: createTRPCConextForHono,
+	}),
 );
 
 const port = 3001;
-// biome-ignore lint/suspicious/noConsole: Server startup message
-console.log(`Server is running on port ${port}`);
+// biome-ignore lint/suspicious/noConsole: server startup message
+console.info(`Server is running on port ${port}`);
 
 serve({
-    fetch: app.fetch,
-    port,
-    hostname: "0.0.0.0"
+	fetch: app.fetch,
+	port,
+	hostname: "0.0.0.0",
 });

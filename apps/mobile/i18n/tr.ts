@@ -13,7 +13,8 @@ const tr = {
 	"profile.title": "Profil & Ayarlar",
 	"profile.accessibility": "Erişilebilirlik",
 	"profile.highContrast": "Yüksek Kontrast Modu",
-	"profile.highContrastDesc": "Daha iyi görünürlük için renk kontrastını artırır",
+	"profile.highContrastDesc":
+		"Daha iyi görünürlük için renk kontrastını artırır",
 	"profile.textSize": "Yazı Boyutu",
 	"profile.language": "Dil",
 	"profile.languageDesc": "Uygulama dili",
@@ -52,7 +53,8 @@ const tr = {
 	"med.freqPeriodic": "Periyodik",
 	"med.reminderTimes": "Hatırlatma Saatleri",
 	"med.addTime": "+ Saat Ekle",
-	"med.noTimes": "Henüz saat eklenmedi. \"+ Saat Ekle\" ile hatırlatma ayarlayın.",
+	"med.noTimes":
+		'Henüz saat eklenmedi. "+ Saat Ekle" ile hatırlatma ayarlayın.',
 	"med.stockTitle": "Stok Takibi",
 	"med.currentStock": "Mevcut Stok",
 	"med.alertLimit": "Uyarı Limiti",
@@ -69,7 +71,8 @@ const tr = {
 	"med.aiNote.generating": "AI Notu Oluşturuluyor...",
 	"med.aiNote.label": "Notlar",
 	"med.aiNote.placeholder": "Not oluşturmak için butona basın...",
-	"med.aiNote.disclaimer": "Bu not AI tarafından üretilmiştir. Doktorunuza veya eczacınıza danışın.",
+	"med.aiNote.disclaimer":
+		"Bu not AI tarafından üretilmiştir. Doktorunuza veya eczacınıza danışın.",
 	"med.aiNote.noName": "Lütfen önce bir marka adı veya etken madde girin.",
 
 	"validation.nameRequired": "Lütfen marka adı veya etken madde giriniz.",
@@ -152,13 +155,15 @@ const tr = {
 
 	// Asistan
 	"assistant.title": "Sağlık Asistanı",
-	"assistant.welcomeMessage": "Merhaba! İlaçlarınız hakkında sorularınızı yanıtlayabilirim. Neler sormak istersiniz?",
+	"assistant.welcomeMessage":
+		"Merhaba! İlaçlarınız hakkında sorularınızı yanıtlayabilirim. Neler sormak istersiniz?",
 	"assistant.inputPlaceholder": "Mesajınızı yazın...",
-	"assistant.suggestion1": "\"Bugün ilacımı içtim mi?\"",
-	"assistant.suggestion2": "\"Bir sonraki ilacım ne zaman?\"",
-	"assistant.suggestion3": "\"İlaç stoğum ne durumda?\"",
+	"assistant.suggestion1": '"Bugün ilacımı içtim mi?"',
+	"assistant.suggestion2": '"Bir sonraki ilacım ne zaman?"',
+	"assistant.suggestion3": '"İlaç stoğum ne durumda?"',
 	"assistant.listening": "Dinleniyor...",
-	"assistant.micPermissionDenied": "Mikrofon izni verilmedi. Ayarlardan etkinleştirin.",
+	"assistant.micPermissionDenied":
+		"Mikrofon izni verilmedi. Ayarlardan etkinleştirin.",
 	"assistant.speakHint": "Mesajı sesli oku",
 	"assistant.stopSpeaking": "Okumayı durdur",
 	"assistant.voiceInputHint": "Sesli mesaj göndermek için basılı tutun",
@@ -166,7 +171,8 @@ const tr = {
 	"assistant.transcribing": "Metin çözümleniyor...",
 	"assistant.processing": "İşleniyor...",
 	"assistant.permissionRequired": "İzin Gerekli",
-	"assistant.voiceRecognitionFailed": "Ses tanıma başarısız oldu. Lütfen tekrar deneyin.",
+	"assistant.voiceRecognitionFailed":
+		"Ses tanıma başarısız oldu. Lütfen tekrar deneyin.",
 	"assistant.recordingTooShort": "Kayıt çok kısa, biraz daha uzun tutun.",
 	"assistant.emptyTranscription": "Sesinizi duyamadım, tekrar deneyin.",
 } as const;

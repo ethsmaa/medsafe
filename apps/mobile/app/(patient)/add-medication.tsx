@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
-	View,
+	ActivityIndicator,
+	KeyboardAvoidingView,
+	Modal,
+	Platform,
+	ScrollView,
+	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
-	ScrollView,
-	StyleSheet,
-	KeyboardAvoidingView,
-	Platform,
-	Modal,
-	ActivityIndicator,
+	View,
 } from "react-native";
 import {
 	SafeAreaView,
@@ -18,14 +18,14 @@ import {
 } from "react-native-safe-area-context";
 import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAiNote } from "@/hooks/useAiNote";
 import {
-	useMedicationForm,
+	DOSE_COUNT_OPTIONS,
 	FORMS,
 	FREQUENCIES,
 	MEAL_STATUSES,
-	DOSE_COUNT_OPTIONS,
+	useMedicationForm,
 } from "@/hooks/useMedicationForm";
-import { useAiNote } from "@/hooks/useAiNote";
 
 export default function AddMedicationScreen() {
 	const { isHighContrast, textSize } = useAccessibility();

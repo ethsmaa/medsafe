@@ -31,8 +31,6 @@ export default function LoginScreen() {
 				password,
 			});
 
-			console.log(error);
-
 			if (error) {
 				Alert.alert("Sign In Failed", error.message);
 			} else {

@@ -59,7 +59,10 @@ export function useMedicationAction({
 		},
 	});
 
-	const takeMedication = (prescriptionMedicationId: string, takenAt?: string) => {
+	const takeMedication = (
+		prescriptionMedicationId: string,
+		takenAt?: string,
+	) => {
 		confirmIntakeMutation.mutate({
 			prescriptionMedicationId,
 			status: "TAKEN",

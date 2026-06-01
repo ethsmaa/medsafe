@@ -45,7 +45,9 @@ export function useChatStore() {
 		if (!loaded.current) return;
 		if (persistTimer.current) clearTimeout(persistTimer.current);
 		persistTimer.current = setTimeout(() => {
-			AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch(() => {});
+			AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch(
+				() => {},
+			);
 		}, PERSIST_DEBOUNCE_MS);
 
 		return () => {

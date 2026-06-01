@@ -45,10 +45,15 @@ Format (output these exact 3 lines and nothing else):
  * @param fdaText - Raw text from OpenFDA (indications or dosage), or null if unavailable
  * @param language - "tr" for Turkish, "en" for English
  */
-export function buildAiNoteUserPrompt(drugName: string, fdaText: string | null, language: string): string {
-	const langInstruction = language === "tr"
-		? "IMPORTANT: Write your entire response in Turkish (Türkçe)."
-		: "IMPORTANT: Write your entire response in English.";
+export function buildAiNoteUserPrompt(
+	drugName: string,
+	fdaText: string | null,
+	language: string,
+): string {
+	const langInstruction =
+		language === "tr"
+			? "IMPORTANT: Write your entire response in Turkish (Türkçe)."
+			: "IMPORTANT: Write your entire response in English.";
 
 	if (fdaText) {
 		return `Drug Name: ${drugName}\n\nProspectus Information:\n${fdaText.slice(0, 3000)}\n\nGenerate the 3-bullet note based on the prospectus above.\n${langInstruction}`;

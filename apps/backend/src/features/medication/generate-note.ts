@@ -1,5 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { AI_NOTE_SYSTEM_PROMPT, GEMINI_MODEL, buildAiNoteUserPrompt } from "./prompts.js";
+import {
+	AI_NOTE_SYSTEM_PROMPT,
+	buildAiNoteUserPrompt,
+	GEMINI_MODEL,
+} from "./prompts.js";
 
 export type NoteSource = "fda" | "ai_only";
 

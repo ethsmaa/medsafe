@@ -1,19 +1,23 @@
-import { useEffect, useState } from "react";
-import { Alert, Platform } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useTRPC } from "@/lib/trpc";
-import { suggestTimes, DOSE_COUNT_OPTIONS } from "@/constants/time-suggestions";
-import { useNotifications } from "@/hooks/useNotifications";
-import { useLanguage } from "@/context/LanguageContext";
+import { useEffect, useState } from "react";
+import { Alert, Platform } from "react-native";
 import {
 	MEDICATION_FORMS as FORMS,
 	MEDICATION_FREQUENCIES as FREQUENCIES,
 	MEAL_STATUSES,
 } from "@/constants/medication";
+import { suggestTimes } from "@/constants/time-suggestions";
+import { useLanguage } from "@/context/LanguageContext";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useTRPC } from "@/lib/trpc";
 
+export {
+	MEAL_STATUSES,
+	MEDICATION_FORMS as FORMS,
+	MEDICATION_FREQUENCIES as FREQUENCIES,
+} from "@/constants/medication";
 export { DOSE_COUNT_OPTIONS } from "@/constants/time-suggestions";
-export { MEDICATION_FORMS as FORMS, MEDICATION_FREQUENCIES as FREQUENCIES, MEAL_STATUSES } from "@/constants/medication";
 
 export function useMedicationForm() {
 	const router = useRouter();
@@ -31,9 +35,9 @@ export function useMedicationForm() {
 
 	// Fetch existing med for editing
 	// patientId is forwarded so caregivers can see the right patient's cabinet
-	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions(
-		patientId ? { patientId } : {},
-	));
+	const cabinetQuery = useQuery(
+		trpc.medication.getMyCabinet.queryOptions(patientId ? { patientId } : {}),
+	);
 	const existingMed = cabinetQuery.data?.find((m) => m.id === id);
 
 	// Form state
@@ -164,8 +168,8 @@ export function useMedicationForm() {
 				id,
 				dosageAmount: dosage,
 				frequency: selectedFreq,
-				currentStock: Number.parseInt(stock) || 0,
-				restockThreshold: Number.parseInt(threshold) || 5,
+				currentStock: Number.parseInt(stock, 10) || 0,
+				restockThreshold: Number.parseInt(threshold, 10) || 5,
 				form: selectedForm,
 				mealStatus: selectedMeal,
 				times: formattedTimes,
@@ -178,8 +182,8 @@ export function useMedicationForm() {
 				nameBrand: brandName,
 				dosageAmount: dosage,
 				frequency: selectedFreq,
-				currentStock: Number.parseInt(stock) || 0,
-				restockThreshold: Number.parseInt(threshold) || 5,
+				currentStock: Number.parseInt(stock, 10) || 0,
+				restockThreshold: Number.parseInt(threshold, 10) || 5,
 				form: selectedForm,
 				mealStatus: selectedMeal,
 				times: formattedTimes,
@@ -231,19 +235,30 @@ export function useMedicationForm() {
 		router,
 		isEditing,
 		// Form values
-		name, setName,
-		brandName, setBrandName,
-		dosage, setDosage,
-		stock, setStock,
-		threshold, setThreshold,
-		doseCount, setDoseCount,
-		selectedFreq, setSelectedFreq,
-		selectedForm, setSelectedForm,
-		selectedMeal, setSelectedMeal,
+		name,
+		setName,
+		brandName,
+		setBrandName,
+		dosage,
+		setDosage,
+		stock,
+		setStock,
+		threshold,
+		setThreshold,
+		doseCount,
+		setDoseCount,
+		selectedFreq,
+		setSelectedFreq,
+		selectedForm,
+		setSelectedForm,
+		selectedMeal,
+		setSelectedMeal,
 		times,
-		notes, setNotes,
+		notes,
+		setNotes,
 		// Time picker
-		showTimePicker, setShowTimePicker,
+		showTimePicker,
+		setShowTimePicker,
 		tempDate,
 		onTimeChange,
 		addTime,

@@ -1,22 +1,16 @@
 {
-    "extends": "@medsafe/typescript-config/base.json",
-    "compilerOptions": {
-        "composite": true,
-        "incremental": true,
-        "noEmit": false,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "outDir": "./dist",
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        }
-    },
-    "include": [
-        "src/**/*",
-        "generated/**/*",
-        "build.mjs"
-    ]
+	"extends": "@medsafe/typescript-config/base.json",
+	"compilerOptions": {
+		"composite": true,
+		"incremental": true,
+		"noEmit": false,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["src/**/*", "generated/**/*", "build.mjs"]
 }

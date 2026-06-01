@@ -1,8 +1,8 @@
-import { SchemaType } from "@google/generative-ai";
 import type {
 	FunctionDeclaration,
 	FunctionDeclarationsTool,
 } from "@google/generative-ai";
+import { SchemaType } from "@google/generative-ai";
 
 /**
  * Gemini Function Calling tool definitions.
@@ -18,7 +18,8 @@ const getTodayIntakeStatus: FunctionDeclaration = {
 		properties: {
 			medicationName: {
 				type: SchemaType.STRING,
-				description: "Sorgulanacak ilaç adı (opsiyonel, boş bırakılırsa tümü döner)",
+				description:
+					"Sorgulanacak ilaç adı (opsiyonel, boş bırakılırsa tümü döner)",
 			},
 		},
 	},
@@ -118,7 +119,8 @@ const getStockStatus: FunctionDeclaration = {
 		properties: {
 			medicationName: {
 				type: SchemaType.STRING,
-				description: "Stok kontrol edilecek ilaç adı (opsiyonel, boş bırakılırsa tümü)",
+				description:
+					"Stok kontrol edilecek ilaç adı (opsiyonel, boş bırakılırsa tümü)",
 			},
 		},
 	},

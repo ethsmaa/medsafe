@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useTRPC } from "@/lib/trpc";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTRPC } from "@/lib/trpc";
 
 export type AiNoteState = {
 	/** The generated (or manually edited) note text */

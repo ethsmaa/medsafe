@@ -9,26 +9,26 @@ export const userRouter = router({
 	getProfile: protectedProcedure
 		.input(z.object({ userId: z.string().optional() }))
 		.query(async ({ ctx }) => {
-		const user = ctx.user;
+			const user = ctx.user;
 
-		const patientProfile = await prisma.patientProfile.findUnique({
-			where: { userId: user.id },
-		});
+			const patientProfile = await prisma.patientProfile.findUnique({
+				where: { userId: user.id },
+			});
 
-		if (patientProfile) {
-			return { role: "PATIENT" as const, profileId: patientProfile.id };
-		}
+			if (patientProfile) {
+				return { role: "PATIENT" as const, profileId: patientProfile.id };
+			}
 
-		const caregiverProfile = await prisma.caregiverProfile.findUnique({
-			where: { userId: user.id },
-		});
+			const caregiverProfile = await prisma.caregiverProfile.findUnique({
+				where: { userId: user.id },
+			});
 
-		if (caregiverProfile) {
-			return { role: "CAREGIVER" as const, profileId: caregiverProfile.id };
-		}
+			if (caregiverProfile) {
+				return { role: "CAREGIVER" as const, profileId: caregiverProfile.id };
+			}
 
-		return { role: null, profileId: null };
-	}),
+			return { role: null, profileId: null };
+		}),
 
 	/**
 	 * Setup the user's role (Onboarding).

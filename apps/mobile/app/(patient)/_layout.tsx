@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { ActiveAlertModal } from "@/components/ActiveAlertModal";
 import { useNotifications } from "@/hooks/useNotifications";
+import { logger } from "@/lib/logger";
 import { useTRPC } from "@/lib/trpc";
 
 export default function PatientLayout() {
@@ -34,7 +35,7 @@ export default function PatientLayout() {
 				"Error",
 				"Failed to record intake. Please try again in the app.",
 			);
-			console.error(error);
+			logger.error(error);
 		},
 		onSettled: () => {
 			// Always close the alarm and stop sound, even if DB update failed (user tapped Take)
@@ -47,7 +48,7 @@ export default function PatientLayout() {
 	// Detect Notification -> Open Alarm
 	useEffect(() => {
 		if (lastNotification) {
-			const notification = lastNotification as any;
+			const notification = lastNotification;
 			const data = notification.request?.content?.data;
 			const title = notification.request?.content?.title || "";
 			const body = notification.request?.content?.body || "";

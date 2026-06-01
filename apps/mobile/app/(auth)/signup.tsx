@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authClient } from "@/lib/auth-client";
+import { logger } from "@/lib/logger";
 import { queryClient } from "@/lib/react-query";
 
 export default function SignupScreen() {
@@ -62,7 +63,7 @@ export default function SignupScreen() {
 				}
 			}
 		} catch (e: unknown) {
-			console.error("Unexpected Error during Sign Up:", e);
+			logger.error("Unexpected Error during Sign Up:", e);
 			const errorMessage =
 				e instanceof Error ? e.message : "An unexpected error occurred";
 			Alert.alert("Critical Error", errorMessage);

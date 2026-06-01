@@ -18,14 +18,16 @@ import { useTRPC } from "@/lib/trpc";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const MEAL_ICONS: Record<string, string> = {
+type IconName = keyof typeof Ionicons.glyphMap;
+
+const MEAL_ICONS: Record<string, IconName> = {
 	BEFORE_MEAL: "restaurant-outline",
 	AFTER_MEAL: "restaurant",
 	WITH_FOOD: "fast-food-outline",
 	ANY: "time-outline",
 };
 
-const FORM_ICONS: Record<string, string> = {
+const FORM_ICONS: Record<string, IconName> = {
 	TABLET: "medkit-outline",
 	CAPSULE: "medkit",
 	SYRUP: "beaker-outline",
@@ -172,7 +174,7 @@ export default function MedicationDetailScreen() {
 				{/* Hero */}
 				<View style={styles.heroCard}>
 					<View style={styles.heroIcon}>
-						<Ionicons name={formIconName as any} size={32} color="#d99696" />
+						<Ionicons name={formIconName} size={32} color="#d99696" />
 					</View>
 					<Text style={styles.heroName}>{name}</Text>
 					{med.medication.nameBrand && (
@@ -199,7 +201,7 @@ export default function MedicationDetailScreen() {
 					</View>
 					<View style={styles.statCard}>
 						<Ionicons
-							name={(MEAL_ICONS[med.mealStatus] as any) ?? "time-outline"}
+							name={MEAL_ICONS[med.mealStatus] ?? "time-outline"}
 							size={20}
 							color={isHighContrast ? "#000" : "#d99696"}
 							style={styles.statIcon}
