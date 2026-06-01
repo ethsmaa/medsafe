@@ -37,7 +37,8 @@ jobs:
       - name: lint
         run: pnpm exec biome ci .
 
+      - name: test
+        run: pnpm test
+
       - name: build
         run: pnpm build
-
-      # test gate comes online in faz 1.5.
