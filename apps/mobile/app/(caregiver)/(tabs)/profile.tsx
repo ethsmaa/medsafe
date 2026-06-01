@@ -19,8 +19,14 @@ import { queryClient } from "@/lib/react-query";
 
 export default function ProfileScreen() {
 	const router = useRouter();
-	const { isHighContrast, textSize, toggleHighContrast, setTextSize } =
-		useAccessibility();
+	const {
+		isHighContrast,
+		isDarkMode,
+		textSize,
+		toggleHighContrast,
+		setThemeMode,
+		setTextSize,
+	} = useAccessibility();
 
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -61,6 +67,24 @@ export default function ProfileScreen() {
 					<Text className="mb-4 font-bold text-lg text-text-main-light dark:text-text-main-dark">
 						Accessibility
 					</Text>
+
+					{/* Dark Mode */}
+					<View className="mb-4 flex-row items-center justify-between">
+						<View>
+							<Text className="mb-1 font-semibold text-base text-text-main-light dark:text-text-main-dark">
+								Dark Mode
+							</Text>
+							<Text className="max-w-[90%] text-sm text-text-sub-light dark:text-text-sub-dark">
+								Use a dark color theme
+							</Text>
+						</View>
+						<Switch
+							value={isDarkMode}
+							onValueChange={(value) => setThemeMode(value ? "dark" : "light")}
+							trackColor={{ false: "#d1d5db", true: "#d99696" }}
+							thumbColor={isDarkMode ? "#ffffff" : "#f4f3f4"}
+						/>
+					</View>
 
 					{/* High Contrast */}
 					<View className="mb-4 flex-row items-center justify-between">
