@@ -8,22 +8,31 @@ import {
 	Modal,
 	RefreshControl,
 	ScrollView,
-	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "@/constants/theme";
-import { useAccessibility } from "@/context/AccessibilityContext";
 import { useTRPC } from "@/lib/trpc";
+
+const CARD =
+	"mb-4 rounded-2xl border border-border-light bg-surface-light p-4 shadow-sm dark:border-border-dark dark:bg-surface-dark";
+const AVATAR =
+	"h-[50px] w-[50px] items-center justify-center rounded-full border border-border-light bg-surface-light dark:border-border-dark dark:bg-surface-dark";
+const AVATAR_TEXT = "font-bold text-xl text-primary";
+const CARD_TITLE =
+	"font-bold text-lg text-text-main-light dark:text-text-main-dark";
+const CARD_SUBTITLE = "text-sm text-text-sub-light dark:text-text-sub-dark";
+const ACTION_BUTTON =
+	"flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-primary py-2.5";
+const SECTION_TITLE =
+	"mb-3 font-bold text-lg text-text-main-light dark:text-text-main-dark";
+const MODAL_BUTTON = "flex-1 items-center justify-center rounded-xl py-3";
 
 export default function CareTeamScreen() {
 	const router = useRouter();
 	const trpc = useTRPC();
-	const { isHighContrast, textSize } = useAccessibility();
-	const styles = makeStyles(isHighContrast, textSize);
 
 	const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
 	const [inviteEmail, setInviteEmail] = useState("");
@@ -83,56 +92,58 @@ export default function CareTeamScreen() {
 		sentInvitesQuery.isLoading;
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
 			{/* Header */}
-			<View style={styles.header}>
-				<TouchableOpacity
-					onPress={() => router.back()}
-					style={styles.backButton}
-				>
+			<View className="flex-row items-center justify-between border-border-light border-b px-5 py-4 dark:border-border-dark">
+				<TouchableOpacity onPress={() => router.back()} className="p-2">
 					<Ionicons
 						name="arrow-back"
 						size={24}
-						color={styles.headerTitle.color}
+						className="text-text-main-light dark:text-text-main-dark"
 					/>
 				</TouchableOpacity>
-				<Text style={styles.headerTitle}>My Care Team</Text>
+				<Text className="font-bold text-text-main-light text-xl dark:text-text-main-dark">
+					My Care Team
+				</Text>
 				<TouchableOpacity
 					onPress={() => setIsInviteModalVisible(true)}
-					style={styles.addButton}
+					className="rounded-full bg-primary p-2"
 				>
-					<Ionicons name="add" size={24} color="white" />
+					<Ionicons name="add" size={24} className="text-white" />
 				</TouchableOpacity>
 			</View>
 
 			<ScrollView
-				contentContainerStyle={styles.content}
+				contentContainerClassName="p-5"
 				refreshControl={
 					<RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
 				}
 			>
 				{/* 1. Received Invites (Pending Requests) */}
 				{receivedInvitesQuery.data && receivedInvitesQuery.data.length > 0 && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Pending Requests</Text>
+					<View className="mb-6">
+						<Text className={SECTION_TITLE}>Pending Requests</Text>
 						{receivedInvitesQuery.data.map((invite) => (
-							<View key={invite.id} style={[styles.card, styles.inviteCard]}>
-								<View style={styles.cardHeader}>
-									<View style={styles.avatar}>
-										<Text style={styles.avatarText}>
+							<View
+								key={invite.id}
+								className={`${CARD} border-2 border-primary`}
+							>
+								<View className="mb-4 flex-row items-center gap-4">
+									<View className={AVATAR}>
+										<Text className={AVATAR_TEXT}>
 											{invite.caregiver.user.name?.[0] || "C"}
 										</Text>
 									</View>
-									<View style={{ flex: 1 }}>
-										<Text style={styles.cardTitle}>
+									<View className="flex-1">
+										<Text className={CARD_TITLE}>
 											{invite.caregiver.user.name}
 										</Text>
-										<Text style={styles.cardSubtitle}>Wants to connect</Text>
+										<Text className={CARD_SUBTITLE}>Wants to connect</Text>
 									</View>
 								</View>
-								<View style={styles.cardActions}>
+								<View className="flex-row gap-3">
 									<TouchableOpacity
-										style={[styles.actionButton, styles.rejectButton]}
+										className={`${ACTION_BUTTON} bg-error-light dark:bg-error-dark`}
 										onPress={() =>
 											respondMutation.mutate({
 												inviteId: invite.id,
@@ -140,10 +151,12 @@ export default function CareTeamScreen() {
 											})
 										}
 									>
-										<Text style={styles.rejectButtonText}>Decline</Text>
+										<Text className="font-semibold text-sm text-white">
+											Decline
+										</Text>
 									</TouchableOpacity>
 									<TouchableOpacity
-										style={[styles.actionButton, styles.acceptButton]}
+										className={`${ACTION_BUTTON} bg-success-light dark:bg-success-dark`}
 										onPress={() =>
 											respondMutation.mutate({
 												inviteId: invite.id,
@@ -151,7 +164,9 @@ export default function CareTeamScreen() {
 											})
 										}
 									>
-										<Text style={styles.acceptButtonText}>Accept</Text>
+										<Text className="font-semibold text-sm text-white">
+											Accept
+										</Text>
 									</TouchableOpacity>
 								</View>
 							</View>
@@ -160,36 +175,38 @@ export default function CareTeamScreen() {
 				)}
 
 				{/* 2. Active Caregivers */}
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Active Caregivers</Text>
+				<View className="mb-6">
+					<Text className={SECTION_TITLE}>Active Caregivers</Text>
 					{careTeamQuery.data?.length === 0 && (
-						<Text style={styles.emptyText}>No active caregivers.</Text>
+						<Text className="text-base text-text-sub-light dark:text-text-sub-dark">
+							No active caregivers.
+						</Text>
 					)}
 					{careTeamQuery.data?.map((member) => (
-						<View key={member.id} style={styles.card}>
-							<View style={styles.cardHeader}>
-								<View style={styles.avatar}>
-									<Text style={styles.avatarText}>
+						<View key={member.id} className={CARD}>
+							<View className="mb-4 flex-row items-center gap-4">
+								<View className={AVATAR}>
+									<Text className={AVATAR_TEXT}>
 										{member.caregiver.user.name?.[0] || "C"}
 									</Text>
 								</View>
-								<View style={{ flex: 1 }}>
-									<Text style={styles.cardTitle}>
+								<View className="flex-1">
+									<Text className={CARD_TITLE}>
 										{member.caregiver.user.name}
 									</Text>
-									<Text style={styles.cardSubtitle}>Caregiver</Text>
+									<Text className={CARD_SUBTITLE}>Caregiver</Text>
 								</View>
 							</View>
 
-							<View style={styles.cardActions}>
+							<View className="flex-row gap-3">
 								<TouchableOpacity
-									style={styles.actionButton}
+									className={ACTION_BUTTON}
 									onPress={() =>
 										handleCall(member.caregiver.user.name || "Caregiver")
 									}
 								>
-									<Ionicons name="call" size={20} color="white" />
-									<Text style={styles.actionButtonText}>Call</Text>
+									<Ionicons name="call" size={20} className="text-white" />
+									<Text className="font-semibold text-sm text-white">Call</Text>
 								</TouchableOpacity>
 							</View>
 						</View>
@@ -198,21 +215,21 @@ export default function CareTeamScreen() {
 
 				{/* 3. Sent Invites (Pending) */}
 				{sentInvitesQuery.data && sentInvitesQuery.data.length > 0 && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Sent Invitations</Text>
+					<View className="mb-6">
+						<Text className={SECTION_TITLE}>Sent Invitations</Text>
 						{sentInvitesQuery.data.map((invite) => (
-							<View key={invite.id} style={[styles.card, { opacity: 0.8 }]}>
-								<View style={styles.cardHeader}>
-									<View style={[styles.avatar, { backgroundColor: "#eee" }]}>
-										<Text style={[styles.avatarText, { color: "#999" }]}>
+							<View key={invite.id} className={`${CARD} opacity-80`}>
+								<View className="mb-4 flex-row items-center gap-4">
+									<View className={`${AVATAR} bg-[#eee]`}>
+										<Text className={`${AVATAR_TEXT} text-[#999]`}>
 											{invite.caregiver.user.name?.[0] || "?"}
 										</Text>
 									</View>
-									<View style={{ flex: 1 }}>
-										<Text style={styles.cardTitle}>
+									<View className="flex-1">
+										<Text className={CARD_TITLE}>
 											{invite.caregiver.user.name || invite.caregiverId}
 										</Text>
-										<Text style={styles.cardSubtitle}>Pending Response</Text>
+										<Text className={CARD_SUBTITLE}>Pending Response</Text>
 									</View>
 								</View>
 							</View>
@@ -228,38 +245,45 @@ export default function CareTeamScreen() {
 				animationType="slide"
 				onRequestClose={() => setIsInviteModalVisible(false)}
 			>
-				<View style={styles.modalOverlay}>
-					<View style={styles.modalContent}>
-						<Text style={styles.modalTitle}>Add Caregiver</Text>
-						<Text style={styles.modalSubtitle}>
+				<View className="flex-1 items-center justify-center bg-black/50 p-5">
+					<View className="w-full max-w-[400px] rounded-3xl bg-surface-light p-6 dark:bg-surface-dark">
+						<Text className="mb-2 font-bold text-text-main-light text-xl dark:text-text-main-dark">
+							Add Caregiver
+						</Text>
+						<Text className="mb-6 text-sm text-text-sub-light dark:text-text-sub-dark">
 							Enter the email address of the caregiver you want to invite.
 						</Text>
 
 						<TextInput
-							style={styles.input}
+							className="mb-6 rounded-xl border border-border-light bg-background-light p-4 text-base text-text-main-light dark:border-border-dark dark:bg-background-dark dark:text-text-main-dark"
 							placeholder="caregiver@example.com"
+							placeholderTextColor="#9ca3af"
 							value={inviteEmail}
 							onChangeText={setInviteEmail}
 							autoCapitalize="none"
 							keyboardType="email-address"
 						/>
 
-						<View style={styles.modalButtons}>
+						<View className="flex-row gap-3">
 							<TouchableOpacity
-								style={[styles.modalButton, styles.cancelButton]}
+								className={`${MODAL_BUTTON} border border-border-light bg-surface-light dark:border-border-dark dark:bg-surface-dark`}
 								onPress={() => setIsInviteModalVisible(false)}
 							>
-								<Text style={styles.cancelButtonText}>Cancel</Text>
+								<Text className="font-semibold text-base text-text-main-light dark:text-text-main-dark">
+									Cancel
+								</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
-								style={[styles.modalButton, styles.confirmButton]}
+								className={`${MODAL_BUTTON} bg-primary`}
 								onPress={handleInvite}
 								disabled={inviteMutation.isPending}
 							>
 								{inviteMutation.isPending ? (
 									<ActivityIndicator color="white" size="small" />
 								) : (
-									<Text style={styles.confirmButtonText}>Send Invite</Text>
+									<Text className="font-semibold text-base text-white">
+										Send Invite
+									</Text>
 								)}
 							</TouchableOpacity>
 						</View>
@@ -269,215 +293,3 @@ export default function CareTeamScreen() {
 		</SafeAreaView>
 	);
 }
-
-const makeStyles = (isHighContrast: boolean, textSize: number) => {
-	const theme = isHighContrast ? Colors.highContrast : Colors.light;
-	return StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: theme.background,
-		},
-		header: {
-			flexDirection: "row",
-			alignItems: "center",
-			justifyContent: "space-between",
-			paddingHorizontal: 20,
-			paddingVertical: 16,
-			borderBottomWidth: 1,
-			borderBottomColor: theme.border,
-		},
-		backButton: {
-			padding: 8,
-		},
-		headerTitle: {
-			fontSize: 20 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-		},
-		addButton: {
-			backgroundColor: theme.primary,
-			padding: 8,
-			borderRadius: 20,
-		},
-		content: {
-			padding: 20,
-		},
-		emptyState: {
-			alignItems: "center",
-			justifyContent: "center",
-			marginTop: 60,
-			gap: 16,
-		},
-		emptyText: {
-			fontSize: 16 * textSize,
-			color: theme.textSecondary,
-		},
-		emptyButton: {
-			backgroundColor: theme.primary,
-			paddingHorizontal: 20,
-			paddingVertical: 12,
-			borderRadius: 24,
-		},
-		emptyButtonText: {
-			color: "white",
-			fontWeight: "600",
-			fontSize: 16 * textSize,
-		},
-		card: {
-			backgroundColor: theme.cardBg,
-			borderRadius: 16,
-			padding: 16,
-			marginBottom: 16,
-			borderWidth: isHighContrast ? 2 : 1,
-			borderColor: theme.border,
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 2 },
-			shadowOpacity: 0.05,
-			shadowRadius: 8,
-			elevation: 2,
-		},
-		cardHeader: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 16,
-			marginBottom: 16,
-		},
-		avatar: {
-			width: 50,
-			height: 50,
-			borderRadius: 25,
-			backgroundColor: theme.cardBg,
-			alignItems: "center",
-			justifyContent: "center",
-			borderWidth: 1,
-			borderColor: theme.border,
-		},
-		avatarText: {
-			fontSize: 20 * textSize,
-			fontWeight: "bold",
-			color: theme.primary,
-		},
-		cardTitle: {
-			fontSize: 18 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-		},
-		cardSubtitle: {
-			fontSize: 14 * textSize,
-			color: theme.textSecondary,
-		},
-		cardActions: {
-			flexDirection: "row",
-			gap: 12,
-		},
-		actionButton: {
-			flex: 1,
-			flexDirection: "row",
-			alignItems: "center",
-			justifyContent: "center",
-			backgroundColor: theme.primary,
-			paddingVertical: 10,
-			borderRadius: 12,
-			gap: 8,
-		},
-		actionButtonText: {
-			color: "white",
-			fontWeight: "600",
-			fontSize: 14 * textSize,
-		},
-		// Modal
-		modalOverlay: {
-			flex: 1,
-			backgroundColor: "rgba(0,0,0,0.5)",
-			justifyContent: "center",
-			alignItems: "center",
-			padding: 20,
-		},
-		modalContent: {
-			backgroundColor: theme.cardBg,
-			borderRadius: 24,
-			padding: 24,
-			width: "100%",
-			maxWidth: 400,
-		},
-		modalTitle: {
-			fontSize: 20 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-			marginBottom: 8,
-		},
-		modalSubtitle: {
-			fontSize: 14 * textSize,
-			color: theme.textSecondary,
-			marginBottom: 24,
-		},
-		input: {
-			backgroundColor: theme.background,
-			borderRadius: 12,
-			padding: 16,
-			fontSize: 16 * textSize,
-			color: theme.text,
-			marginBottom: 24,
-			borderWidth: 1,
-			borderColor: theme.border,
-		},
-		modalButtons: {
-			flexDirection: "row",
-			gap: 12,
-		},
-		modalButton: {
-			flex: 1,
-			paddingVertical: 12,
-			borderRadius: 12,
-			alignItems: "center",
-			justifyContent: "center",
-		},
-		cancelButton: {
-			backgroundColor: theme.cardBg,
-			borderWidth: 1,
-			borderColor: theme.border,
-		},
-		confirmButton: {
-			backgroundColor: theme.primary,
-		},
-		cancelButtonText: {
-			color: theme.text,
-			fontWeight: "600",
-			fontSize: 16 * textSize,
-		},
-		confirmButtonText: {
-			color: "white",
-			fontWeight: "600",
-			fontSize: 16 * textSize,
-		},
-		section: {
-			marginBottom: 24,
-		},
-		sectionTitle: {
-			fontSize: 18 * textSize,
-			fontWeight: "bold",
-			color: theme.text,
-			marginBottom: 12,
-		},
-		inviteCard: {
-			borderWidth: 2,
-			borderColor: theme.primary, // Highlight pending invites
-		},
-		rejectButton: {
-			backgroundColor: theme.error, // Red
-		},
-		rejectButtonText: {
-			color: "white",
-			fontWeight: "600",
-			fontSize: 14 * textSize,
-		},
-		acceptButton: {
-			backgroundColor: theme.success, // Green
-		},
-		acceptButtonText: {
-			color: "white",
-			fontWeight: "600",
-			fontSize: 14 * textSize,
-		},
-	});
-};
