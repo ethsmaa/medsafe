@@ -5,12 +5,10 @@ import {
 	ActivityIndicator,
 	FlatList,
 	RefreshControl,
-	StyleSheet,
 	Text,
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAccessibility } from "@/context/AccessibilityContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTRPC } from "@/lib/trpc";
 import { useActivityLogStore } from "@/stores/activityLogStore";
@@ -98,20 +96,30 @@ function formatDelta(deltaMinutes: number | null, onTimeStr: string): string {
 
 const STATUS_CONFIG: Record<
 	IntakeStatus,
-	{ icon: keyof typeof Ionicons.glyphMap; bg: string; tint: string }
+	{ icon: keyof typeof Ionicons.glyphMap; bgClass: string; tintClass: string }
 > = {
-	TAKEN: { icon: "checkmark-circle", bg: "#dcfce7", tint: "#16a34a" },
-	SKIPPED: { icon: "remove-circle", bg: "#fef9c3", tint: "#ca8a04" },
-	MISSED: { icon: "close-circle", bg: "#fee2e2", tint: "#dc2626" },
+	TAKEN: {
+		icon: "checkmark-circle",
+		bgClass: "bg-green-100 dark:bg-green-900/30",
+		tintClass: "text-green-600 dark:text-green-400",
+	},
+	SKIPPED: {
+		icon: "remove-circle",
+		bgClass: "bg-yellow-100 dark:bg-yellow-900/30",
+		tintClass: "text-yellow-600 dark:text-yellow-400",
+	},
+	MISSED: {
+		icon: "close-circle",
+		bgClass: "bg-red-100 dark:bg-red-900/30",
+		tintClass: "text-red-600 dark:text-red-400",
+	},
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ActivityLogScreen() {
-	const { isHighContrast, textSize } = useAccessibility();
 	const { t } = useLanguage();
 	const trpc = useTRPC();
-	const styles = makeStyles(isHighContrast, textSize);
 	const { markAsSeen } = useActivityLogStore();
 
 	const logQuery = useQuery(trpc.careTeam.getActivityLog.queryOptions());
@@ -144,14 +152,25 @@ export default function ActivityLogScreen() {
 		[],
 	);
 
+	const header = (
+		<View className="px-5 pt-2 pb-4">
+			<Text className="font-extrabold text-2xl text-text-main-light tracking-tight dark:text-text-main-dark">
+				{t("log.title")}
+			</Text>
+			<Text className="mt-0.5 text-text-sub-light text-xs dark:text-text-sub-dark">
+				{t("log.subtitle")}
+			</Text>
+		</View>
+	);
+
 	if (logQuery.isLoading) {
 		return (
-			<SafeAreaView style={styles.container} edges={["top"]}>
-				<View style={styles.header}>
-					<Text style={styles.title}>{t("log.title")}</Text>
-					<Text style={styles.subtitle}>{t("log.subtitle")}</Text>
-				</View>
-				<View style={styles.centered}>
+			<SafeAreaView
+				className="flex-1 bg-background-light dark:bg-background-dark"
+				edges={["top"]}
+			>
+				{header}
+				<View className="flex-1 items-center justify-center pb-[60px]">
 					<ActivityIndicator size="large" color="#d99696" />
 				</View>
 			</SafeAreaView>
@@ -160,33 +179,37 @@ export default function ActivityLogScreen() {
 
 	if (entries.length === 0) {
 		return (
-			<SafeAreaView style={styles.container} edges={["top"]}>
-				<View style={styles.header}>
-					<Text style={styles.title}>{t("log.title")}</Text>
-					<Text style={styles.subtitle}>{t("log.subtitle")}</Text>
-				</View>
-				<View style={styles.centered}>
-					<View style={styles.emptyIconCircle}>
-						<Ionicons name="time-outline" size={40} color="#d99696" />
+			<SafeAreaView
+				className="flex-1 bg-background-light dark:bg-background-dark"
+				edges={["top"]}
+			>
+				{header}
+				<View className="flex-1 items-center justify-center pb-[60px]">
+					<View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-primary-soft-light dark:bg-primary-soft-dark">
+						<Ionicons name="time-outline" size={40} className="text-primary" />
 					</View>
-					<Text style={styles.emptyText}>{t("log.empty")}</Text>
-					<Text style={styles.emptyDesc}>{t("log.emptyDesc")}</Text>
+					<Text className="mb-1.5 font-bold text-lg text-text-main-light dark:text-text-main-dark">
+						{t("log.empty")}
+					</Text>
+					<Text className="px-10 text-center text-sm text-text-sub-light leading-5 dark:text-text-sub-dark">
+						{t("log.emptyDesc")}
+					</Text>
 				</View>
 			</SafeAreaView>
 		);
 	}
 
 	return (
-		<SafeAreaView style={styles.container} edges={["top"]}>
-			<View style={styles.header}>
-				<Text style={styles.title}>{t("log.title")}</Text>
-				<Text style={styles.subtitle}>{t("log.subtitle")}</Text>
-			</View>
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
+			{header}
 
 			<FlatList
 				data={grouped}
 				keyExtractor={(item) => item.label}
-				contentContainerStyle={styles.listContent}
+				contentContainerClassName="px-4 pb-8"
 				showsVerticalScrollIndicator={false}
 				refreshControl={
 					<RefreshControl
@@ -196,12 +219,14 @@ export default function ActivityLogScreen() {
 					/>
 				}
 				renderItem={({ item: group }) => (
-					<View style={styles.group}>
+					<View className="mb-2">
 						{/* Date separator */}
-						<View style={styles.dateSeparator}>
-							<View style={styles.dateLine} />
-							<Text style={styles.dateLabel}>{group.label}</Text>
-							<View style={styles.dateLine} />
+						<View className="my-3 flex-row items-center gap-2.5">
+							<View className="h-px flex-1 bg-border-light dark:bg-border-dark" />
+							<Text className="font-bold text-[11px] text-text-sub-light uppercase tracking-wider dark:text-text-sub-dark">
+								{group.label}
+							</Text>
+							<View className="h-px flex-1 bg-border-light dark:bg-border-dark" />
 						</View>
 
 						{/* Log rows */}
@@ -229,36 +254,37 @@ export default function ActivityLogScreen() {
 							const isOnTime = delta === null || Math.abs(delta) <= 30;
 
 							return (
-								<View key={entry.id} style={styles.logCard}>
+								<View
+									key={entry.id}
+									className="mb-2 flex-row items-center gap-3 rounded-2xl bg-surface-light p-3.5 shadow-sm dark:bg-surface-dark"
+								>
 									{/* Status icon */}
 									<View
-										style={[styles.iconCircle, { backgroundColor: cfg.bg }]}
+										className={`h-12 w-12 shrink-0 items-center justify-center rounded-full ${cfg.bgClass}`}
 									>
-										<Ionicons name={cfg.icon} size={24} color={cfg.tint} />
+										<Ionicons
+											name={cfg.icon}
+											size={24}
+											className={cfg.tintClass}
+										/>
 									</View>
 
 									{/* Content */}
-									<View style={styles.logBody}>
-										<Text style={styles.logTitle} numberOfLines={2}>
-											<Text style={styles.logPatient}>{patientName}</Text>{" "}
-											{statusText} <Text style={styles.logMed}>{medName}</Text>
+									<View className="flex-1 gap-1">
+										<Text
+											className="text-sm text-text-main-light leading-5 dark:text-text-main-dark"
+											numberOfLines={2}
+										>
+											<Text className="font-bold">{patientName}</Text>{" "}
+											{statusText}{" "}
+											<Text className="font-semibold">{medName}</Text>
 										</Text>
-										<View style={styles.logMeta}>
+										<View className="flex-row gap-1.5">
 											<View
-												style={[
-													styles.timingBadge,
-													{
-														backgroundColor: isOnTime ? "#dcfce7" : "#fee2e2",
-													},
-												]}
+												className={`rounded-lg px-2 py-0.5 ${isOnTime ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"}`}
 											>
 												<Text
-													style={[
-														styles.timingText,
-														{
-															color: isOnTime ? "#16a34a" : "#dc2626",
-														},
-													]}
+													className={`font-semibold text-[11px] ${isOnTime ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
 												>
 													{timingLabel}
 												</Text>
@@ -267,7 +293,7 @@ export default function ActivityLogScreen() {
 									</View>
 
 									{/* Time */}
-									<Text style={styles.logTime}>
+									<Text className="shrink-0 font-medium text-text-sub-light text-xs dark:text-text-sub-dark">
 										{formatTime(entry.takenAt)}
 									</Text>
 								</View>
@@ -279,114 +305,3 @@ export default function ActivityLogScreen() {
 		</SafeAreaView>
 	);
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const makeStyles = (isHighContrast: boolean, textSize: number) =>
-	StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6",
-		},
-		header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
-		title: {
-			fontSize: 26 * textSize,
-			fontWeight: "800",
-			color: isHighContrast ? "#000000" : "#111827",
-			letterSpacing: -0.5,
-		},
-		subtitle: {
-			fontSize: 13 * textSize,
-			color: isHighContrast ? "#000000" : "#6b7280",
-			marginTop: 2,
-		},
-		centered: {
-			flex: 1,
-			alignItems: "center",
-			justifyContent: "center",
-			paddingBottom: 60,
-		},
-		emptyIconCircle: {
-			width: 80,
-			height: 80,
-			borderRadius: 40,
-			backgroundColor: "#fde8e8",
-			alignItems: "center",
-			justifyContent: "center",
-			marginBottom: 16,
-		},
-		emptyText: {
-			fontSize: 18 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000" : "#374151",
-			marginBottom: 6,
-		},
-		emptyDesc: {
-			fontSize: 14 * textSize,
-			color: isHighContrast ? "#000" : "#6b7280",
-			textAlign: "center",
-			paddingHorizontal: 40,
-			lineHeight: 20,
-		},
-		listContent: { paddingHorizontal: 16, paddingBottom: 32 },
-		group: { marginBottom: 8 },
-		dateSeparator: {
-			flexDirection: "row",
-			alignItems: "center",
-			marginVertical: 12,
-			gap: 10,
-		},
-		dateLine: {
-			flex: 1,
-			height: 1,
-			backgroundColor: isHighContrast ? "#000" : "#e5e7eb",
-		},
-		dateLabel: {
-			fontSize: 11 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000" : "#9ca3af",
-			textTransform: "uppercase",
-			letterSpacing: 0.8,
-		},
-		logCard: {
-			flexDirection: "row",
-			alignItems: "center",
-			backgroundColor: isHighContrast ? "#ffffff" : "white",
-			borderRadius: 16,
-			padding: 14,
-			marginBottom: 8,
-			gap: 12,
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: 0.05,
-			shadowRadius: 4,
-			elevation: 1,
-			borderWidth: isHighContrast ? 1 : 0,
-			borderColor: "#000",
-		},
-		iconCircle: {
-			width: 48,
-			height: 48,
-			borderRadius: 24,
-			alignItems: "center",
-			justifyContent: "center",
-			flexShrink: 0,
-		},
-		logBody: { flex: 1, gap: 4 },
-		logTitle: {
-			fontSize: 14 * textSize,
-			color: isHighContrast ? "#000" : "#111827",
-			lineHeight: 20,
-		},
-		logPatient: { fontWeight: "700" },
-		logMed: { fontWeight: "600", color: isHighContrast ? "#000" : "#374151" },
-		logMeta: { flexDirection: "row", gap: 6 },
-		timingBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-		timingText: { fontSize: 11 * textSize, fontWeight: "600" },
-		logTime: {
-			fontSize: 12 * textSize,
-			color: isHighContrast ? "#000" : "#9ca3af",
-			fontWeight: "500",
-			flexShrink: 0,
-		},
-	});
