@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
 	ActivityIndicator,
 	ScrollView,
-	StyleSheet,
 	Switch,
 	Text,
 	TouchableOpacity,
@@ -23,7 +22,6 @@ export default function ProfileScreen() {
 	const { isHighContrast, textSize, toggleHighContrast, setTextSize } =
 		useAccessibility();
 
-	const styles = makeStyles(isHighContrast, textSize);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 	const { clearNotificationState } = useNotifications();
@@ -49,19 +47,28 @@ export default function ProfileScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container} edges={["top"]}>
-			<ScrollView contentContainerStyle={styles.scrollContent}>
-				<Text style={styles.title}>Profile & Settings</Text>
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
+			<ScrollView contentContainerClassName="p-6">
+				<Text className="mb-8 font-bold text-3xl text-text-main-light dark:text-text-main-dark">
+					Profile & Settings
+				</Text>
 
 				{/* Accessibility Settings */}
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Accessibility</Text>
+				<View className="mb-6 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark">
+					<Text className="mb-4 font-bold text-lg text-text-main-light dark:text-text-main-dark">
+						Accessibility
+					</Text>
 
 					{/* High Contrast */}
-					<View style={styles.settingRow}>
+					<View className="mb-4 flex-row items-center justify-between">
 						<View>
-							<Text style={styles.label}>High Contrast Mode</Text>
-							<Text style={styles.description}>
+							<Text className="mb-1 font-semibold text-base text-text-main-light dark:text-text-main-dark">
+								High Contrast Mode
+							</Text>
+							<Text className="max-w-[90%] text-sm text-text-sub-light dark:text-text-sub-dark">
 								Increase color contrast for better visibility
 							</Text>
 						</View>
@@ -74,10 +81,12 @@ export default function ProfileScreen() {
 					</View>
 
 					{/* Text Size */}
-					<View style={styles.settingRow}>
+					<View className="mb-4 flex-row items-center justify-between">
 						<View>
-							<Text style={styles.label}>Text Size</Text>
-							<Text style={styles.description}>
+							<Text className="mb-1 font-semibold text-base text-text-main-light dark:text-text-main-dark">
+								Text Size
+							</Text>
+							<Text className="max-w-[90%] text-sm text-text-sub-light dark:text-text-sub-dark">
 								Adjust text scale ({textSize.toFixed(1)}x)
 							</Text>
 						</View>
@@ -95,19 +104,25 @@ export default function ProfileScreen() {
 				</View>
 
 				{/* Account Actions */}
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Account</Text>
+				<View className="mb-6 rounded-2xl bg-surface-light p-5 shadow-sm dark:bg-surface-dark">
+					<Text className="mb-4 font-bold text-lg text-text-main-light dark:text-text-main-dark">
+						Account
+					</Text>
 					<TouchableOpacity
-						style={styles.logoutButton}
+						className="flex-row items-center gap-2 py-2"
 						onPress={handleLogout}
 						disabled={isLoggingOut}
 					>
 						{isLoggingOut ? (
 							<ActivityIndicator size="small" color="#ef4444" />
 						) : (
-							<Ionicons name="log-out-outline" size={24} color="#ef4444" />
+							<Ionicons
+								name="log-out-outline"
+								size={24}
+								className="text-error-light dark:text-error-dark"
+							/>
 						)}
-						<Text style={styles.logoutText}>
+						<Text className="font-semibold text-base text-error-light dark:text-error-dark">
 							{isLoggingOut ? "Logging Out..." : "Log Out"}
 						</Text>
 					</TouchableOpacity>
@@ -116,67 +131,3 @@ export default function ProfileScreen() {
 		</SafeAreaView>
 	);
 }
-
-const makeStyles = (isHighContrast: boolean, textSize: number) =>
-	StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: isHighContrast ? "#ffffff" : "#f3f4f6",
-		},
-		scrollContent: {
-			padding: 24,
-		},
-		title: {
-			fontSize: 32 * textSize,
-			fontWeight: "bold",
-			color: isHighContrast ? "#000000" : "#111827",
-			marginBottom: 32,
-		},
-		section: {
-			backgroundColor: isHighContrast ? "#ffffff" : "#ffffff",
-			borderRadius: 16,
-			padding: 20,
-			marginBottom: 24,
-			borderWidth: isHighContrast ? 2 : 0,
-			borderColor: "#000000",
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: 0.05,
-			shadowRadius: 2,
-			elevation: 1,
-		},
-		sectionTitle: {
-			fontSize: 18 * textSize,
-			fontWeight: "bold",
-			color: isHighContrast ? "#000000" : "#1f2937",
-			marginBottom: 16,
-		},
-		settingRow: {
-			flexDirection: "row",
-			justifyContent: "space-between",
-			alignItems: "center",
-			marginBottom: 16,
-		},
-		label: {
-			fontSize: 16 * textSize,
-			fontWeight: "600",
-			color: isHighContrast ? "#000000" : "#374151",
-			marginBottom: 4,
-		},
-		description: {
-			fontSize: 14 * textSize,
-			color: isHighContrast ? "#000000" : "#6b7280",
-			maxWidth: "90%",
-		},
-		logoutButton: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 8,
-			paddingVertical: 8,
-		},
-		logoutText: {
-			fontSize: 16 * textSize,
-			fontWeight: "600",
-			color: "#ef4444",
-		},
-	});
