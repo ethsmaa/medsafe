@@ -5,105 +5,39 @@ import {
 	ActivityIndicator,
 	Alert,
 	ScrollView,
-	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAccessibility } from "@/context/AccessibilityContext";
+import { MedicationDetailHero } from "@/components/medication/MedicationDetailHero";
+import { MedicationDeviceControls } from "@/components/medication/MedicationDeviceControls";
+import { MedicationStatsRow } from "@/components/medication/MedicationStatsRow";
 import { useMedicationAction } from "@/hooks/useMedicationAction";
-import { fireDeviceAlarm, stopDeviceAlarm } from "@/lib/deviceApi";
+import { FORM_ICONS } from "@/lib/medication-display";
 import { useTRPC } from "@/lib/trpc";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-type IconName = keyof typeof Ionicons.glyphMap;
-
-const MEAL_ICONS: Record<string, IconName> = {
-	BEFORE_MEAL: "restaurant-outline",
-	AFTER_MEAL: "restaurant",
-	WITH_FOOD: "fast-food-outline",
-	ANY: "time-outline",
-};
-
-const FORM_ICONS: Record<string, IconName> = {
-	TABLET: "medkit-outline",
-	CAPSULE: "medkit",
-	SYRUP: "beaker-outline",
-	CREAM: "brush-outline",
-	INJECTION: "flask-outline",
-	OTHER: "ellipsis-horizontal-circle-outline",
-};
-
-function formatFrequency(f: string): string {
-	switch (f) {
-		case "DAILY":
-			return "Daily";
-		case "WEEKLY":
-			return "Weekly";
-		case "AS_NEEDED":
-			return "As Needed";
-		case "PERIODIC":
-			return "Periodic";
-		default:
-			return f;
-	}
-}
-
-function formatMealStatus(m: string): string {
-	switch (m) {
-		case "BEFORE_MEAL":
-			return "Before Meal";
-		case "AFTER_MEAL":
-			return "After Meal";
-		case "WITH_FOOD":
-			return "With Food";
-		case "ANY":
-			return "Any Time";
-		default:
-			return m;
-	}
-}
-
-// Schedule'daki "HH:MM" zamanlardan, simdiden sonraki en yakininin kac dakika
-// sonra oldugunu doner. Bugunun tum zamanlari gectiyse yarinin ilk zamanini kullanir.
-function minutesUntilNextDose(
-	schedules: { timeOfDay: string }[] | undefined,
-): number {
-	if (!schedules || schedules.length === 0) return 1;
-	const now = new Date();
-	const nowMin = now.getHours() * 60 + now.getMinutes();
-	const todayMinutes = schedules
-		.map((s) => {
-			const [h, m] = s.timeOfDay.split(":").map(Number);
-			return (h || 0) * 60 + (m || 0);
-		})
-		.sort((a, b) => a - b);
-	const upcoming = todayMinutes.find((m) => m > nowMin);
-	if (upcoming !== undefined) return upcoming - nowMin;
-	// Bugun bitti, yarinin ilki
-	return 24 * 60 - nowMin + todayMinutes[0];
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
+const SECTION =
+	"mb-3 rounded-2xl bg-surface-light p-4 shadow-sm dark:bg-surface-dark";
+const SECTION_TITLE =
+	"font-bold text-sm text-text-main-light dark:text-text-main-dark";
 
 export default function MedicationDetailScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
-	const { isHighContrast, isDarkMode, textSize } = useAccessibility();
 	const trpc = useTRPC();
 	const { deleteMedication } = useMedicationAction();
-	const styles = makeStyles(isHighContrast, isDarkMode, textSize);
 
-	// Use getMyCabinet and find the specific medication by id
 	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
 	const med = cabinetQuery.data?.find((m) => m.id === id);
 
 	if (cabinetQuery.isLoading) {
 		return (
-			<SafeAreaView style={styles.container} edges={["top"]}>
-				<View style={styles.centered}>
+			<SafeAreaView
+				className="flex-1 bg-background-light dark:bg-background-dark"
+				edges={["top"]}
+			>
+				<View className="flex-1 items-center justify-center">
 					<ActivityIndicator size="large" color="#d99696" />
 				</View>
 			</SafeAreaView>
@@ -112,46 +46,73 @@ export default function MedicationDetailScreen() {
 
 	if (!med) {
 		return (
-			<SafeAreaView style={styles.container} edges={["top"]}>
-				<View style={styles.header}>
-					<TouchableOpacity
-						onPress={() => router.back()}
-						style={styles.backBtn}
-					>
+			<SafeAreaView
+				className="flex-1 bg-background-light dark:bg-background-dark"
+				edges={["top"]}
+			>
+				<View className="flex-row items-center gap-3 px-4 py-3">
+					<TouchableOpacity onPress={() => router.back()} className="p-1">
 						<Ionicons
 							name="arrow-back"
 							size={24}
-							color={isHighContrast ? "#000" : "#374151"}
+							className="text-text-main-light dark:text-text-main-dark"
 						/>
 					</TouchableOpacity>
 				</View>
-				<View style={styles.centered}>
-					<Text style={styles.errorText}>Medication not found.</Text>
+				<View className="flex-1 items-center justify-center">
+					<Text className="text-base text-error-light dark:text-error-dark">
+						Medication not found.
+					</Text>
 				</View>
 			</SafeAreaView>
 		);
 	}
 
 	const name = med.medication.nameBrand || med.medication.nameGeneric;
+	const generic = med.medication.nameBrand ? med.medication.nameGeneric : null;
 	const formIconName = FORM_ICONS[med.form] ?? "medkit-outline";
 	const isLowStock = med.currentStock <= med.restockThreshold;
 
+	const confirmDelete = () => {
+		Alert.alert(
+			"Delete Medication",
+			`Are you sure you want to delete ${name}?`,
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Delete",
+					style: "destructive",
+					onPress: () => {
+						deleteMedication(med.id);
+						router.back();
+					},
+				},
+			],
+		);
+	};
+
 	return (
-		<SafeAreaView style={styles.container} edges={["top"]}>
+		<SafeAreaView
+			className="flex-1 bg-background-light dark:bg-background-dark"
+			edges={["top"]}
+		>
 			{/* Header */}
-			<View style={styles.header}>
-				<TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+			<View className="flex-row items-center gap-3 px-4 py-3">
+				<TouchableOpacity onPress={() => router.back()} className="p-1">
 					<Ionicons
 						name="arrow-back"
 						size={24}
-						color={isHighContrast ? "#000" : "#374151"}
+						className="text-text-main-light dark:text-text-main-dark"
 					/>
 				</TouchableOpacity>
-				<Text style={styles.headerTitle} numberOfLines={1}>
+				<Text
+					className="flex-1 font-bold text-lg text-text-main-light dark:text-text-main-dark"
+					numberOfLines={1}
+				>
 					{name}
 				</Text>
 				<TouchableOpacity
-					style={styles.editBtn}
+					className="h-9 w-9 items-center justify-center rounded-full bg-primary-soft-light dark:bg-primary-soft-dark"
 					onPress={() =>
 						router.push({
 							pathname: "/(patient)/add-medication",
@@ -159,454 +120,128 @@ export default function MedicationDetailScreen() {
 						})
 					}
 				>
-					<Ionicons
-						name="create-outline"
-						size={22}
-						color={isHighContrast ? "#000" : "#d99696"}
-					/>
+					<Ionicons name="create-outline" size={22} className="text-primary" />
 				</TouchableOpacity>
 			</View>
 
 			<ScrollView
-				contentContainerStyle={styles.scrollContent}
+				contentContainerClassName="p-4 pb-10"
 				showsVerticalScrollIndicator={false}
 			>
-				{/* Hero */}
-				<View style={styles.heroCard}>
-					<View style={styles.heroIcon}>
-						<Ionicons name={formIconName} size={32} color="#d99696" />
-					</View>
-					<Text style={styles.heroName}>{name}</Text>
-					{med.medication.nameBrand && (
-						<Text style={styles.heroGeneric}>{med.medication.nameGeneric}</Text>
-					)}
-					<View style={styles.dosageBadge}>
-						<Text style={styles.dosageText}>{med.dosageAmount}</Text>
-					</View>
-				</View>
+				<MedicationDetailHero
+					iconName={formIconName}
+					name={name}
+					generic={generic}
+					dosage={med.dosageAmount}
+				/>
 
-				{/* Quick stats row */}
-				<View style={styles.statsRow}>
-					<View style={styles.statCard}>
-						<Ionicons
-							name="calendar-outline"
-							size={20}
-							color={isHighContrast ? "#000" : "#d99696"}
-							style={styles.statIcon}
-						/>
-						<Text style={styles.statLabel}>Frequency</Text>
-						<Text style={styles.statValue}>
-							{formatFrequency(med.frequency)}
-						</Text>
-					</View>
-					<View style={styles.statCard}>
-						<Ionicons
-							name={MEAL_ICONS[med.mealStatus] ?? "time-outline"}
-							size={20}
-							color={isHighContrast ? "#000" : "#d99696"}
-							style={styles.statIcon}
-						/>
-						<Text style={styles.statLabel}>Timing</Text>
-						<Text style={styles.statValue}>
-							{formatMealStatus(med.mealStatus)}
-						</Text>
-					</View>
-					<View style={[styles.statCard, isLowStock && styles.statCardWarning]}>
-						<Ionicons
-							name="cube-outline"
-							size={20}
-							color={
-								isLowStock ? "#dc2626" : isHighContrast ? "#000" : "#d99696"
-							}
-							style={styles.statIcon}
-						/>
-						<Text style={styles.statLabel}>Stock</Text>
-						<Text
-							style={[styles.statValue, isLowStock && styles.statValueWarning]}
-						>
-							{med.currentStock}
-						</Text>
-					</View>
-				</View>
+				<MedicationStatsRow
+					frequency={med.frequency}
+					mealStatus={med.mealStatus}
+					stock={med.currentStock}
+					isLowStock={isLowStock}
+				/>
 
 				{/* Schedule */}
 				{med.doseSchedules && med.doseSchedules.length > 0 && (
-					<View style={styles.section}>
-						<View style={styles.sectionHeaderInner}>
+					<View className={SECTION}>
+						<View className="mb-3 flex-row items-center gap-2">
 							<Ionicons
 								name="notifications-outline"
 								size={18}
-								color="#d99696"
+								className="text-primary"
 							/>
-							<Text style={styles.sectionTitle}>Reminder Times</Text>
+							<Text className={SECTION_TITLE}>Reminder Times</Text>
 						</View>
-						<View style={styles.timesList}>
+						<View className="flex-row flex-wrap gap-2">
 							{med.doseSchedules.map((s) => (
-								<View key={s.id} style={styles.timeChip}>
-									<Text style={styles.timeChipText}>{s.timeOfDay}</Text>
+								<View
+									key={s.id}
+									className="rounded-xl bg-primary-soft-light px-3.5 py-2 dark:bg-primary-soft-dark"
+								>
+									<Text className="font-bold text-primary text-sm">
+										{s.timeOfDay}
+									</Text>
 								</View>
 							))}
 						</View>
 					</View>
 				)}
 
-				{/* Notes / Instructions */}
+				{/* Notes */}
 				{med.instructions ? (
-					<View style={styles.section}>
-						<View style={styles.sectionHeaderInner}>
+					<View className={SECTION}>
+						<View className="mb-3 flex-row items-center gap-2">
 							<Ionicons
 								name="document-text-outline"
 								size={18}
-								color="#d99696"
+								className="text-primary"
 							/>
-							<Text style={styles.sectionTitle}>Notes</Text>
+							<Text className={SECTION_TITLE}>Notes</Text>
 						</View>
-						<Text style={styles.notesText}>{med.instructions}</Text>
+						<Text className="text-sm text-text-main-light leading-[22px] dark:text-text-main-dark">
+							{med.instructions}
+						</Text>
 					</View>
 				) : null}
 
 				{/* Inventory */}
-				<View style={styles.section}>
-					<View style={styles.sectionHeaderInner}>
-						<Ionicons name="cube-outline" size={18} color="#d99696" />
-						<Text style={styles.sectionTitle}>Inventory</Text>
+				<View className={SECTION}>
+					<View className="mb-3 flex-row items-center gap-2">
+						<Ionicons name="cube-outline" size={18} className="text-primary" />
+						<Text className={SECTION_TITLE}>Inventory</Text>
 					</View>
-					<View style={styles.inventoryRow}>
-						<View style={styles.inventoryItem}>
-							<Text style={styles.inventoryLabel}>Current Stock</Text>
+					<View className="flex-row gap-3">
+						<View className="flex-1">
+							<Text className="mb-1 text-text-sub-light text-xs dark:text-text-sub-dark">
+								Current Stock
+							</Text>
 							<Text
-								style={[
-									styles.inventoryValue,
-									isLowStock && styles.statValueWarning,
-								]}
+								className={`font-bold text-base ${isLowStock ? "text-red-600" : "text-text-main-light dark:text-text-main-dark"}`}
 							>
 								{med.currentStock} units
 							</Text>
 						</View>
-						<View style={styles.inventoryItem}>
-							<Text style={styles.inventoryLabel}>Alert Limit</Text>
-							<Text style={styles.inventoryValue}>
+						<View className="flex-1">
+							<Text className="mb-1 text-text-sub-light text-xs dark:text-text-sub-dark">
+								Alert Limit
+							</Text>
+							<Text className="font-bold text-base text-text-main-light dark:text-text-main-dark">
 								{med.restockThreshold} units
 							</Text>
 						</View>
 					</View>
 					{isLowStock && (
-						<View style={styles.lowStockWarning}>
-							<Ionicons name="alert-circle" size={16} color="#dc2626" />
-							<Text style={styles.lowStockText}>
+						<View className="mt-3 flex-row items-center gap-2 rounded-[10px] bg-red-50 p-2.5">
+							<Ionicons
+								name="alert-circle"
+								size={16}
+								className="text-red-600"
+							/>
+							<Text className="flex-1 text-[13px] text-red-600">
 								Stock is running low — consider restocking soon.
 							</Text>
 						</View>
 					)}
 				</View>
 
-				{/* ESP32 cihaz kontrolleri */}
-				<View style={styles.deviceRow}>
-					<TouchableOpacity
-						style={[styles.deviceButton, styles.deviceButtonTest]}
-						onPress={async () => {
-							try {
-								const nextDoseMinutes = minutesUntilNextDose(med.doseSchedules);
-								await fireDeviceAlarm({
-									medication: name,
-									nextDoseMinutes,
-								});
-								const h = Math.floor(nextDoseMinutes / 60);
-								const m = nextDoseMinutes % 60;
-								const eta = h > 0 ? `${h}s ${m}d` : `${m}d`;
-								Alert.alert("Cihaz", `Alarm gönderildi — sonraki doz: ${eta}`);
-							} catch (err) {
-								Alert.alert(
-									"Cihaz hatası",
-									(err as Error).message || "Bilinmeyen hata",
-								);
-							}
-						}}
-					>
-						<Ionicons name="notifications" size={18} color="#0e7490" />
-						<Text style={styles.deviceButtonTextTest}>Test Et</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={[styles.deviceButton, styles.deviceButtonStop]}
-						onPress={async () => {
-							try {
-								await stopDeviceAlarm();
-								Alert.alert("Cihaz", "Alarm durduruldu");
-							} catch (err) {
-								Alert.alert(
-									"Cihaz hatası",
-									(err as Error).message || "Bilinmeyen hata",
-								);
-							}
-						}}
-					>
-						<Ionicons name="stop-circle" size={18} color="#b45309" />
-						<Text style={styles.deviceButtonTextStop}>Durdur</Text>
-					</TouchableOpacity>
-				</View>
+				{/* ESP32 device controls */}
+				<MedicationDeviceControls
+					medicationName={name}
+					schedules={med.doseSchedules}
+				/>
 
 				{/* Delete */}
 				<TouchableOpacity
-					style={styles.deleteButton}
-					onPress={() =>
-						Alert.alert(
-							"Delete Medication",
-							`Are you sure you want to delete ${name}?`,
-							[
-								{ text: "Cancel", style: "cancel" },
-								{
-									text: "Delete",
-									style: "destructive",
-									onPress: () => {
-										deleteMedication(med.id);
-										router.back();
-									},
-								},
-							],
-						)
-					}
+					className="mt-1 flex-row items-center justify-center gap-2 rounded-2xl border border-red-200 bg-surface-light p-4 dark:bg-surface-dark"
+					onPress={confirmDelete}
 				>
-					<Ionicons name="trash-outline" size={18} color="#dc2626" />
-					<Text style={styles.deleteText}>Delete Medication</Text>
+					<Ionicons name="trash-outline" size={18} className="text-red-600" />
+					<Text className="font-semibold text-red-600 text-sm">
+						Delete Medication
+					</Text>
 				</TouchableOpacity>
 			</ScrollView>
 		</SafeAreaView>
 	);
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const makeStyles = (
-	isHighContrast: boolean,
-	isDark: boolean,
-	textSize: number,
-) =>
-	StyleSheet.create({
-		container: {
-			flex: 1,
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#1e1414" : "#f3f4f6",
-		},
-		centered: { flex: 1, alignItems: "center", justifyContent: "center" },
-		errorText: { fontSize: 16 * textSize, color: "#ef4444" },
-		header: {
-			flexDirection: "row",
-			alignItems: "center",
-			paddingHorizontal: 16,
-			paddingVertical: 12,
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#1e1414" : "#f3f4f6",
-			gap: 12,
-		},
-		backBtn: { padding: 4 },
-		headerTitle: {
-			flex: 1,
-			fontSize: 18 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000" : isDark ? "#f0ecec" : "#111827",
-		},
-		editBtn: {
-			padding: 4,
-			width: 36,
-			height: 36,
-			alignItems: "center",
-			justifyContent: "center",
-			borderRadius: 18,
-			backgroundColor: isHighContrast
-				? "#e5e7eb"
-				: isDark
-					? "#3d2a2a"
-					: "#fde8e8",
-		},
-		scrollContent: { padding: 16, paddingBottom: 40 },
-		heroCard: {
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#2d2424" : "white",
-			borderRadius: 20,
-			padding: 24,
-			alignItems: "center",
-			marginBottom: 16,
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 2 },
-			shadowOpacity: isDark ? 0.2 : 0.06,
-			shadowRadius: 8,
-			elevation: 2,
-		},
-		heroIcon: {
-			width: 72,
-			height: 72,
-			borderRadius: 36,
-			backgroundColor: isHighContrast
-				? "#f3f4f6"
-				: isDark
-					? "#3d2a2a"
-					: "#fde8e8",
-			alignItems: "center",
-			justifyContent: "center",
-			marginBottom: 12,
-		},
-		heroIconText: { fontSize: 32 },
-		heroName: {
-			fontSize: 22 * textSize,
-			fontWeight: "800",
-			color: isHighContrast ? "#000" : isDark ? "#f0ecec" : "#111827",
-			textAlign: "center",
-			marginBottom: 4,
-		},
-		heroGeneric: {
-			fontSize: 14 * textSize,
-			color: isHighContrast ? "#000" : isDark ? "#a09090" : "#6b7280",
-			marginBottom: 12,
-		},
-		dosageBadge: {
-			backgroundColor: isHighContrast ? "#e5e7eb" : "#f5e0e0",
-			paddingHorizontal: 16,
-			paddingVertical: 6,
-			borderRadius: 16,
-		},
-		dosageText: {
-			fontSize: 15 * textSize,
-			fontWeight: "700",
-			color: "#d99696",
-		},
-		statsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
-		statCard: {
-			flex: 1,
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#2d2424" : "white",
-			borderRadius: 16,
-			padding: 14,
-			alignItems: "center",
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: 0.04,
-			shadowRadius: 4,
-			elevation: 1,
-		},
-		statCardWarning: {
-			backgroundColor: "#fef2f2",
-			borderWidth: 1,
-			borderColor: "#fecaca",
-		},
-		statIcon: { marginBottom: 6 },
-		statLabel: {
-			fontSize: 10 * textSize,
-			color: isHighContrast ? "#000" : "#9ca3af",
-			fontWeight: "600",
-			marginBottom: 4,
-			textTransform: "uppercase",
-		},
-		statValue: {
-			fontSize: 14 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000" : isDark ? "#f0ecec" : "#111827",
-		},
-		statValueWarning: { color: "#dc2626" },
-		section: {
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#2d2424" : "white",
-			borderRadius: 16,
-			padding: 16,
-			marginBottom: 12,
-			shadowColor: "#000",
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: 0.04,
-			shadowRadius: 4,
-			elevation: 1,
-		},
-		sectionTitle: {
-			fontSize: 14 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000" : isDark ? "#f0ecec" : "#374151",
-		},
-		sectionHeaderInner: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 8,
-			marginBottom: 12,
-		},
-		timesList: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-		timeChip: {
-			backgroundColor: isHighContrast ? "#e5e7eb" : "#f5e0e0",
-			paddingHorizontal: 14,
-			paddingVertical: 8,
-			borderRadius: 12,
-		},
-		timeChipText: {
-			fontSize: 15 * textSize,
-			fontWeight: "700",
-			color: "#d99696",
-		},
-		notesText: {
-			fontSize: 14 * textSize,
-			lineHeight: 22,
-			color: isHighContrast ? "#000" : isDark ? "#d0c8c8" : "#374151",
-		},
-		inventoryRow: { flexDirection: "row", gap: 12 },
-		inventoryItem: { flex: 1 },
-		inventoryLabel: {
-			fontSize: 12 * textSize,
-			color: isHighContrast ? "#000" : "#9ca3af",
-			marginBottom: 4,
-		},
-		inventoryValue: {
-			fontSize: 16 * textSize,
-			fontWeight: "700",
-			color: isHighContrast ? "#000" : isDark ? "#f0ecec" : "#111827",
-		},
-		lowStockWarning: {
-			flexDirection: "row",
-			alignItems: "center",
-			gap: 8,
-			marginTop: 12,
-			backgroundColor: "#fef2f2",
-			padding: 10,
-			borderRadius: 10,
-		},
-		lowStockText: { fontSize: 13 * textSize, color: "#dc2626", flex: 1 },
-		deleteButton: {
-			flexDirection: "row",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: 8,
-			padding: 16,
-			borderRadius: 16,
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#2d2424" : "white",
-			borderWidth: 1,
-			borderColor: "#fecaca",
-			marginTop: 4,
-		},
-		deleteText: {
-			fontSize: 15 * textSize,
-			fontWeight: "600",
-			color: "#dc2626",
-		},
-		deviceRow: {
-			flexDirection: "row",
-			gap: 10,
-			marginTop: 8,
-		},
-		deviceButton: {
-			flex: 1,
-			flexDirection: "row",
-			alignItems: "center",
-			justifyContent: "center",
-			gap: 8,
-			padding: 14,
-			borderRadius: 16,
-			borderWidth: 1,
-		},
-		deviceButtonTest: {
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#1c2e33" : "#ecfeff",
-			borderColor: "#a5f3fc",
-		},
-		deviceButtonStop: {
-			backgroundColor: isHighContrast ? "#fff" : isDark ? "#3d2e1a" : "#fef3c7",
-			borderColor: "#fcd34d",
-		},
-		deviceButtonTextTest: {
-			fontSize: 15 * textSize,
-			fontWeight: "600",
-			color: "#0e7490",
-		},
-		deviceButtonTextStop: {
-			fontSize: 15 * textSize,
-			fontWeight: "600",
-			color: "#b45309",
-		},
-	});
