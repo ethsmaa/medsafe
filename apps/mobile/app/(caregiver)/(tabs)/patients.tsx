@@ -34,6 +34,18 @@ export default function PatientsScreen() {
 
 			{patientsQuery.isLoading ? (
 				<ActivityIndicator size="large" color="#d99696" />
+			) : patientsQuery.isError ? (
+				<View className="flex-1 items-center justify-center gap-3 p-6">
+					<Text className="text-center text-base text-text-sub-light dark:text-text-sub-dark">
+						Could not load patients.
+					</Text>
+					<TouchableOpacity
+						onPress={onRefresh}
+						className="rounded-lg bg-primary px-5 py-2.5"
+					>
+						<Text className="font-semibold text-sm text-white">Retry</Text>
+					</TouchableOpacity>
+				</View>
 			) : patientsQuery.data?.length === 0 ? (
 				<View className="flex-1 items-center justify-center">
 					<Text className="text-base text-text-sub-light dark:text-text-sub-dark">
@@ -47,7 +59,7 @@ export default function PatientsScreen() {
 					contentContainerClassName="gap-3 p-4"
 					refreshControl={
 						<RefreshControl
-							refreshing={patientsQuery.isLoading}
+							refreshing={patientsQuery.isFetching}
 							onRefresh={onRefresh}
 						/>
 					}
