@@ -87,6 +87,8 @@ export default function PatientDashboard() {
 				</View>
 				<TouchableOpacity
 					onPress={() => router.push("/(patient)/(tabs)/profile")}
+					accessibilityRole="button"
+					accessibilityLabel="Profile and settings"
 					className="h-10 w-10 items-center justify-center rounded-full bg-primary shadow-sm"
 				>
 					<Ionicons name="person" size={20} color="white" />
@@ -117,7 +119,10 @@ export default function PatientDashboard() {
 				))}
 
 				{/* NEXT DOSE - SIMPLE CARD (No complex Hero) */}
-				<Text className="mt-6 mb-4 font-bold text-text-main-light text-xl dark:text-text-main-dark">
+				<Text
+					accessibilityRole="header"
+					className="mt-6 mb-4 font-bold text-text-main-light text-xl dark:text-text-main-dark"
+				>
 					Up Next
 				</Text>
 
@@ -159,6 +164,8 @@ export default function PatientDashboard() {
 											// sessizce gec — cihaz ulasilamayabilir
 										}
 									}}
+									accessibilityRole="button"
+									accessibilityLabel="Send a reminder to my device"
 									className="rounded-full bg-white/20 p-3 active:opacity-70"
 								>
 									<Ionicons name="notifications" size={24} color="white" />
@@ -175,6 +182,9 @@ export default function PatientDashboard() {
 									}
 								}}
 								disabled={isTaking}
+								accessibilityRole="button"
+								accessibilityLabel="Take now"
+								accessibilityState={{ disabled: isTaking, busy: isTaking }}
 								className="mt-6 flex-row items-center justify-center rounded-xl bg-white p-4 active:opacity-90"
 							>
 								{isTaking ? (
@@ -210,11 +220,16 @@ export default function PatientDashboard() {
 
 				{/* Timeline */}
 				<View className="mt-2 mb-4 flex-row items-center justify-between">
-					<Text className="font-bold text-text-main-light text-xl dark:text-text-main-dark">
+					<Text
+						accessibilityRole="header"
+						className="font-bold text-text-main-light text-xl dark:text-text-main-dark"
+					>
 						Today's Schedule
 					</Text>
 					<TouchableOpacity
 						onPress={() => router.push("/(patient)/(tabs)/calendar")}
+						accessibilityRole="button"
+						accessibilityLabel="See all medications in the calendar"
 					>
 						<Text className="font-bold text-base text-primary">See all</Text>
 					</TouchableOpacity>
@@ -241,7 +256,10 @@ export default function PatientDashboard() {
 				{/* Flexible Items */}
 				{flexibleItems && flexibleItems.length > 0 && (
 					<View className="mt-8">
-						<Text className="mb-4 font-bold text-text-main-light text-xl dark:text-text-main-dark">
+						<Text
+							accessibilityRole="header"
+							className="mb-4 font-bold text-text-main-light text-xl dark:text-text-main-dark"
+						>
 							As Needed
 						</Text>
 						<View className="gap-y-2">

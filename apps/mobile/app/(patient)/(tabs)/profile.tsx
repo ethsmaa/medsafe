@@ -79,7 +79,10 @@ export default function ProfileScreen() {
 			edges={["top"]}
 		>
 			<ScrollView contentContainerClassName="p-6">
-				<Text className="mb-7 font-bold text-3xl text-text-main-light tracking-tight dark:text-text-main-dark">
+				<Text
+					accessibilityRole="header"
+					className="mb-7 font-bold text-3xl text-text-main-light tracking-tight dark:text-text-main-dark"
+				>
 					{t("profile.title")}
 				</Text>
 
@@ -98,6 +101,8 @@ export default function ProfileScreen() {
 						<TouchableOpacity
 							className={`${SEGMENT} ${locale === "tr" ? "bg-primary shadow-sm" : ""}`}
 							onPress={() => setLocale("tr")}
+							accessibilityRole="button"
+							accessibilityState={{ selected: locale === "tr" }}
 						>
 							<Text
 								className={`${SEGMENT_TEXT} ${locale === "tr" ? "text-white" : ""}`}
@@ -108,6 +113,8 @@ export default function ProfileScreen() {
 						<TouchableOpacity
 							className={`${SEGMENT} ${locale === "en" ? "bg-primary shadow-sm" : ""}`}
 							onPress={() => setLocale("en")}
+							accessibilityRole="button"
+							accessibilityState={{ selected: locale === "en" }}
 						>
 							<Text
 								className={`${SEGMENT_TEXT} ${locale === "en" ? "text-white" : ""}`}
@@ -135,6 +142,9 @@ export default function ProfileScreen() {
 								key={opt.key}
 								className={`${SEGMENT} ${themeMode === opt.key ? "bg-primary shadow-sm" : ""}`}
 								onPress={() => setThemeMode(opt.key)}
+								accessibilityRole="button"
+								accessibilityState={{ selected: themeMode === opt.key }}
+								accessibilityLabel={opt.label}
 							>
 								<Ionicons
 									name={opt.icon}
@@ -180,6 +190,7 @@ export default function ProfileScreen() {
 							</View>
 						</View>
 						<Switch
+							accessibilityLabel={t("profile.highContrast")}
 							value={isHighContrast}
 							onValueChange={toggleHighContrast}
 							trackColor={{
@@ -205,6 +216,7 @@ export default function ProfileScreen() {
 						</View>
 					</View>
 					<Slider
+						accessibilityLabel={t("profile.textSize")}
 						style={{ width: "100%", height: 40, marginTop: -8 }}
 						minimumValue={0.8}
 						maximumValue={2.0}
@@ -230,6 +242,8 @@ export default function ProfileScreen() {
 					<TouchableOpacity
 						className={ROW}
 						onPress={() => router.push("/(patient)/care-team")}
+						accessibilityRole="button"
+						accessibilityLabel={t("profile.manageCaregivers")}
 						activeOpacity={0.6}
 					>
 						<View className="flex-1 flex-row items-center gap-3">
@@ -264,6 +278,9 @@ export default function ProfileScreen() {
 						className={ROW}
 						onPress={handleLogout}
 						disabled={isLoggingOut}
+						accessibilityRole="button"
+						accessibilityLabel={t("profile.logout")}
+						accessibilityState={{ disabled: isLoggingOut, busy: isLoggingOut }}
 						activeOpacity={0.6}
 					>
 						<View className="flex-1 flex-row items-center gap-3">
