@@ -2,6 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../database/prisma.js";
 import { protectedProcedure, router } from "../trpc/index.js";
+import { generateConnectCode, normalizeConnectCode } from "./connect-code.js";
+import { resolveConnectionRoles } from "./connect-roles.js";
+import { canRespondToInvite } from "./invite-authz.js";
 
 export const careTeamRouter = router({
 	/**
@@ -92,7 +95,11 @@ export const careTeamRouter = router({
 		}),
 
 	/**
-	 * Patient accepts or rejects an invitation.
+	 * Accept or reject an invitation.
+	 *
+	 * Only the *recipient* (the side that did not initiate the invite) may
+	 * respond: the patient answers caregiver-initiated invites, and the
+	 * caregiver answers patient-initiated invites.
 	 */
 	respondToInvite: protectedProcedure
 		.input(
@@ -105,10 +112,9 @@ export const careTeamRouter = router({
 			const { inviteId, status } = input;
 			const user = ctx.user;
 
-			// Verify user is the patient for this invite
 			const invite = await prisma.careTeamMember.findUnique({
 				where: { id: inviteId },
-				include: { patient: true },
+				include: { patient: true, caregiver: true },
 			});
 
 			if (!invite) {
@@ -118,10 +124,26 @@ export const careTeamRouter = router({
 				});
 			}
 
-			if (invite.patient.userId !== user.id) {
+			const allowed = canRespondToInvite(
+				{
+					initiatedBy: invite.initiatedBy,
+					patientUserId: invite.patient.userId,
+					caregiverUserId: invite.caregiver.userId,
+				},
+				user.id,
+			);
+
+			if (!allowed) {
 				throw new TRPCError({
 					code: "FORBIDDEN",
 					message: "You are not authorized to respond to this invitation.",
+				});
+			}
+
+			if (invite.status !== "INVITED") {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "This invitation has already been responded to.",
 				});
 			}
 
@@ -205,6 +227,34 @@ export const careTeamRouter = router({
 				caregiverId: caregiverProfile.id,
 				status: "INVITED",
 				initiatedBy: "PATIENT",
+			},
+			include: {
+				patient: {
+					include: {
+						user: {
+							select: { name: true, image: true, email: true },
+						},
+					},
+				},
+			},
+		});
+	}),
+
+	/**
+	 * List invites SENT by the current caregiver, still pending.
+	 * InitiatedBy: CAREGIVER
+	 */
+	getCaregiverSentInvites: protectedProcedure.query(async ({ ctx }) => {
+		const caregiverProfile = await prisma.caregiverProfile.findUnique({
+			where: { userId: ctx.user.id },
+		});
+		if (!caregiverProfile) return [];
+
+		return await prisma.careTeamMember.findMany({
+			where: {
+				caregiverId: caregiverProfile.id,
+				status: "INVITED",
+				initiatedBy: "CAREGIVER",
 			},
 			include: {
 				patient: {
@@ -457,6 +507,167 @@ export const careTeamRouter = router({
 				},
 				orderBy: { takenAt: "desc" },
 				take: input?.limit ?? 100,
+			});
+		}),
+
+	/**
+	 * Returns the current user's shareable connect code, creating it on first
+	 * use. A patient and a caregiver can link by scanning the QR or typing it.
+	 */
+	getMyConnectCode: protectedProcedure.query(async ({ ctx }) => {
+		const user = await prisma.user.findUnique({
+			where: { id: ctx.user.id },
+			select: {
+				connectCode: true,
+				patientProfile: { select: { id: true } },
+				caregiverProfile: { select: { id: true } },
+			},
+		});
+
+		const role = user?.caregiverProfile
+			? "CAREGIVER"
+			: user?.patientProfile
+				? "PATIENT"
+				: null;
+
+		if (!role) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "Complete your profile setup before sharing a connect code.",
+			});
+		}
+
+		if (user?.connectCode) {
+			return { code: user.connectCode, role };
+		}
+
+		// Write the candidate directly and let the DB unique constraint decide;
+		// retry on a P2002 collision. This avoids a check-then-write TOCTOU race.
+		for (let attempt = 0; attempt < 5; attempt++) {
+			const candidate = generateConnectCode();
+			try {
+				await prisma.user.update({
+					where: { id: ctx.user.id },
+					data: { connectCode: candidate },
+				});
+				return { code: candidate, role };
+			} catch (err) {
+				const errCode =
+					typeof err === "object" && err !== null && "code" in err
+						? (err as { code?: unknown }).code
+						: undefined;
+				if (errCode === "P2002") continue; // candidate collided, try again
+				throw err;
+			}
+		}
+
+		throw new TRPCError({
+			code: "INTERNAL_SERVER_ERROR",
+			message: "Could not generate a connect code. Please try again.",
+		});
+	}),
+
+	/**
+	 * Connect the current user to the owner of `code`. Scanning or entering a
+	 * code is treated as mutual consent, so the link is created ACTIVE.
+	 */
+	connectWithCode: protectedProcedure
+		.input(z.object({ code: z.string().trim().min(8) }))
+		.mutation(async ({ ctx, input }) => {
+			const code = normalizeConnectCode(input.code);
+
+			const target = await prisma.user.findUnique({
+				where: { connectCode: code },
+				include: {
+					patientProfile: { select: { id: true } },
+					caregiverProfile: { select: { id: true } },
+				},
+			});
+
+			if (!target) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Invalid or expired code.",
+				});
+			}
+			if (target.id === ctx.user.id) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "You cannot connect to yourself.",
+				});
+			}
+
+			const me = await prisma.user.findUnique({
+				where: { id: ctx.user.id },
+				include: {
+					patientProfile: { select: { id: true } },
+					caregiverProfile: { select: { id: true } },
+				},
+			});
+			if (!me) {
+				throw new TRPCError({ code: "NOT_FOUND", message: "User not found." });
+			}
+
+			const resolution = resolveConnectionRoles(
+				{
+					isPatient: !!me.patientProfile,
+					isCaregiver: !!me.caregiverProfile,
+				},
+				{
+					isPatient: !!target.patientProfile,
+					isCaregiver: !!target.caregiverProfile,
+				},
+			);
+			if (!resolution.ok) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: resolution.reason,
+				});
+			}
+
+			const patientUser = resolution.patient === "me" ? me : target;
+			const caregiverUser = resolution.patient === "me" ? target : me;
+			const patientProfileId = patientUser.patientProfile?.id;
+			const caregiverProfileId = caregiverUser.caregiverProfile?.id;
+
+			if (!patientProfileId || !caregiverProfileId) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Both accounts must finish onboarding before connecting.",
+				});
+			}
+
+			const initiatedBy = resolution.patient === "me" ? "PATIENT" : "CAREGIVER";
+
+			const existing = await prisma.careTeamMember.findUnique({
+				where: {
+					patientId_caregiverId: {
+						patientId: patientProfileId,
+						caregiverId: caregiverProfileId,
+					},
+				},
+			});
+
+			if (existing) {
+				if (existing.status === "ACTIVE") {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message: "You are already connected.",
+					});
+				}
+				return await prisma.careTeamMember.update({
+					where: { id: existing.id },
+					data: { status: "ACTIVE", initiatedBy },
+				});
+			}
+
+			return await prisma.careTeamMember.create({
+				data: {
+					patientId: patientProfileId,
+					caregiverId: caregiverProfileId,
+					status: "ACTIVE",
+					initiatedBy,
+				},
 			});
 		}),
 });
