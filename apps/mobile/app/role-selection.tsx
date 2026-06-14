@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
@@ -58,7 +59,7 @@ export default function RoleSelectionScreen() {
 					onPress={() => setSelectedRole("PATIENT")}
 					activeOpacity={0.8}
 				>
-					<Text className="text-[32px]">👤</Text>
+					<Ionicons name="person" size={32} className="text-primary" />
 					<View>
 						<Text
 							className={`mb-1 font-bold text-lg ${selectedRole === "PATIENT" ? "text-emerald-800" : "text-text-main-light dark:text-text-main-dark"}`}
@@ -78,7 +79,7 @@ export default function RoleSelectionScreen() {
 					onPress={() => setSelectedRole("CAREGIVER")}
 					activeOpacity={0.8}
 				>
-					<Text className="text-[32px]">🩺</Text>
+					<Ionicons name="medkit" size={32} className="text-primary" />
 					<View>
 						<Text
 							className={`mb-1 font-bold text-lg ${selectedRole === "CAREGIVER" ? "text-emerald-800" : "text-text-main-light dark:text-text-main-dark"}`}
