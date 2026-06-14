@@ -12,6 +12,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AddMedicationMenu } from "@/components/medication/AddMedicationMenu";
 import { useLanguage } from "@/context/LanguageContext";
 import { useMedicationAction } from "@/hooks/useMedicationAction";
 import { useTRPC } from "@/lib/trpc";
@@ -34,6 +35,7 @@ export default function CabinetScreen() {
 
 	const [isSelectionMode, setIsSelectionMode] = useState(false);
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+	const [menuVisible, setMenuVisible] = useState(false);
 
 	const cabinetQuery = useQuery(trpc.medication.getMyCabinet.queryOptions({}));
 
@@ -115,19 +117,9 @@ export default function CabinetScreen() {
 						</Text>
 						<TouchableOpacity
 							className="rounded-full bg-primary p-2"
-							onPress={() =>
-								Alert.alert(t("med.new"), t("cabinet.addFirst"), [
-									{
-										text: `📝 ${t("cabinet.addManual")}`,
-										onPress: () => router.push("/(patient)/add-medication"),
-									},
-									{
-										text: `📷 ${t("cabinet.scanBox")}`,
-										onPress: () => router.push("/(patient)/scan-medication"),
-									},
-									{ text: t("common.cancel"), style: "cancel" },
-								])
-							}
+							onPress={() => setMenuVisible(true)}
+							accessibilityRole="button"
+							accessibilityLabel={t("med.new")}
 						>
 							<Ionicons name="add" size={24} className="text-white" />
 						</TouchableOpacity>
@@ -242,6 +234,22 @@ export default function CabinetScreen() {
 					}}
 				/>
 			)}
+			<AddMedicationMenu
+				visible={menuVisible}
+				title={t("med.new")}
+				manualLabel={t("cabinet.addManual")}
+				scanLabel={t("cabinet.scanBox")}
+				cancelLabel={t("common.cancel")}
+				onManual={() => {
+					setMenuVisible(false);
+					router.push("/(patient)/add-medication");
+				}}
+				onScan={() => {
+					setMenuVisible(false);
+					router.push("/(patient)/scan-medication");
+				}}
+				onClose={() => setMenuVisible(false)}
+			/>
 		</SafeAreaView>
 	);
 }

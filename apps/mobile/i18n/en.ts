@@ -59,6 +59,8 @@ const en: Record<TranslationKey, string> = {
 	"med.saveChanges": "Save Changes",
 	"med.edit": "Edit Medication",
 	"med.new": "New Medication",
+	"med.newSubtitle": "Add a new medication to your schedule.",
+	"med.editSubtitle": "Update your medication details below.",
 
 	// AI Note Card
 	"med.aiNote.title": "AI Medication Note",
@@ -113,6 +115,7 @@ const en: Record<TranslationKey, string> = {
 
 	// Common
 	"common.cancel": "Cancel",
+	"common.back": "Back",
 	"common.confirm": "Confirm",
 	"common.save": "Save",
 	"common.delete": "Delete",
