@@ -23,8 +23,13 @@ const OPENFDA_BASE = "https://api.fda.gov/drug/label.json";
  */
 export async function fetchDrugInfo(drugName: string): Promise<string | null> {
 	try {
-		const query = encodeURIComponent(`"${drugName}"`);
-		const url = `${OPENFDA_BASE}?search=openfda.brand_name:${query}+openfda.generic_name:${query}&limit=1`;
+		// Match the name against EITHER the brand or the generic field. The whole
+		// search expression is URL-encoded so the drug name cannot inject extra
+		// query parameters, and OR (not AND) is used so a drug whose brand and
+		// generic names differ still matches.
+		const quoted = `"${drugName}"`;
+		const search = `openfda.brand_name:${quoted} OR openfda.generic_name:${quoted}`;
+		const url = `${OPENFDA_BASE}?search=${encodeURIComponent(search)}&limit=1`;
 
 		const response = await fetch(url, {
 			signal: AbortSignal.timeout(6_000), // 6 s hard limit

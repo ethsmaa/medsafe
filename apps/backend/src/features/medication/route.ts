@@ -318,7 +318,7 @@ export const medicationRouter = router({
 
 		const events = await prisma.intakeEvent.findMany({
 			where: {
-				prescriptionMedication: { patientId: patient.id },
+				prescriptionMedication: { patientId: patient.id, frequency: "DAILY" },
 				takenAt: { gte: todayStart, lte: todayEnd },
 				status: "TAKEN",
 			},

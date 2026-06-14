@@ -1,4 +1,5 @@
 import { prisma } from "../database/prisma.js";
+import { computeAdherence } from "../medication/adherence.js";
 import type { ToolHandlerResult } from "./types.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -328,7 +329,8 @@ export async function handleLogSideEffect(
 export async function handleGetAdherenceSummary(
 	patientId: string,
 ): Promise<ToolHandlerResult> {
-	const sevenDaysAgo = new Date();
+	const now = new Date();
+	const sevenDaysAgo = new Date(now);
 	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 	sevenDaysAgo.setHours(0, 0, 0, 0);
 
@@ -343,35 +345,26 @@ export async function handleGetAdherenceSummary(
 		},
 	});
 
-	let totalExpected = 0;
-	let totalTaken = 0;
-	let totalSkipped = 0;
-	let totalMissed = 0;
-
-	for (const pm of prescriptions) {
-		if (pm.frequency === "DAILY") {
-			totalExpected += pm.doseSchedules.length * 7;
-		}
-
-		for (const event of pm.intakeEvents) {
-			if (event.status === "TAKEN") totalTaken++;
-			else if (event.status === "SKIPPED") totalSkipped++;
-			else if (event.status === "MISSED") totalMissed++;
-		}
-	}
-
-	const adherencePercentage =
-		totalExpected > 0 ? Math.round((totalTaken / totalExpected) * 100) : 100;
+	const result = computeAdherence(
+		prescriptions.map((pm) => ({
+			frequency: pm.frequency,
+			startDate: pm.startDate,
+			doseScheduleCount: pm.doseSchedules.length,
+			events: pm.intakeEvents,
+		})),
+		now,
+		7,
+	);
 
 	return {
 		success: true,
 		data: {
 			periodDays: 7,
-			totalExpectedDoses: totalExpected,
-			takenDoses: totalTaken,
-			skippedDoses: totalSkipped,
-			missedDoses: totalMissed,
-			adherencePercentage: Math.min(100, adherencePercentage),
+			totalExpectedDoses: result.totalExpected,
+			takenDoses: result.taken,
+			skippedDoses: result.skipped,
+			missedDoses: result.missed,
+			adherencePercentage: result.percentage,
 		},
 	};
 }
@@ -476,22 +469,27 @@ export async function handleRecordMedicationIntake(
 		}
 	}
 
-	await prisma.intakeEvent.create({
-		data: {
-			prescriptionMedicationId: prescription.id,
-			status: args.status,
-			takenAt: takenAtDate,
-			isOnTime,
-		},
-	});
+	// Record the event and decrement stock atomically, never below zero.
+	const willDecrement =
+		args.status === "TAKEN" && prescription.currentStock > 0;
 
-	// Decrement stock if taken
-	if (args.status === "TAKEN") {
-		await prisma.prescriptionMedication.update({
-			where: { id: prescription.id },
-			data: { currentStock: { decrement: 1 } },
+	await prisma.$transaction(async (tx) => {
+		await tx.intakeEvent.create({
+			data: {
+				prescriptionMedicationId: prescription.id,
+				status: args.status,
+				takenAt: takenAtDate,
+				isOnTime,
+			},
 		});
-	}
+
+		if (willDecrement) {
+			await tx.prescriptionMedication.update({
+				where: { id: prescription.id },
+				data: { currentStock: { decrement: 1 } },
+			});
+		}
+	});
 
 	return {
 		success: true,
@@ -500,8 +498,7 @@ export async function handleRecordMedicationIntake(
 			status: args.status,
 			takenAt: takenAtDate.toISOString(),
 			isOnTime,
-			currentStock:
-				prescription.currentStock - (args.status === "TAKEN" ? 1 : 0),
+			currentStock: prescription.currentStock - (willDecrement ? 1 : 0),
 		},
 	};
 }
