@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Platform } from "react-native";
 import {
 	MEDICATION_FORMS as FORMS,
@@ -84,9 +84,13 @@ export function useMedicationForm() {
 		}
 	}, [scanResult, isEditing]);
 
-	// Pre-fill from existing medication (editing)
+	// Pre-fill from existing medication (editing). Guarded so a background
+	// refetch of existingMed does not overwrite edits the user is making.
+	const prefilledRef = useRef(false);
 	useEffect(() => {
+		if (prefilledRef.current) return;
 		if (isEditing && existingMed) {
+			prefilledRef.current = true;
 			setName(existingMed.medication.nameGeneric || "");
 			setBrandName(existingMed.medication.nameBrand || "");
 			setDosage(existingMed.dosageAmount);

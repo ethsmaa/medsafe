@@ -1,6 +1,6 @@
 import { Audio } from "expo-av";
 import { File } from "expo-file-system";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MIN_DURATION_MS = 800;
 const MAX_DURATION_MS = 60_000;
@@ -148,6 +148,16 @@ export function useVoiceRecorder(options?: { onMaxDuration?: () => void }) {
 				} catch {}
 			}
 		} catch {}
+	}, []);
+
+	// Stop and release the microphone if the screen unmounts mid-recording.
+	useEffect(() => {
+		return () => {
+			if (maxTimerRef.current) clearTimeout(maxTimerRef.current);
+			const rec = recordingRef.current;
+			recordingRef.current = null;
+			rec?.stopAndUnloadAsync().catch(() => {});
+		};
 	}, []);
 
 	return {

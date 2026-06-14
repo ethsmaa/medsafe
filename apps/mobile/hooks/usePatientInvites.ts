@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert } from "react-native";
+import { queryClient } from "@/lib/react-query";
 import { useTRPC } from "@/lib/trpc";
 
 export function usePatientInvites() {
@@ -13,7 +14,12 @@ export function usePatientInvites() {
 		...trpc.careTeam.respondToInvite.mutationOptions(),
 		onSuccess: () => {
 			Alert.alert("Success", "Caregiver added to your team.");
-			invitesQuery.refetch();
+			// Refresh the invite list AND the caregiver list (shown on other
+			// screens) so accepting an invite is reflected everywhere.
+			queryClient.invalidateQueries(
+				trpc.careTeam.getMyReceivedInvites.pathFilter(),
+			);
+			queryClient.invalidateQueries(trpc.careTeam.getMyCaregivers.pathFilter());
 		},
 		onError: (err) => {
 			Alert.alert("Error", err.message);
