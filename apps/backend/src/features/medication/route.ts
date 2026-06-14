@@ -8,6 +8,7 @@ import {
 	MEDICATION_FREQUENCIES,
 } from "./constants.js";
 import { generateMedicationNote } from "./generate-note.js";
+import { assertCanManagePatient } from "./manage-authz.js";
 import { resolveTargetPatient } from "./resolve-patient.js";
 import { scanMedicationImage } from "./scan-medication.js";
 
@@ -18,7 +19,10 @@ export const medicationRouter = router({
 	scanBox: protectedProcedure
 		.input(
 			z.object({
-				imageBase64: z.string().min(1, "Image data is required"),
+				imageBase64: z
+					.string()
+					.min(1, "Image data is required")
+					.max(8_000_000, "Image is too large"),
 			}),
 		)
 		.mutation(async ({ input }) => {
@@ -218,15 +222,31 @@ export const medicationRouter = router({
 				takenAt: z.string().optional(),
 			}),
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			const { prescriptionMedicationId, status, takenAt } = input;
 			const takenAtDate = takenAt ? new Date(takenAt) : new Date();
 
 			return await prisma.$transaction(async (tx) => {
 				const pm = await tx.prescriptionMedication.findUnique({
 					where: { id: prescriptionMedicationId },
-					include: { doseSchedules: true },
+					include: {
+						doseSchedules: true,
+						patient: { select: { userId: true } },
+					},
 				});
+
+				if (!pm) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Medication not found.",
+					});
+				}
+				if (pm.patient.userId !== ctx.user.id) {
+					throw new TRPCError({
+						code: "FORBIDDEN",
+						message: "You do not have access to this medication.",
+					});
+				}
 
 				let isOnTime = true;
 				let minutesDelta = 0;
@@ -395,17 +415,7 @@ export const medicationRouter = router({
 				});
 			}
 
-			if (pm.patient.userId !== ctx.user.id) {
-				const caregiver = await prisma.caregiverProfile.findUnique({
-					where: { userId: ctx.user.id },
-				});
-				if (!caregiver) {
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: "You do not have permission to delete this medication.",
-					});
-				}
-			}
+			await assertCanManagePatient(ctx.user.id, pm.patientId);
 
 			return await prisma.prescriptionMedication.update({
 				where: { id },
@@ -427,19 +437,9 @@ export const medicationRouter = router({
 				include: { patient: true },
 			});
 
-			for (const pm of medications) {
-				if (pm.patient.userId !== ctx.user.id) {
-					const caregiver = await prisma.caregiverProfile.findUnique({
-						where: { userId: ctx.user.id },
-					});
-					if (!caregiver) {
-						throw new TRPCError({
-							code: "FORBIDDEN",
-							message:
-								"You do not have permission to delete these medications.",
-						});
-					}
-				}
+			const patientIds = [...new Set(medications.map((pm) => pm.patientId))];
+			for (const patientId of patientIds) {
+				await assertCanManagePatient(ctx.user.id, patientId);
 			}
 
 			return await prisma.prescriptionMedication.updateMany({
@@ -480,17 +480,7 @@ export const medicationRouter = router({
 				});
 			}
 
-			if (pm.patient.userId !== ctx.user.id) {
-				const caregiver = await prisma.caregiverProfile.findUnique({
-					where: { userId: ctx.user.id },
-				});
-				if (!caregiver) {
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: "You do not have permission to update this medication.",
-					});
-				}
-			}
+			await assertCanManagePatient(ctx.user.id, pm.patientId);
 
 			return await prisma.$transaction(async (tx) => {
 				const updatedPm = await tx.prescriptionMedication.update({

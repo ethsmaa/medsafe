@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const ChatMessageSchema = z.object({
 	role: z.enum(["user", "assistant"]),
-	content: z.string(),
+	content: z.string().max(4000),
 	timestamp: z.string(),
 });
 
@@ -13,8 +13,8 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 // ─── Chat Input / Output ──────────────────────────────────────────────────────
 
 export const ChatInputSchema = z.object({
-	message: z.string().min(1, "Mesaj boş olamaz"),
-	conversationHistory: z.array(ChatMessageSchema).default([]),
+	message: z.string().min(1, "Mesaj boş olamaz").max(4000),
+	conversationHistory: z.array(ChatMessageSchema).max(50).default([]),
 	language: z.enum(["tr", "en"]).default("tr"),
 });
 

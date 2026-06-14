@@ -25,7 +25,6 @@ export const auth = betterAuth({
 	trustedOrigins: [
 		"http://localhost:3000",
 		"http://localhost:3001",
-		"exp://*/*", // Trust all Expo development URLs
 		"exp://10.0.0.*:*/*", // Trust 10.0.0.x IP range
 		"exp://192.168.*.*:*/*", // Trust 192.168.x.x IP range
 		"exp://172.*.*.*:*/*", // Trust 172.x.x.x IP range

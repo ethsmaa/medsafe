@@ -38,6 +38,15 @@ app.all("/api/auth/*", (c) => {
 	return auth.handler(c.req.raw);
 });
 
+// Device endpoints require an authenticated session.
+app.use("/api/device/*", async (c, next) => {
+	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+	if (!session) {
+		return c.json({ error: "Unauthorized" }, 401);
+	}
+	await next();
+});
+
 app.route("/api/device", deviceRouter);
 
 app.use(
