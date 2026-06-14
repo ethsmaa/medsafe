@@ -13,6 +13,8 @@ model User {
   email         String  @unique
   emailVerified Boolean @default(false)
   image         String?
+  // Short shareable code used to connect a patient and a caregiver via QR / code.
+  connectCode   String?  @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

@@ -14,6 +14,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ConnectCodeModal } from "@/components/care-team/ConnectCodeModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { authClient } from "@/lib/auth-client";
 import { logger } from "@/lib/logger";
@@ -25,10 +26,17 @@ export default function CaregiverDashboard() {
 	const trpc = useTRPC();
 	const { t } = useLanguage();
 	const [inviteEmail, setInviteEmail] = useState("");
+	const [isConnectVisible, setIsConnectVisible] = useState(false);
 	const router = useRouter();
 
 	const patientsQuery = useQuery(trpc.careTeam.getMyPatients.queryOptions());
 	const logQuery = useQuery(trpc.careTeam.getActivityLog.queryOptions());
+	const receivedInvitesQuery = useQuery(
+		trpc.careTeam.getCaregiverReceivedInvites.queryOptions(),
+	);
+	const sentInvitesQuery = useQuery(
+		trpc.careTeam.getCaregiverSentInvites.queryOptions(),
+	);
 	const allLogEntries = (logQuery.data ?? []) as Array<{ id: string }>;
 	const { getUnreadCount } = useActivityLogStore();
 	const pendingCount = getUnreadCount(allLogEntries);
@@ -39,6 +47,18 @@ export default function CaregiverDashboard() {
 		onSuccess: () => {
 			Alert.alert("Success", "Invitation sent successfully!");
 			setInviteEmail("");
+			sentInvitesQuery.refetch();
+		},
+		onError: (err) => {
+			Alert.alert("Error", err.message);
+		},
+	});
+
+	const respondMutation = useMutation({
+		...trpc.careTeam.respondToInvite.mutationOptions(),
+		onSuccess: () => {
+			receivedInvitesQuery.refetch();
+			patientsQuery.refetch();
 		},
 		onError: (err) => {
 			Alert.alert("Error", err.message);
@@ -121,6 +141,67 @@ export default function CaregiverDashboard() {
 					</TouchableOpacity>
 				</View>
 
+				{/* Care Team Requests (invites received from patients) */}
+				{receivedInvitesQuery.data && receivedInvitesQuery.data.length > 0 && (
+					<View className="mb-8">
+						<Text className="mb-3 font-bold text-lg text-text-main-light dark:text-text-main-dark">
+							Care Team Requests
+						</Text>
+						{receivedInvitesQuery.data.map((invite) => (
+							<View
+								key={invite.id}
+								className="mb-3 rounded-2xl border-2 border-primary bg-surface-light p-4 shadow-sm dark:bg-surface-dark"
+							>
+								<View className="mb-3 flex-row items-center gap-3">
+									<View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+										<Text className="font-bold text-primary text-xl">
+											{invite.patient.user.name?.[0] || "P"}
+										</Text>
+									</View>
+									<View className="flex-1">
+										<Text className="font-bold text-base text-text-main-light dark:text-text-main-dark">
+											{invite.patient.user.name || invite.patient.user.email}
+										</Text>
+										<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
+											Wants you on their care team
+										</Text>
+									</View>
+								</View>
+								<View className="flex-row gap-3">
+									<TouchableOpacity
+										className="flex-1 items-center justify-center rounded-xl border border-border-light py-2.5 dark:border-border-dark"
+										disabled={respondMutation.isPending}
+										onPress={() =>
+											respondMutation.mutate({
+												inviteId: invite.id,
+												status: "REJECTED",
+											})
+										}
+									>
+										<Text className="font-semibold text-sm text-text-main-light dark:text-text-main-dark">
+											Decline
+										</Text>
+									</TouchableOpacity>
+									<TouchableOpacity
+										className="flex-1 items-center justify-center rounded-xl bg-primary py-2.5"
+										disabled={respondMutation.isPending}
+										onPress={() =>
+											respondMutation.mutate({
+												inviteId: invite.id,
+												status: "ACTIVE",
+											})
+										}
+									>
+										<Text className="font-semibold text-sm text-white">
+											Accept
+										</Text>
+									</TouchableOpacity>
+								</View>
+							</View>
+						))}
+					</View>
+				)}
+
 				{/* Invite Section */}
 				<View className="mb-8 rounded-2xl bg-surface-light p-6 shadow-sm dark:bg-surface-dark">
 					<View className="mb-4 flex-row items-center gap-3">
@@ -174,6 +255,44 @@ export default function CaregiverDashboard() {
 					</KeyboardAvoidingView>
 				</View>
 
+				{/* Connect with QR / code */}
+				<TouchableOpacity
+					onPress={() => setIsConnectVisible(true)}
+					className="mb-8 flex-row items-center justify-center gap-2 rounded-2xl border border-primary bg-surface-light p-4 shadow-sm dark:bg-surface-dark"
+				>
+					<Ionicons name="qr-code-outline" size={20} className="text-primary" />
+					<Text className="font-semibold text-base text-primary">
+						Connect with QR / code
+					</Text>
+				</TouchableOpacity>
+
+				{/* Pending sent invitations */}
+				{sentInvitesQuery.data && sentInvitesQuery.data.length > 0 && (
+					<View className="mb-8">
+						<Text className="mb-3 font-bold text-lg text-text-main-light dark:text-text-main-dark">
+							Pending Invitations
+						</Text>
+						{sentInvitesQuery.data.map((invite) => (
+							<View
+								key={invite.id}
+								className="mb-3 flex-row items-center gap-3 rounded-2xl bg-surface-light p-4 opacity-80 shadow-sm dark:bg-surface-dark"
+							>
+								<View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+									<Ionicons name="time-outline" size={20} color="#9ca3af" />
+								</View>
+								<View className="flex-1">
+									<Text className="font-semibold text-base text-text-main-light dark:text-text-main-dark">
+										{invite.patient.user.name || invite.patient.user.email}
+									</Text>
+									<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
+										Waiting for response
+									</Text>
+								</View>
+							</View>
+						))}
+					</View>
+				)}
+
 				{/* Quick Links */}
 				<View className="gap-4">
 					<Text className="font-bold text-lg text-text-main-light dark:text-text-main-dark">
@@ -218,6 +337,16 @@ export default function CaregiverDashboard() {
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
+
+			<ConnectCodeModal
+				visible={isConnectVisible}
+				onClose={() => setIsConnectVisible(false)}
+				onConnected={() => {
+					patientsQuery.refetch();
+					receivedInvitesQuery.refetch();
+					sentInvitesQuery.refetch();
+				}}
+			/>
 		</SafeAreaView>
 	);
 }

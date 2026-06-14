@@ -14,6 +14,7 @@ import {
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ConnectCodeModal } from "@/components/care-team/ConnectCodeModal";
 import { useTRPC } from "@/lib/trpc";
 
 const CARD =
@@ -35,6 +36,7 @@ export default function CareTeamScreen() {
 	const trpc = useTRPC();
 
 	const [isInviteModalVisible, setIsInviteModalVisible] = useState(false);
+	const [isConnectVisible, setIsConnectVisible] = useState(false);
 	const [inviteEmail, setInviteEmail] = useState("");
 
 	// Queries
@@ -105,12 +107,24 @@ export default function CareTeamScreen() {
 				<Text className="font-bold text-text-main-light text-xl dark:text-text-main-dark">
 					My Care Team
 				</Text>
-				<TouchableOpacity
-					onPress={() => setIsInviteModalVisible(true)}
-					className="rounded-full bg-primary p-2"
-				>
-					<Ionicons name="add" size={24} className="text-white" />
-				</TouchableOpacity>
+				<View className="flex-row items-center gap-2">
+					<TouchableOpacity
+						onPress={() => setIsConnectVisible(true)}
+						className="rounded-full border border-primary p-2"
+					>
+						<Ionicons
+							name="qr-code-outline"
+							size={22}
+							className="text-primary"
+						/>
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={() => setIsInviteModalVisible(true)}
+						className="rounded-full bg-primary p-2"
+					>
+						<Ionicons name="add" size={24} className="text-white" />
+					</TouchableOpacity>
+				</View>
 			</View>
 
 			<ScrollView
@@ -290,6 +304,16 @@ export default function CareTeamScreen() {
 					</View>
 				</View>
 			</Modal>
+
+			<ConnectCodeModal
+				visible={isConnectVisible}
+				onClose={() => setIsConnectVisible(false)}
+				onConnected={() => {
+					careTeamQuery.refetch();
+					receivedInvitesQuery.refetch();
+					sentInvitesQuery.refetch();
+				}}
+			/>
 		</SafeAreaView>
 	);
 }
