@@ -62,6 +62,8 @@ const tr = {
 	"med.saveChanges": "Değişiklikleri Kaydet",
 	"med.edit": "İlacı Düzenle",
 	"med.new": "Yeni İlaç",
+	"med.newSubtitle": "Programınıza yeni bir ilaç ekleyin.",
+	"med.editSubtitle": "İlaç bilgilerinizi aşağıdan güncelleyin.",
 
 	// AI Not Kartı
 	"med.aiNote.title": "AI İlaç Notu",
@@ -116,6 +118,7 @@ const tr = {
 
 	// Common
 	"common.cancel": "İptal",
+	"common.back": "Geri",
 	"common.confirm": "Onayla",
 	"common.save": "Kaydet",
 	"common.delete": "Sil",

@@ -71,6 +71,8 @@ export default function AddMedicationScreen() {
 			<View className="flex-row items-center justify-between bg-background-light px-4 py-3 dark:bg-background-dark">
 				<TouchableOpacity
 					onPress={() => form.router.back()}
+					accessibilityRole="button"
+					accessibilityLabel={t("common.back")}
 					className="h-10 w-10 items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark"
 					hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 				>
@@ -97,13 +99,11 @@ export default function AddMedicationScreen() {
 				>
 					{/* Hero */}
 					<View className="mb-2.5 items-center">
-						<View className="mb-3 h-20 w-20 items-center justify-center rounded-full bg-blue-100">
+						<View className="mb-3 h-20 w-20 items-center justify-center rounded-full bg-primary-soft-light dark:bg-primary-soft-dark">
 							<Ionicons name="medkit" size={40} className="text-primary" />
 						</View>
 						<Text className="text-center text-sm text-text-sub-light dark:text-text-sub-dark">
-							{form.isEditing
-								? "Update your medication details below."
-								: "Add a new medication to your schedule."}
+							{form.isEditing ? t("med.editSubtitle") : t("med.newSubtitle")}
 						</Text>
 					</View>
 
@@ -218,6 +218,11 @@ export default function AddMedicationScreen() {
 						className={`items-center rounded-2xl bg-primary py-[18px] shadow-lg ${form.isSaving ? "opacity-70" : ""}`}
 						onPress={form.handleSave}
 						disabled={form.isSaving}
+						accessibilityRole="button"
+						accessibilityState={{
+							disabled: form.isSaving,
+							busy: form.isSaving,
+						}}
 					>
 						{form.isSaving ? (
 							<ActivityIndicator color="white" />
