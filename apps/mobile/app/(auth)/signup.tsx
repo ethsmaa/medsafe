@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -85,9 +86,11 @@ export default function SignupScreen() {
 					<View className="mt-5 mb-10 items-center">
 						<View className="mb-6 flex-row justify-center">
 							<View className="h-20 w-20 items-center justify-center rounded-full bg-primary/20">
-								<Text style={{ fontSize: 40 }} className="text-primary">
-									📝
-								</Text>
+								<Ionicons
+									name="person-add"
+									size={40}
+									className="text-primary"
+								/>
 							</View>
 						</View>
 						<Text className="mb-2 text-center font-bold text-4xl text-text-main-light dark:text-text-main-dark">

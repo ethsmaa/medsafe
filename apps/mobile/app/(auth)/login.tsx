@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useState } from "react";
 import {
@@ -55,9 +56,7 @@ export default function LoginScreen() {
 				<View className="mb-10 items-center">
 					<View className="mb-6 flex-row justify-center">
 						<View className="h-20 w-20 items-center justify-center rounded-full bg-primary/20">
-							<Text style={{ fontSize: 40 }} className="text-primary">
-								💊
-							</Text>
+							<Ionicons name="medkit" size={40} className="text-primary" />
 						</View>
 					</View>
 					<Text className="mb-3 text-center font-bold text-4xl text-text-main-light tracking-tight dark:text-text-main-dark">
