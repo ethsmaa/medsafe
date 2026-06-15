@@ -12,6 +12,7 @@ import "../global.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useRootNavigationState, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
+import { Text, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -20,6 +21,19 @@ import { useUser } from "@/hooks/use-user";
 import { useUserRole } from "@/hooks/use-user-role";
 import { queryClient } from "@/lib/react-query";
 import { TRPCProvider, trpcClient } from "@/lib/trpc";
+
+// Cap how far the OS "larger text" accessibility setting scales our fonts.
+// Low-vision users can still enlarge text substantially (up to 2x), but the
+// cap stops fixed-height buttons and rows from breaking at extreme sizes.
+type ScalableDefaults = { defaultProps?: { maxFontSizeMultiplier?: number } };
+const MAX_FONT_SCALE = 2;
+for (const Component of [Text, TextInput]) {
+	const scalable = Component as unknown as ScalableDefaults;
+	scalable.defaultProps = {
+		...scalable.defaultProps,
+		maxFontSizeMultiplier: MAX_FONT_SCALE,
+	};
+}
 
 export const unstable_settings = {
 	anchor: "(tabs)",
