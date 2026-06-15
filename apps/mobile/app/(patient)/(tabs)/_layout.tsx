@@ -9,7 +9,7 @@ export default function PatientTabsLayout() {
 	const { t } = useLanguage();
 	const insets = useSafeAreaInsets();
 
-	const tabBarActiveTintColor = "#d99696";
+	const tabBarActiveTintColor = "#0F766E";
 	const tabBarInactiveTintColor = isDarkMode ? "#6b5e5e" : "#9ca3af";
 
 	return (

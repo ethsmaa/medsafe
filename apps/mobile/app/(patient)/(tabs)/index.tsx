@@ -196,7 +196,7 @@ export default function PatientDashboard() {
 										<Ionicons
 											name="checkmark-circle"
 											size={20}
-											color="#d99696"
+											color="#0F766E"
 										/>
 										<Text className="ml-2 font-bold text-primary">
 											Take Now

@@ -20,7 +20,7 @@ export default function CaregiverTabsLayout() {
 	const unreadCount = getUnreadCount(allEntries);
 	const showBadge = unreadCount > 0;
 
-	const tabBarActiveTintColor = "#d99696";
+	const tabBarActiveTintColor = "#0F766E";
 	const tabBarInactiveTintColor = "#9ca3af";
 
 	return (

@@ -33,7 +33,7 @@ export default function PatientsScreen() {
 			</View>
 
 			{patientsQuery.isLoading ? (
-				<ActivityIndicator size="large" color="#d99696" />
+				<ActivityIndicator size="large" color="#0F766E" />
 			) : patientsQuery.isError ? (
 				<View className="flex-1 items-center justify-center gap-3 p-6">
 					<Text className="text-center text-base text-text-sub-light dark:text-text-sub-dark">

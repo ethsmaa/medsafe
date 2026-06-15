@@ -81,7 +81,7 @@ export default function ProfileScreen() {
 						<Switch
 							value={isDarkMode}
 							onValueChange={(value) => setThemeMode(value ? "dark" : "light")}
-							trackColor={{ false: "#d1d5db", true: "#d99696" }}
+							trackColor={{ false: "#d1d5db", true: "#0F766E" }}
 							thumbColor={isDarkMode ? "#ffffff" : "#f4f3f4"}
 						/>
 					</View>
@@ -99,7 +99,7 @@ export default function ProfileScreen() {
 						<Switch
 							value={isHighContrast}
 							onValueChange={toggleHighContrast}
-							trackColor={{ false: "#d1d5db", true: "#d99696" }}
+							trackColor={{ false: "#d1d5db", true: "#0F766E" }}
 							thumbColor={isHighContrast ? "#ffffff" : "#f4f3f4"}
 						/>
 					</View>
@@ -122,7 +122,7 @@ export default function ProfileScreen() {
 						step={0.1}
 						value={textSize}
 						onSlidingComplete={setTextSize}
-						minimumTrackTintColor="#d99696"
+						minimumTrackTintColor="#0F766E"
 						maximumTrackTintColor="#d1d5db"
 					/>
 				</View>
