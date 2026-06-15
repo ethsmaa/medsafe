@@ -1,8 +1,4 @@
-import {
-	DarkTheme,
-	DefaultTheme,
-	ThemeProvider,
-} from "@react-navigation/native";
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
@@ -16,7 +12,6 @@ import { Text, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
 import { LanguageProvider } from "@/context/LanguageContext";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useUser } from "@/hooks/use-user";
 import { useUserRole } from "@/hooks/use-user-role";
 import { queryClient } from "@/lib/react-query";
@@ -40,8 +35,6 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme();
-
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<SafeAreaProvider>
@@ -49,9 +42,7 @@ export default function RootLayout() {
 					<LanguageProvider>
 						<TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
 							<QueryClientProvider client={queryClient}>
-								<ThemeProvider
-									value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-								>
+								<ThemeProvider value={DefaultTheme}>
 									<RootLayoutNav />
 									<StatusBar style="auto" />
 								</ThemeProvider>
