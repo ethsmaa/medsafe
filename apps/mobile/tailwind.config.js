@@ -21,11 +21,11 @@ module.exports = {
 				"success-dark": "#34d399",
 				"error-light": "#DC2626",
 				"error-dark": "#f87171",
-				"warning-light": "#D97706",
+				"warning-light": "#B45309",
 				"warning-dark": "#fbbf24",
 				"info-light": "#2563EB",
 				"info-dark": "#60a5fa",
-				"primary-soft-light": "#CFEDE9",
+				"primary-soft-light": "#D8F2EE",
 				"primary-soft-dark": "#163E3A",
 			},
 			fontFamily: {
