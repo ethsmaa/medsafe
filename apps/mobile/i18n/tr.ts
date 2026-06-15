@@ -16,6 +16,8 @@ const tr = {
 	"profile.highContrastDesc":
 		"Daha iyi görünürlük için renk kontrastını artırır",
 	"profile.textSize": "Yazı Boyutu",
+	"profile.textSizeHint":
+		"Yazı boyutunu telefonunuzun ekran ayarlarından büyütebilirsiniz. Uygulama otomatik olarak uyum sağlar.",
 	"profile.language": "Dil",
 	"profile.languageDesc": "Uygulama dili",
 	"profile.theme": "Tema",

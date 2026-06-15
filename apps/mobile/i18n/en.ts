@@ -14,6 +14,8 @@ const en: Record<TranslationKey, string> = {
 	"profile.highContrast": "High Contrast Mode",
 	"profile.highContrastDesc": "Increase color contrast for better visibility",
 	"profile.textSize": "Text Size",
+	"profile.textSizeHint":
+		"Adjust text size in your phone's display settings. The app follows it automatically.",
 	"profile.language": "Language",
 	"profile.languageDesc": "App language",
 	"profile.theme": "Theme",

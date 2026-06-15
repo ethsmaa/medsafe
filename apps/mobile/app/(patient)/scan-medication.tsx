@@ -68,7 +68,7 @@ export default function ScanMedicationScreen() {
 	if (!permission) {
 		return (
 			<SafeAreaView className="flex-1 bg-black">
-				<ActivityIndicator size="large" color="#d99696" />
+				<ActivityIndicator size="large" color="#0F766E" />
 			</SafeAreaView>
 		);
 	}
@@ -145,7 +145,7 @@ export default function ScanMedicationScreen() {
 					>
 						<View className="h-16 w-16 items-center justify-center rounded-full bg-[#f0f0f0]">
 							{scanMutation.isPending ? (
-								<ActivityIndicator size="small" color="#d99696" />
+								<ActivityIndicator size="small" color="#0F766E" />
 							) : (
 								<Ionicons name="scan" size={32} className="text-primary" />
 							)}

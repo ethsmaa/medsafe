@@ -171,7 +171,7 @@ export default function ActivityLogScreen() {
 			>
 				{header}
 				<View className="flex-1 items-center justify-center pb-[60px]">
-					<ActivityIndicator size="large" color="#d99696" />
+					<ActivityIndicator size="large" color="#0F766E" />
 				</View>
 			</SafeAreaView>
 		);
@@ -215,7 +215,7 @@ export default function ActivityLogScreen() {
 					<RefreshControl
 						refreshing={logQuery.isFetching}
 						onRefresh={() => logQuery.refetch()}
-						tintColor="#d99696"
+						tintColor="#0F766E"
 					/>
 				}
 				renderItem={({ item: group }) => (

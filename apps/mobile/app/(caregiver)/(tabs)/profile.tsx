@@ -1,17 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
 	ActivityIndicator,
 	ScrollView,
-	Switch,
 	Text,
 	TouchableOpacity,
 	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAccessibility } from "@/context/AccessibilityContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { authClient } from "@/lib/auth-client";
 import { logger } from "@/lib/logger";
@@ -19,14 +16,6 @@ import { queryClient } from "@/lib/react-query";
 
 export default function ProfileScreen() {
 	const router = useRouter();
-	const {
-		isHighContrast,
-		isDarkMode,
-		textSize,
-		toggleHighContrast,
-		setThemeMode,
-		setTextSize,
-	} = useAccessibility();
 
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -68,63 +57,23 @@ export default function ProfileScreen() {
 						Accessibility
 					</Text>
 
-					{/* Dark Mode */}
-					<View className="mb-4 flex-row items-center justify-between">
-						<View>
-							<Text className="mb-1 font-semibold text-base text-text-main-light dark:text-text-main-dark">
-								Dark Mode
-							</Text>
-							<Text className="max-w-[90%] text-sm text-text-sub-light dark:text-text-sub-dark">
-								Use a dark color theme
-							</Text>
-						</View>
-						<Switch
-							value={isDarkMode}
-							onValueChange={(value) => setThemeMode(value ? "dark" : "light")}
-							trackColor={{ false: "#d1d5db", true: "#d99696" }}
-							thumbColor={isDarkMode ? "#ffffff" : "#f4f3f4"}
+					{/* Text size is driven by the phone's own text-size setting */}
+					<View className="flex-row items-start gap-3">
+						<Ionicons
+							name="text-outline"
+							size={22}
+							className="text-text-sub-light dark:text-text-sub-dark"
 						/>
-					</View>
-
-					{/* High Contrast */}
-					<View className="mb-4 flex-row items-center justify-between">
-						<View>
-							<Text className="mb-1 font-semibold text-base text-text-main-light dark:text-text-main-dark">
-								High Contrast Mode
-							</Text>
-							<Text className="max-w-[90%] text-sm text-text-sub-light dark:text-text-sub-dark">
-								Increase color contrast for better visibility
-							</Text>
-						</View>
-						<Switch
-							value={isHighContrast}
-							onValueChange={toggleHighContrast}
-							trackColor={{ false: "#d1d5db", true: "#d99696" }}
-							thumbColor={isHighContrast ? "#ffffff" : "#f4f3f4"}
-						/>
-					</View>
-
-					{/* Text Size */}
-					<View className="mb-4 flex-row items-center justify-between">
-						<View>
+						<View className="flex-1">
 							<Text className="mb-1 font-semibold text-base text-text-main-light dark:text-text-main-dark">
 								Text Size
 							</Text>
-							<Text className="max-w-[90%] text-sm text-text-sub-light dark:text-text-sub-dark">
-								Adjust text scale ({textSize.toFixed(1)}x)
+							<Text className="text-sm text-text-sub-light dark:text-text-sub-dark">
+								Adjust text size in your phone's display settings — the app
+								follows it automatically.
 							</Text>
 						</View>
 					</View>
-					<Slider
-						style={{ width: "100%", height: 40 }}
-						minimumValue={0.8}
-						maximumValue={2.0}
-						step={0.1}
-						value={textSize}
-						onSlidingComplete={setTextSize}
-						minimumTrackTintColor="#d99696"
-						maximumTrackTintColor="#d1d5db"
-					/>
 				</View>
 
 				{/* Account Actions */}

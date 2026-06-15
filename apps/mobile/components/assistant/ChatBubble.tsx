@@ -30,7 +30,7 @@ export function ChatBubble({
 			<View
 				className={`rounded-2xl px-4 py-3 ${
 					isUser
-						? "rounded-br-sm bg-rose-400"
+						? "rounded-br-sm bg-primary"
 						: isDarkMode
 							? "rounded-bl-sm bg-neutral-700"
 							: "rounded-bl-sm bg-neutral-100"

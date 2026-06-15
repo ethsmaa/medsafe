@@ -10,7 +10,7 @@ import { useTRPC } from "@/lib/trpc";
 const CARD_BASE =
 	"flex-row items-center gap-5 rounded-[20px] border-2 bg-surface-light p-6 shadow-sm dark:bg-surface-dark";
 const CARD_SELECTED =
-	"border-success-light bg-primary-soft-light dark:bg-primary-soft-dark";
+	"border-primary bg-primary-soft-light dark:bg-primary-soft-dark";
 
 export default function RoleSelectionScreen() {
 	const trpc = useTRPC();
@@ -62,12 +62,12 @@ export default function RoleSelectionScreen() {
 					<Ionicons name="person" size={32} className="text-primary" />
 					<View>
 						<Text
-							className={`mb-1 font-bold text-lg ${selectedRole === "PATIENT" ? "text-emerald-800" : "text-text-main-light dark:text-text-main-dark"}`}
+							className={`mb-1 font-bold text-lg ${selectedRole === "PATIENT" ? "text-primary" : "text-text-main-light dark:text-text-main-dark"}`}
 						>
 							I am a Patient
 						</Text>
 						<Text
-							className={`text-sm ${selectedRole === "PATIENT" ? "text-emerald-800" : "text-text-sub-light dark:text-text-sub-dark"}`}
+							className={`text-sm ${selectedRole === "PATIENT" ? "text-primary" : "text-text-sub-light dark:text-text-sub-dark"}`}
 						>
 							Manage my own medications
 						</Text>
@@ -82,12 +82,12 @@ export default function RoleSelectionScreen() {
 					<Ionicons name="medkit" size={32} className="text-primary" />
 					<View>
 						<Text
-							className={`mb-1 font-bold text-lg ${selectedRole === "CAREGIVER" ? "text-emerald-800" : "text-text-main-light dark:text-text-main-dark"}`}
+							className={`mb-1 font-bold text-lg ${selectedRole === "CAREGIVER" ? "text-primary" : "text-text-main-light dark:text-text-main-dark"}`}
 						>
 							I am a Caregiver
 						</Text>
 						<Text
-							className={`text-sm ${selectedRole === "CAREGIVER" ? "text-emerald-800" : "text-text-sub-light dark:text-text-sub-dark"}`}
+							className={`text-sm ${selectedRole === "CAREGIVER" ? "text-primary" : "text-text-sub-light dark:text-text-sub-dark"}`}
 						>
 							Manage for others
 						</Text>

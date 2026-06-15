@@ -27,7 +27,7 @@ export default function PatientDetailScreen() {
 	if (patientQuery.isLoading) {
 		return (
 			<SafeAreaView className="flex-1 items-center justify-center bg-background-light dark:bg-background-dark">
-				<ActivityIndicator size="large" color="#d99696" />
+				<ActivityIndicator size="large" color="#0F766E" />
 			</SafeAreaView>
 		);
 	}

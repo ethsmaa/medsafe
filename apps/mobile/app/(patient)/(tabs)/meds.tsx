@@ -128,7 +128,7 @@ export default function CabinetScreen() {
 			</View>
 
 			{cabinetQuery.isLoading ? (
-				<ActivityIndicator size="large" color="#d99696" />
+				<ActivityIndicator size="large" color="#0F766E" />
 			) : cabinetQuery.data?.length === 0 ? (
 				<View className="flex-1 items-center justify-center">
 					<Text className="text-base text-text-sub-light dark:text-text-sub-dark">

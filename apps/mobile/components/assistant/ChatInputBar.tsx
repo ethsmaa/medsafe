@@ -103,7 +103,7 @@ export function ChatInputBar({
 				disabled={!showSendable || isSending}
 				className={`h-10 w-10 items-center justify-center rounded-full ${
 					showSendable && !isSending
-						? "bg-rose-400"
+						? "bg-primary"
 						: isDarkMode
 							? "bg-neutral-700"
 							: "bg-neutral-200"

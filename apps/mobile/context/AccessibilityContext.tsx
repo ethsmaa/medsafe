@@ -7,7 +7,6 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import { logger } from "@/lib/logger";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -37,42 +36,11 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 	const isDarkMode =
 		themeMode === "dark" || (themeMode === "system" && systemScheme === "dark");
 
-	// Sync NativeWind color scheme with our setting
+	// Dark mode is intentionally disabled for now. Force the light scheme on
+	// mount so the app never gets stuck on a theme saved during earlier testing.
 	useEffect(() => {
-		if (themeMode === "system") {
-			setColorScheme("system");
-		} else {
-			setColorScheme(themeMode);
-		}
-	}, [themeMode, setColorScheme]);
-
-	useEffect(() => {
-		const loadSettings = async () => {
-			try {
-				const savedContrast = await AsyncStorage.getItem("isHighContrast");
-				const savedSize = await AsyncStorage.getItem("textSize");
-				const savedTheme = await AsyncStorage.getItem("themeMode");
-
-				if (savedContrast !== null) {
-					setIsHighContrast(JSON.parse(savedContrast));
-				}
-				if (savedSize !== null) {
-					setTextSizeState(Number.parseFloat(savedSize));
-				}
-				if (
-					savedTheme === "light" ||
-					savedTheme === "dark" ||
-					savedTheme === "system"
-				) {
-					setThemeModeState(savedTheme);
-				}
-			} catch (e) {
-				logger.error("Failed to load accessibility settings", e);
-			}
-		};
-
-		loadSettings();
-	}, []);
+		setColorScheme("light");
+	}, [setColorScheme]);
 
 	const toggleHighContrast = async () => {
 		const newValue = !isHighContrast;

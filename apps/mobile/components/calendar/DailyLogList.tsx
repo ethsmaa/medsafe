@@ -56,7 +56,7 @@ function statusStyle(status: string): StatusStyle {
 
 export const DailyLogList = ({ isLoading, logs }: DailyLogListProps) => {
 	if (isLoading) {
-		return <ActivityIndicator size="large" color="#d99696" className="mt-10" />;
+		return <ActivityIndicator size="large" color="#0F766E" className="mt-10" />;
 	}
 
 	if (logs.length === 0) {
