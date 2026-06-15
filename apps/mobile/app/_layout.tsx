@@ -7,7 +7,7 @@ import "../global.css";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useRootNavigationState, useRouter, useSegments } from "expo-router";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { Text, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
@@ -55,7 +55,10 @@ export default function RootLayout() {
 	);
 }
 
-function RootLayoutNav() {
+// Memoized so a re-render of a parent provider (e.g. changing the app language,
+// which lives above the navigator) does not re-run the fragile root navigation
+// hooks below. Screens that consume those contexts still update on their own.
+const RootLayoutNav = memo(function RootLayoutNav() {
 	const { data: user, isLoading: isUserLoading } = useUser();
 	const {
 		role,
@@ -137,4 +140,4 @@ function RootLayoutNav() {
 			/>
 		</Stack>
 	);
-}
+});
